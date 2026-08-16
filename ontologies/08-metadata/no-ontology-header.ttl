@@ -1,0 +1,25 @@
+@prefix :     <https://example.org/test/headerless#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# ERROR: nothing in this file is declared "a owl:Ontology" -- the ontology
+#        has no identifying IRI at all -> QUA-005
+
+:Widget
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Widget"@en ;
+    skos:prefLabel  "Widget"@en .
+
+:Gadget
+    a               owl:Class ;
+    rdfs:subClassOf :Widget ;
+    rdfs:label      "Gadget"@en ;
+    skos:prefLabel  "Gadget"@en .
+
+# skos:prefLabel is an external W3C term used above. Declaring it locally is
+# what keeps the referential-integrity check STR-002 ("undefined property
+# used") quiet about it -- STR-002 exempts only the rdf:/rdfs:/owl:
+# namespaces, not all of w3.org. See README.md, "Observations".
+skos:prefLabel a owl:AnnotationProperty .

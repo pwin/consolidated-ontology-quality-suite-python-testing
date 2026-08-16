@@ -1,0 +1,53 @@
+@prefix :     <https://example.org/test/clean#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Control fixture: deliberately error-free. Nothing here should produce a
+# Violation-severity finding from any stage of the suite. Warnings/Info are
+# tolerated (e.g. CNF-005 "class never populated") -- see tests/fixtures.py.
+
+<https://example.org/test/clean>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/test/clean/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Clean control ontology"@en .
+
+:Agent
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Agent"@en ;
+    skos:prefLabel  "Agent"@en .
+
+:Person
+    a               owl:Class ;
+    rdfs:subClassOf :Agent ;
+    rdfs:label      "Person"@en ;
+    skos:prefLabel  "Person"@en .
+
+:Organization
+    a               owl:Class ;
+    rdfs:subClassOf :Agent ;
+    rdfs:label      "Organization"@en ;
+    skos:prefLabel  "Organization"@en .
+
+:worksFor
+    a              owl:ObjectProperty ;
+    rdfs:domain    :Person ;
+    rdfs:range     :Organization ;
+    rdfs:label     "works for"@en ;
+    skos:prefLabel "worksFor"@en .
+
+:fullName
+    a              owl:DatatypeProperty ;
+    rdfs:domain    :Person ;
+    rdfs:range     xsd:string ;
+    rdfs:label     "full name"@en ;
+    skos:prefLabel "fullName"@en .
+
+# skos:prefLabel is an external W3C term used above. Declaring it locally is
+# what keeps the referential-integrity check STR-002 ("undefined property
+# used") quiet about it -- STR-002 exempts only the rdf:/rdfs:/owl:
+# namespaces, not all of w3.org. See README.md, "Observations".
+skos:prefLabel a owl:AnnotationProperty .

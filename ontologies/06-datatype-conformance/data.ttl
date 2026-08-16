@@ -1,0 +1,31 @@
+@prefix :     <https://example.org/test/datatypes#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+:carol
+    a          :Person , owl:NamedIndividual ;
+    rdfs:label "Carol"@en ;
+    # ERROR: DD-MM-YYYY is not a valid xsd:date lexical form -> DAT-001
+    :birthDate "31-12-1990"^^xsd:date ;
+    # ERROR: :worksFor has rdfs:range :Organization, but :dave is a :Person
+    #        -> CNF-004
+    :worksFor  :dave .
+
+:dave
+    a          :Person , owl:NamedIndividual ;
+    rdfs:label "Dave"@en .
+
+:acme
+    a          :Organization , owl:NamedIndividual ;
+    rdfs:label "ACME Ltd"@en ;
+    # ERROR: not a valid xsd:integer lexical form -> DAT-001
+    :headcount "twelve"^^xsd:integer ;
+    # ERROR: not a valid xsd:boolean lexical form. NOT DETECTED -- rdflib
+    #        rewrites the stored lexical form to "false", so DAT-001's regex
+    #        never sees "yes". See experiments/illtyped_boolean_probe.py and
+    #        README.md, "Observations".
+    :isActive  "yes"^^xsd:boolean ;
+    # ERROR: :birthDate has rdfs:domain :Person, but :acme is an
+    #        :Organization -> CNF-003
+    :birthDate "1990-01-01"^^xsd:date .

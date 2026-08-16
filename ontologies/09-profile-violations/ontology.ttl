@@ -1,0 +1,104 @@
+@prefix :     <https://example.org/test/profiles#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Legal OWL2 DL, but deliberately outside all three tractable profiles.
+# Only reported when profile checking is explicitly requested (--profile
+# EL/QL/RL) -> REA-010 (EL), REA-011 (QL), REA-012 (RL).
+
+<https://example.org/test/profiles>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/test/profiles/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "OWL2 profile-violation fixture"@en .
+
+:Vehicle
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Vehicle"@en ;
+    skos:prefLabel  "Vehicle"@en .
+
+:Car
+    a               owl:Class ;
+    rdfs:subClassOf :Vehicle ;
+    rdfs:label      "Car"@en ;
+    skos:prefLabel  "Car"@en .
+
+:Boat
+    a               owl:Class ;
+    rdfs:subClassOf :Vehicle ;
+    owl:disjointWith :Car ;                      # disjointness: outside EL
+    rdfs:label      "Boat"@en ;
+    skos:prefLabel  "Boat"@en .
+
+:Wheel
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Wheel"@en ;
+    skos:prefLabel  "Wheel"@en .
+
+# Disjunction: outside EL, QL and RL
+:Amphibian
+    a                  owl:Class ;
+    owl:equivalentClass [ a owl:Class ; owl:unionOf ( :Car :Boat ) ] ;
+    rdfs:label         "Amphibian"@en ;
+    skos:prefLabel     "Amphibian"@en .
+
+# Negation: outside EL, QL and RL
+:NonVehicle
+    a                  owl:Class ;
+    owl:equivalentClass [ a owl:Class ; owl:complementOf :Vehicle ] ;
+    rdfs:label         "Non-vehicle"@en ;
+    skos:prefLabel     "NonVehicle"@en .
+
+# Universal restriction: outside EL (and unverifiable in QL)
+:WheeledVehicle
+    a               owl:Class ;
+    rdfs:subClassOf :Vehicle ,
+                    [ a owl:Restriction ;
+                      owl:onProperty :hasWheel ;
+                      owl:allValuesFrom :Wheel ] ;
+    rdfs:label      "Wheeled vehicle"@en ;
+    skos:prefLabel  "WheeledVehicle"@en .
+
+# Cardinality > 1: outside EL, QL and RL
+:Quadricycle
+    a               owl:Class ;
+    rdfs:subClassOf :WheeledVehicle ,
+                    [ a owl:Restriction ;
+                      owl:onProperty :hasWheel ;
+                      owl:minCardinality "4"^^xsd:nonNegativeInteger ] ;
+    rdfs:label      "Quadricycle"@en ;
+    skos:prefLabel  "Quadricycle"@en .
+
+:hasWheel
+    a              owl:ObjectProperty ;
+    rdfs:domain    :Vehicle ;
+    rdfs:range     :Wheel ;
+    rdfs:label     "has wheel"@en ;
+    skos:prefLabel "hasWheel"@en .
+
+# Transitive: outside QL
+:partOf
+    a              owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:domain    :Vehicle ;
+    rdfs:range     :Vehicle ;
+    rdfs:label     "part of"@en ;
+    skos:prefLabel "partOf"@en .
+
+# Functional: outside EL
+:vin
+    a              owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain    :Vehicle ;
+    rdfs:range     xsd:string ;
+    rdfs:label     "vin"@en ;
+    skos:prefLabel "vin"@en .
+
+# skos:prefLabel is an external W3C term used above. Declaring it locally is
+# what keeps the referential-integrity check STR-002 ("undefined property
+# used") quiet about it -- STR-002 exempts only the rdf:/rdfs:/owl:
+# namespaces, not all of w3.org. See README.md, "Observations".
+skos:prefLabel a owl:AnnotationProperty .

@@ -1,0 +1,20 @@
+[project]
+name = "owl2-error-detection-tests"
+version = "0.1.0"
+description = "Deliberately broken OWL2 ontologies + a harness asserting the Ontology Quality Suite detects each seeded error"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+license-files = ["LICENSE-MIT", "LICENSE-APACHE"]
+authors = [{ name = "Peter Winstanley" }]
+requires-python = ">=3.12"
+dependencies = [
+    "ontology-quality-suite",
+]
+
+[tool.uv.sources]
+ontology-quality-suite = { path = "../consolidated_ontology_suite_python", editable = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

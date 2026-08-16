@@ -1,0 +1,12 @@
+@prefix :     <https://example.org/test/undeclared#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# ERROR: ":Persson" is a typo -- that class is never declared anywhere
+#        -> STR-001 (undefined class used as rdf:type), CNF-001
+# ERROR: ":hasNmae" is a typo -- that property is never declared anywhere
+#        -> STR-002 (undefined property used), STR-007 (predicate never typed), CNF-002
+:bob
+    a          :Persson , owl:NamedIndividual ;
+    rdfs:label "Bob"@en ;
+    :hasNmae   "Bob Example" .

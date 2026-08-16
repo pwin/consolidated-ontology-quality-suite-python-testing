@@ -1,0 +1,57 @@
+@prefix :     <https://example.org/test/datatypes#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/test/datatypes>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/test/datatypes/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Datatype and domain/range conformance fixture"@en .
+
+:Person
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Person"@en ;
+    skos:prefLabel  "Person"@en .
+
+:Organization
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Organization"@en ;
+    skos:prefLabel  "Organization"@en .
+
+:birthDate
+    a              owl:DatatypeProperty ;
+    rdfs:domain    :Person ;
+    rdfs:range     xsd:date ;
+    rdfs:label     "birth date"@en ;
+    skos:prefLabel "birthDate"@en .
+
+:headcount
+    a              owl:DatatypeProperty ;
+    rdfs:domain    :Organization ;
+    rdfs:range     xsd:integer ;
+    rdfs:label     "headcount"@en ;
+    skos:prefLabel "headcount"@en .
+
+:isActive
+    a              owl:DatatypeProperty ;
+    rdfs:domain    :Organization ;
+    rdfs:range     xsd:boolean ;
+    rdfs:label     "is active"@en ;
+    skos:prefLabel "isActive"@en .
+
+:worksFor
+    a              owl:ObjectProperty ;
+    rdfs:domain    :Person ;
+    rdfs:range     :Organization ;
+    rdfs:label     "works for"@en ;
+    skos:prefLabel "worksFor"@en .
+
+# skos:prefLabel is an external W3C term used above. Declaring it locally is
+# what keeps the referential-integrity check STR-002 ("undefined property
+# used") quiet about it -- STR-002 exempts only the rdf:/rdfs:/owl:
+# namespaces, not all of w3.org. See README.md, "Observations".
+skos:prefLabel a owl:AnnotationProperty .

@@ -1,0 +1,73 @@
+@prefix :     <https://example.org/test/efficiency#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# ERROR: a 6-hop rdfs:subClassOf chain (:Level0 .. :Level6) -> EFF-001
+# ERROR: anonymous restrictions push blank nodes over 20% of all nodes
+#        -> EFF-002
+
+<https://example.org/test/efficiency>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/test/efficiency/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Efficiency fixture"@en .
+
+:Widget
+    a              owl:Class ;
+    rdfs:label     "Widget"@en ;
+    skos:prefLabel "Widget"@en .
+
+:hasPart
+    a              owl:ObjectProperty ;
+    rdfs:domain    :Widget ;
+    rdfs:range     :Widget ;
+    rdfs:label     "has part"@en ;
+    skos:prefLabel "hasPart"@en .
+
+:Level6
+    a              owl:Class ;
+    rdfs:label     "Level 6"@en ;
+    skos:prefLabel "Level6"@en .
+
+:Level5
+    a               owl:Class ;
+    rdfs:subClassOf :Level6 , [ a owl:Restriction ; owl:onProperty :hasPart ; owl:someValuesFrom :Widget ] ;
+    rdfs:label      "Level 5"@en ;
+    skos:prefLabel  "Level5"@en .
+
+:Level4
+    a               owl:Class ;
+    rdfs:subClassOf :Level5 , [ a owl:Restriction ; owl:onProperty :hasPart ; owl:someValuesFrom :Widget ] ;
+    rdfs:label      "Level 4"@en ;
+    skos:prefLabel  "Level4"@en .
+
+:Level3
+    a               owl:Class ;
+    rdfs:subClassOf :Level4 , [ a owl:Restriction ; owl:onProperty :hasPart ; owl:someValuesFrom :Widget ] ;
+    rdfs:label      "Level 3"@en ;
+    skos:prefLabel  "Level3"@en .
+
+:Level2
+    a               owl:Class ;
+    rdfs:subClassOf :Level3 , [ a owl:Restriction ; owl:onProperty :hasPart ; owl:someValuesFrom :Widget ] ;
+    rdfs:label      "Level 2"@en ;
+    skos:prefLabel  "Level2"@en .
+
+:Level1
+    a               owl:Class ;
+    rdfs:subClassOf :Level2 , [ a owl:Restriction ; owl:onProperty :hasPart ; owl:someValuesFrom :Widget ] ;
+    rdfs:label      "Level 1"@en ;
+    skos:prefLabel  "Level1"@en .
+
+:Level0
+    a               owl:Class ;
+    rdfs:subClassOf :Level1 , [ a owl:Restriction ; owl:onProperty :hasPart ; owl:someValuesFrom :Widget ] ;
+    rdfs:label      "Level 0"@en ;
+    skos:prefLabel  "Level0"@en .
+
+# skos:prefLabel is an external W3C term used above. Declaring it locally is
+# what keeps the referential-integrity check STR-002 ("undefined property
+# used") quiet about it -- STR-002 exempts only the rdf:/rdfs:/owl:
+# namespaces, not all of w3.org. See README.md, "Observations".
+skos:prefLabel a owl:AnnotationProperty .

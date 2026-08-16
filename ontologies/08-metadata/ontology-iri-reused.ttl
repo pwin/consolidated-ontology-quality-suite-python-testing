@@ -1,0 +1,24 @@
+@prefix :     <https://example.org/test/reused#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# ERROR: the ontology's own identifying IRI is reused verbatim as the
+#        namespace IRI its concepts are minted in -> QUA-006
+<https://example.org/test/reused#>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/test/reused/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Reused-IRI fixture"@en .
+
+:Widget
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Widget"@en ;
+    skos:prefLabel  "Widget"@en .
+
+# skos:prefLabel is an external W3C term used above. Declaring it locally is
+# what keeps the referential-integrity check STR-002 ("undefined property
+# used") quiet about it -- STR-002 exempts only the rdf:/rdfs:/owl:
+# namespaces, not all of w3.org. See README.md, "Observations".
+skos:prefLabel a owl:AnnotationProperty .

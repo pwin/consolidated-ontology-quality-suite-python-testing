@@ -1,0 +1,37 @@
+@prefix :     <https://example.org/test/reasoning#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<https://example.org/test/reasoning>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/test/reasoning/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Property-characteristic violation fixture"@en .
+
+:Person
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Person"@en ;
+    skos:prefLabel  "Person"@en .
+
+# The axioms here are correct -- data.ttl is what contradicts them.
+:supervises
+    a              owl:ObjectProperty , owl:AsymmetricProperty ;
+    rdfs:domain    :Person ;
+    rdfs:range     :Person ;
+    rdfs:label     "supervises"@en ;
+    skos:prefLabel "supervises"@en .
+
+:reportsTo
+    a              owl:ObjectProperty , owl:IrreflexiveProperty ;
+    rdfs:domain    :Person ;
+    rdfs:range     :Person ;
+    rdfs:label     "reports to"@en ;
+    skos:prefLabel "reportsTo"@en .
+
+# skos:prefLabel is an external W3C term used above. Declaring it locally is
+# what keeps the referential-integrity check STR-002 ("undefined property
+# used") quiet about it -- STR-002 exempts only the rdf:/rdfs:/owl:
+# namespaces, not all of w3.org. See README.md, "Observations".
+skos:prefLabel a owl:AnnotationProperty .

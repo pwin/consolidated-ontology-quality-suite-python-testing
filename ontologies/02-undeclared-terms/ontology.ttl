@@ -1,0 +1,35 @@
+@prefix :     <https://example.org/test/undeclared#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Seeded errors: none in the ontology itself. The ontology is correct; the
+# companion data.ttl misspells a class IRI and a property IRI, so the
+# referential-integrity checks (STR-001/002/007) and the data-vs-ontology
+# conformance checks (CNF-001/002) should fire.
+
+<https://example.org/test/undeclared>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/test/undeclared/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Undeclared-term fixture"@en .
+
+:Person
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Person"@en ;
+    skos:prefLabel  "Person"@en .
+
+:hasName
+    a              owl:DatatypeProperty ;
+    rdfs:domain    :Person ;
+    rdfs:range     xsd:string ;
+    rdfs:label     "has name"@en ;
+    skos:prefLabel "hasName"@en .
+
+# skos:prefLabel is an external W3C term used above. Declaring it locally is
+# what keeps the referential-integrity check STR-002 ("undefined property
+# used") quiet about it -- STR-002 exempts only the rdf:/rdfs:/owl:
+# namespaces, not all of w3.org. See README.md, "Observations".
+skos:prefLabel a owl:AnnotationProperty .

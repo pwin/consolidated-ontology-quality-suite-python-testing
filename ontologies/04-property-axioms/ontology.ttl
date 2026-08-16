@@ -1,0 +1,96 @@
+@prefix :     <https://example.org/test/props#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<https://example.org/test/props>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/test/props/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Property-axiom fixture"@en .
+
+:Person
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Person"@en ;
+    skos:prefLabel  "Person"@en .
+
+:Organization
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Organization"@en ;
+    skos:prefLabel  "Organization"@en .
+
+:Component
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Component"@en ;
+    skos:prefLabel  "Component"@en .
+
+:Assembly
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Assembly"@en ;
+    skos:prefLabel  "Assembly"@en .
+
+# Functional -- data.ttl gives one subject two distinct values -> LOG-002
+:hasParent
+    a              owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain    :Person ;
+    rdfs:range     :Person ;
+    rdfs:label     "has parent"@en ;
+    skos:prefLabel "hasParent"@en .
+
+# ERROR: two different inverses for one property -> LOG-004
+:knows
+    a              owl:ObjectProperty ;
+    owl:inverseOf  :knownBy , :acquaintedWith ;
+    rdfs:domain    :Person ;
+    rdfs:range     :Person ;
+    rdfs:label     "knows"@en ;
+    skos:prefLabel "knows"@en .
+
+:knownBy
+    a              owl:ObjectProperty ;
+    rdfs:domain    :Person ;
+    rdfs:range     :Person ;
+    rdfs:label     "known by"@en ;
+    skos:prefLabel "knownBy"@en .
+
+:acquaintedWith
+    a              owl:ObjectProperty ;
+    rdfs:domain    :Person ;
+    rdfs:range     :Person ;
+    rdfs:label     "acquainted with"@en ;
+    skos:prefLabel "acquaintedWith"@en .
+
+# ERROR: a property declared its own inverse -> LOG-005
+:linkedTo
+    a              owl:ObjectProperty ;
+    owl:inverseOf  :linkedTo ;
+    rdfs:domain    :Component ;
+    rdfs:range     :Component ;
+    rdfs:label     "linked to"@en ;
+    skos:prefLabel "linkedTo"@en .
+
+# ERROR: symmetric, but domain != range -> LOG-006
+:marriedTo
+    a              owl:ObjectProperty , owl:SymmetricProperty ;
+    rdfs:domain    :Person ;
+    rdfs:range     :Organization ;
+    rdfs:label     "married to"@en ;
+    skos:prefLabel "marriedTo"@en .
+
+# ERROR: transitive, but domain != range -> LOG-007
+:partOf
+    a              owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:domain    :Component ;
+    rdfs:range     :Assembly ;
+    rdfs:label     "part of"@en ;
+    skos:prefLabel "partOf"@en .
+
+# skos:prefLabel is an external W3C term used above. Declaring it locally is
+# what keeps the referential-integrity check STR-002 ("undefined property
+# used") quiet about it -- STR-002 exempts only the rdf:/rdfs:/owl:
+# namespaces, not all of w3.org. See README.md, "Observations".
+skos:prefLabel a owl:AnnotationProperty .

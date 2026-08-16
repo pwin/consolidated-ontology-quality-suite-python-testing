@@ -1,0 +1,18 @@
+@prefix :     <https://example.org/test/props#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# ERROR: :hasParent is owl:FunctionalProperty, but :kid has two distinct
+#        values for it -> LOG-002
+:kid
+    a          :Person , owl:NamedIndividual ;
+    rdfs:label "Kid"@en ;
+    :hasParent :mum , :dad .
+
+:mum
+    a          :Person , owl:NamedIndividual ;
+    rdfs:label "Mum"@en .
+
+:dad
+    a          :Person , owl:NamedIndividual ;
+    rdfs:label "Dad"@en .

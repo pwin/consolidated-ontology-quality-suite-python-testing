@@ -1,0 +1,62 @@
+@prefix :     <https://example.org/test/style#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Ontology header is deliberately complete here, so the only findings left
+# are naming/documentation ones.
+
+<https://example.org/test/style>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/test/style/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Naming-style fixture"@en .
+
+# ERROR: class local name is snake_case, not UpperCamelCase -> STY-001
+# ERROR: no rdfs:label / skos:prefLabel at all               -> QUA-001
+:person_record
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing .
+
+# ERROR: class local name uses a hyphen -> STY-001, and mixing "_" with "-"
+#        across the ontology's local names -> STY-005
+:Vehicle-Part
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Vehicle part"@en ;
+    skos:prefLabel  "VehiclePart"@en .
+
+# ERROR: property local name is Upper_Snake, not lowerCamelCase -> STY-002
+:Has_Owner
+    a              owl:ObjectProperty ;
+    rdfs:domain    :Vehicle-Part ;
+    rdfs:range     :Vehicle-Part ;
+    rdfs:label     "has owner"@en ;
+    skos:prefLabel "HasOwner"@en .
+
+# ERROR: rdfs:label carries no language tag -> STY-003
+:legacyId
+    a              owl:DatatypeProperty ;
+    rdfs:domain    :Vehicle-Part ;
+    rdfs:range     xsd:string ;
+    rdfs:label     "Legacy identifier" ;
+    skos:prefLabel "legacyId"@en .
+
+# ERROR: term is owl:deprecated but still used as a type below -> QUA-003
+:LegacyRecord
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    owl:deprecated  true ;
+    rdfs:label      "Legacy record"@en ;
+    skos:prefLabel  "LegacyRecord"@en .
+
+:legacy1
+    a          :LegacyRecord , owl:NamedIndividual ;
+    rdfs:label "Legacy record 1"@en .
+
+# skos:prefLabel is an external W3C term used above. Declaring it locally is
+# what keeps the referential-integrity check STR-002 ("undefined property
+# used") quiet about it -- STR-002 exempts only the rdf:/rdfs:/owl:
+# namespaces, not all of w3.org. See README.md, "Observations".
+skos:prefLabel a owl:AnnotationProperty .

@@ -1,0 +1,10 @@
+@prefix :     <https://example.org/test/disjoint#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# ERROR: an individual typed with two classes declared owl:disjointWith each
+#        other -> REA-001 (and REA-020: the whole graph is inconsistent, if a
+#        real DL reasoner is available)
+:rex
+    a          :Cat , :Dog , owl:NamedIndividual ;
+    rdfs:label "Rex"@en .

@@ -1,0 +1,44 @@
+@prefix :     <https://example.org/test/disjoint#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<https://example.org/test/disjoint>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/test/disjoint/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Disjointness-contradiction fixture"@en .
+
+:Animal
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Animal"@en ;
+    skos:prefLabel  "Animal"@en .
+
+# ERROR: a class asserted disjoint with its own superclass is unsatisfiable
+#        -> LOG-001 (and REA-021 from a real DL reasoner, if one is available)
+:Plant
+    a               owl:Class ;
+    rdfs:subClassOf :Animal ;
+    owl:disjointWith :Animal ;
+    rdfs:label      "Plant"@en ;
+    skos:prefLabel  "Plant"@en .
+
+:Cat
+    a               owl:Class ;
+    rdfs:subClassOf :Animal ;
+    owl:disjointWith :Dog ;
+    rdfs:label      "Cat"@en ;
+    skos:prefLabel  "Cat"@en .
+
+:Dog
+    a               owl:Class ;
+    rdfs:subClassOf :Animal ;
+    rdfs:label      "Dog"@en ;
+    skos:prefLabel  "Dog"@en .
+
+# skos:prefLabel is an external W3C term used above. Declaring it locally is
+# what keeps the referential-integrity check STR-002 ("undefined property
+# used") quiet about it -- STR-002 exempts only the rdf:/rdfs:/owl:
+# namespaces, not all of w3.org. See README.md, "Observations".
+skos:prefLabel a owl:AnnotationProperty .

@@ -1,0 +1,18 @@
+@prefix :     <https://example.org/test/reasoning#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# ERROR: :supervises is owl:AsymmetricProperty but holds both ways between
+#        :ann and :ben -> REA-002
+# ERROR: :reportsTo is owl:IrreflexiveProperty but :ann reports to herself
+#        -> REA-003
+:ann
+    a           :Person , owl:NamedIndividual ;
+    rdfs:label  "Ann"@en ;
+    :supervises :ben ;
+    :reportsTo  :ann .
+
+:ben
+    a           :Person , owl:NamedIndividual ;
+    rdfs:label  "Ben"@en ;
+    :supervises :ann .
