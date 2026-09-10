@@ -29,7 +29,7 @@ uv run pytest -q            # same expectations, as pass/fail tests
 
 All 16 fixtures pass: **43 of the registry's 61 checks** are asserted, and
 every seeded error is detected. Counts below are from `uv run python report.py`
-against suite 0.14.2 — 147 findings in total, identical across runs.
+against suite 0.14.3 — 151 findings in total, identical across runs.
 
 Taken together with [competency_tests/](competency_tests/), **58 of the 61
 checks are exercised by some fixture**. The three that are not — `REA-005`,
