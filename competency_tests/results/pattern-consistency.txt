@@ -15,6 +15,8 @@
 == ontology+taxonomy <-> output data ==
   [CNF-003] https://example.org/water/data/asset-A1 uses property https://w3id.org/semanticarts/ns/ontology/gist/numericValue but its type doesn't match (or descend from) any of the property's declared domain classes -- rdfs:domain, or gist-style domainIncludes -- in the output-data graph.
   [CNF-003] https://example.org/water/data/asset-A2 uses property https://w3id.org/semanticarts/ns/ontology/gist/numericValue but its type doesn't match (or descend from) any of the property's declared domain classes -- rdfs:domain, or gist-style domainIncludes -- in the output-data graph.
+  [CNF-004] Value 2026-01-05T08:00:00 of property https://example.org/water/model#takenAt doesn't match any of the property's declared range classes/datatypes -- rdfs:range, or gist-style rangeIncludes -- in the output-data graph.
+  [CNF-004] Value 2026-01-05T12:00:00 of property https://example.org/water/model#takenAt doesn't match any of the property's declared range classes/datatypes -- rdfs:range, or gist-style rangeIncludes -- in the output-data graph.
   [CNF-004] Value 1.8 of property https://w3id.org/semanticarts/ns/ontology/gist/numericValue doesn't match any of the property's declared range classes/datatypes -- rdfs:range, or gist-style rangeIncludes -- in the output-data graph.
   [CNF-004] Value 1.9 of property https://w3id.org/semanticarts/ns/ontology/gist/numericValue doesn't match any of the property's declared range classes/datatypes -- rdfs:range, or gist-style rangeIncludes -- in the output-data graph.
   [CNF-004] Value 118.0 of property https://w3id.org/semanticarts/ns/ontology/gist/numericValue doesn't match any of the property's declared range classes/datatypes -- rdfs:range, or gist-style rangeIncludes -- in the output-data graph.
@@ -26,8 +28,6 @@
   [CNF-004] Value 47.5 of property https://w3id.org/semanticarts/ns/ontology/gist/numericValue doesn't match any of the property's declared range classes/datatypes -- rdfs:range, or gist-style rangeIncludes -- in the output-data graph.
   [CNF-004] Value 88.0 of property https://w3id.org/semanticarts/ns/ontology/gist/numericValue doesn't match any of the property's declared range classes/datatypes -- rdfs:range, or gist-style rangeIncludes -- in the output-data graph.
   [CNF-004] Value 91.5 of property https://w3id.org/semanticarts/ns/ontology/gist/numericValue doesn't match any of the property's declared range classes/datatypes -- rdfs:range, or gist-style rangeIncludes -- in the output-data graph.
-  [CNF-004] Value 2026-01-05T08:00:00 of property https://example.org/water/model#takenAt doesn't match any of the property's declared range classes/datatypes -- rdfs:range, or gist-style rangeIncludes -- in the output-data graph.
-  [CNF-004] Value 2026-01-05T12:00:00 of property https://example.org/water/model#takenAt doesn't match any of the property's declared range classes/datatypes -- rdfs:range, or gist-style rangeIncludes -- in the output-data graph.
 == taxonomy <-> output data ==
   [undeclared_taxonomy_reference] https://example.org/water/vocab#Culvert is used as the value of https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy in the data graph but is not declared as an individual anywhere in the given taxonomy set.
   [undeclared_taxonomy_reference] https://example.org/water/vocab#Resevoir is used as the value of https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy in the data graph but is not declared as an individual anywhere in the given taxonomy set.

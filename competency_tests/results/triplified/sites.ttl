@@ -1,7 +1,7 @@
 @prefix : <https://example.org/water/model#> .
+<https://example.org/water/data/site-S3> a :Site ;
+	:siteName "Westfield" .
 <https://example.org/water/data/site-S2> a :Site ;
 	:siteName "Eastbrook" .
 <https://example.org/water/data/site-S1> a :Site ;
 	:siteName "Northgate" .
-<https://example.org/water/data/site-S3> a :Site ;
-	:siteName "Westfield" .

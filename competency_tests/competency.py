@@ -56,8 +56,16 @@ class Coverage:
 
 
 def _clean(text: str) -> str:
-    """The source CSVs are peppered with U+00A0 NO-BREAK SPACE. Left in, they
-    survive into every generated table and read as stray characters."""
+    """Normalise a field read from the CSVs.
+
+    They arrived spacing many words with U+00A0 NO-BREAK SPACE. Those have
+    since been converted to ordinary spaces in the files themselves -- 122 of
+    them -- because a tool that strips rather than converts them welds words
+    together into text that still parses and still reads like prose
+    ("ontology.Identify"), which happened here once already. The replace
+    below is kept as a safeguard for anything re-imported from the same
+    source, and is a no-op on the files as they now stand.
+    """
     return text.replace(chr(0xA0), " ").strip()
 
 

@@ -1,8 +1,8 @@
-﻿# ,Issue ,Summary 
-23,Prefix and namespace declarations differ between outputs ,"Compare prefixes and namespace IRIs across artefacts, showing prefixes unique to one output and cases where one namespace uses different prefix names. "
-24,Predicate usage differs unexpectedly between comparable outputs ,"Summarise predicates unique to each output, shared by both, or used differently so reviewers can focus on changed relationships. "
-25,Class populations differ unexpectedly ,Compare the number or presence of instances by class between comparable outputs and highlight substantial differences for investigation. 
-26,Subject-predicate values or relationships have changed ,"For matching subject-predicate pairs, highlight changed object values and relationship targets without presenting every triple-level difference. "
-27,Equivalent values appear different because of representation ,"Normalise literals before comparison so datatype declarations, formatting or acceptable differences in geometric precision do not create false differences. "
-28,Identifiers described as global are inconsistent across outputs ,Flag cases where the same real-world subject is assigned different identifiers despite an expectation of global stability. 
+﻿# ,Issue ,Summary 
+23,Prefix and namespace declarations differ between outputs ,"Compare prefixes and namespace IRIs across artefacts, showing prefixes unique to one output and cases where one namespace uses different prefix names. "
+24,Predicate usage differs unexpectedly between comparable outputs ,"Summarise predicates unique to each output, shared by both, or used differently so reviewers can focus on changed relationships. "
+25,Class populations differ unexpectedly ,Compare the number or presence of instances by class between comparable outputs and highlight substantial differences for investigation. 
+26,Subject-predicate values or relationships have changed ,"For matching subject-predicate pairs, highlight changed object values and relationship targets without presenting every triple-level difference. "
+27,Equivalent values appear different because of representation ,"Normalise literals before comparison so datatype declarations, formatting or acceptable differences in geometric precision do not create false differences. "
+28,Identifiers described as global are inconsistent across outputs ,Flag cases where the same real-world subject is assigned different identifiers despite an expectation of global stability. 
 ,,
