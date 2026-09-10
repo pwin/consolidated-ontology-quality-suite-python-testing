@@ -181,19 +181,17 @@ FIXTURES: List[Fixture] = [
         expected=("LOG-003", "STR-003", "STR-005", "STR-008", "STR-009"),
     ),
     Fixture(
-        # Deliberately the `checks` stage rather than `data`: the data stage
-        # crashes on this fixture's language-tagged literals -- see README.md,
-        # "Issues found" #5, and experiments/langstring_crash_probe.py. `checks`
-        # runs the same registry over the same graph without the conformance
-        # layer that raises, so both seeded defects are still asserted. Move it
-        # back to `data` once the suite is fixed.
+        # Back on the `data` stage since suite 0.14.3 fixed the crash this
+        # fixture's language-tagged literals used to cause (README.md, "Issues
+        # found" #5). The tagged :note value is now reported as the CNF-004
+        # range violation it is -- rdf:langString does not satisfy xsd:string.
         name="12-literal-volume",
-        stage="checks",
+        stage="data",
         ontology="12-literal-volume/ontology.ttl",
         data="12-literal-volume/data.ttl",
         seeded_errors="60 values on one subject-predicate pair; the same lexical form twice under "
                       "two language tags",
-        expected=("EFF-003", "DAT-003"),
+        expected=("EFF-003", "DAT-003", "CNF-004"),
     ),
     Fixture(
         name="13-unsatisfiable-class",

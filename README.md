@@ -66,17 +66,12 @@ across the 0.6.0 → 0.14.2 upgrade: `skos:definition` on each term, for the
 
 ## Issues found
 
-Building these fixtures surfaced five defects in the suite. **The first four
-are fixed** in ontology-quality-suite 0.6.0 (commit `2f4950c`, which also
-credits three more found while fixing them); those sections keep the original
-evidence and record how the fixed suite behaves now. The fixtures themselves
-did not need changing — they pin check ids, not finding counts, which is what
-let them survive the fix. **The fifth is open** against 0.14.2 and is a crash
-rather than a misreported finding.
-
-A sixth, in `pattern-consistency` rather than in a check, is recorded in
-[competency_tests/COMPETENCY_COVERAGE.md](competency_tests/COMPETENCY_COVERAGE.md)
-under "Observations", where the fixtures that demonstrate it live.
+Building these fixtures surfaced six defects in the suite, **all now fixed** —
+the first four in ontology-quality-suite 0.6.0 (commit `2f4950c`, which also
+credits three more found while fixing them), the last two in 0.14.3. Each
+section keeps the original evidence and records how the fixed suite behaves
+now. The fixtures themselves needed almost no changing across either round —
+they pin check ids, not finding counts, which is what let them survive.
 
 ### 1. pyshacl reported every finding as a Violation, ignoring the declared severity — fixed
 
@@ -201,7 +196,7 @@ reports `x2` on three consecutive runs.
   owlready2's RDF/XML parser rejects the ill-typed literals. The degradation is
   visible in the report rather than silent, which is the designed behaviour.
 
-### 5. `data` crashes on a language-tagged literal — open
+### 5. `data` crashed on a language-tagged literal — fixed
 
 Found while adding the `DAT-003` fixture, which needs two literals sharing a
 lexical form — most naturally the same text under two language tags.
@@ -219,8 +214,8 @@ a wrong IRI:
 AttributeError: term 'langString' not in namespace 'http://www.w3.org/2000/01/rdf-schema#'
 ```
 
-This is a crash, not a misreported finding: the `data` stage stops, taking every
-other check in that run with it. Three ordinary conditions have to coincide — a
+This was a crash, not a misreported finding: the `data` stage stopped, taking
+every other check in that run with it. Three ordinary conditions have to coincide — a
 property whose `rdfs:range` names an XSD datatype, a language-tagged value for
 it, and any stage that calls `check_conformance` (`data`, `sketch --ontology`,
 `run`). `rdfs:range xsd:string` with a `"..."@en` value is the everyday case.
@@ -231,15 +226,33 @@ $ uv run python experiments/langstring_crash_probe.py
   "Checked"@en (tagged)        CRASH  AttributeError: term 'langString' not in namespace '...rdf-schema#'
 ```
 
-The fix is one word — `RDF.langString`, which that module already imports. Note
-it also changes the answer rather than just unblocking it: a `rdf:langString` is
-not an `xsd:string`, so once the term resolves, the tagged literal is a genuine
-`CNF-004` range violation and should be reported as one.
+**Now:** fixed in ontology-quality-suite 0.14.3 — one word, `RDF.langString`,
+which that module already imports. The fix also changes the answer rather than
+just unblocking it: a `rdf:langString` is not an `xsd:string`, so the tagged
+literal is now reported as the `CNF-004` range violation it always was. The
+suite's own test for a tagged literal could never have caught this — it uses
+`foaf:name`, whose `rdfs:Literal` range short-circuits two lines above the
+defect. `12-literal-volume` is back on the `data` stage and asserts `CNF-004`
+alongside its two seeded defects.
 
-Until it is fixed, `12-literal-volume` runs through the `checks` stage instead of
-`data`. That stage runs the same registry over the same graph without the
-conformance layer that raises, so both seeded defects are still asserted; the
-fixture carries a comment saying to move it back.
+### 6. `pattern-consistency` misreported per-row entities as taxonomy references — fixed
+
+`check_taxonomy_references` skips the per-row entities a mapping builds
+(`?vehicle_IRI` and the like) by recognising the sketch's scratch namespace,
+`https://tarqlviz.org/`. But `sketch.ttl` renders those entities using the
+*query's* own empty prefix whenever the query declares one — and most do. Every
+unbound variable then landed in the model's namespace and was reported as a
+reference to a nonexistent taxonomy term.
+
+Measured on the competency-test mappings, where all four files declare
+`PREFIX : <...>`: **11 of 12 findings named a CONSTRUCT variable**, burying the
+one real one (`vocab:Resevoir`, a typo for `vocab:Reservoir`). The suite's own
+worked example does not declare `:`, which is why its output looked clean.
+
+**Now:** fixed in 0.14.3. `tarql_visualiser.per_row_entity_iris` computes both
+candidate namespaces — the scratch one and each query's own empty prefix —
+crossed with the variable names that query's CONSTRUCT blocks use, so the answer
+holds whichever binding won.
 
 ## Competency tests
 

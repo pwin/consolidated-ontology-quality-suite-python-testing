@@ -549,6 +549,18 @@ def _observations(by_key: Dict[str, Run]) -> List[str]:
     gaps = [r for r in by_key["pattern-consistency"].rows if r.check_id == "taxonomy-reference"]
     variables = _construct_variables()
     spurious = [r for r in gaps if r.focus_node.rsplit("#", 1)[-1].rsplit("/", 1)[-1] in variables]
+    if not spurious:
+        notes.append(
+            "**`check_taxonomy_references` no longer over-reports when a query declares its own `:` "
+            "prefix** -- fixed in suite 0.14.3, found here. All four mappings in this example declare "
+            "`prefix : <{}>`, and against 0.14.2 that produced 12 taxonomy-reference findings of which "
+            "11 named a CONSTRUCT *variable* rather than a hard-coded term, burying the one real one. "
+            "The check skips per-row entities by recognising the sketch's scratch namespace, but "
+            "`sketch.ttl` renders them with the query's own empty prefix whenever the query declares "
+            "one. `tarql_visualiser.per_row_entity_iris` now covers both candidate namespaces. This "
+            "run: {} finding(s), {} of them variable-derived -- {}.".format(
+                WATER, len(gaps), len(spurious),
+                ", ".join("`" + r.focus_node.rsplit("#", 1)[-1] + "`" for r in gaps) or "none"))
     if spurious:
         notes.append(
             "**`check_taxonomy_references` over-reports when a query declares its own `:` prefix.** "

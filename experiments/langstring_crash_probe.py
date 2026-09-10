@@ -1,4 +1,8 @@
-"""Why does `ontology-quality-suite data` crash on a language-tagged literal?
+"""Why did `ontology-quality-suite data` crash on a language-tagged literal?
+
+FIXED UPSTREAM in ontology-quality-suite 0.14.3. Against 0.14.2 and earlier
+this probe reproduced the crash; against >= 0.14.3 it is a regression check --
+both rows below should report, neither should raise.
 
 Found while adding a fixture for DAT-003 ("duplicate literal values"), which
 needs two literals carrying the same lexical form -- the natural way to build
@@ -77,11 +81,11 @@ def main() -> None:
     attempt('"Checked" (untagged)', UNTAGGED)
     attempt('"Checked"@en (tagged)', TAGGED)
     print()
-    print("The fix is one word: rdf:langString, not RDFS.langString. rdflib already")
-    print("imports RDF alongside RDFS in that module, so it is `RDF.langString`.")
-    print("Worth noting that the correct value also changes the answer -- a")
-    print("langString is not an xsd:string, so once it resolves, the tagged")
-    print("literal is a genuine range violation and should be reported as one.")
+    print("Fixed in 0.14.3, in one word: RDF.langString, which that module already")
+    print("imports. The correct value also changes the answer rather than merely")
+    print("unblocking it -- a langString is not an xsd:string, so the tagged literal")
+    print("is a genuine CNF-004 range violation and is now reported as one. Declare")
+    print("the range rdfs:Literal if tagged values are what you intend.")
 
 
 if __name__ == "__main__":

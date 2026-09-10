@@ -121,7 +121,7 @@ uv run ontology-quality-suite checks --ontology competency_tests/fixtures/vsix/e
 ```powershell
 uv run python experiments/severity_probe.py         # pyshacl reports every finding as Violation
 uv run python experiments/illtyped_boolean_probe.py # DAT-001 can't see an invalid xsd:boolean
-uv run python experiments/langstring_crash_probe.py # `data` crashes on a language-tagged literal (open)
+uv run python experiments/langstring_crash_probe.py # `data` crashed on a language-tagged literal (fixed in 0.14.3)
 ```
 
 ## 6. Useful variations
