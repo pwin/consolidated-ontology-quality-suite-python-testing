@@ -1,0 +1,13 @@
+﻿# ,Issue ,Summary 
+14,Construct variable used but never defined ,"Detect variables referenced in a TARQL CONSTRUCT that are not bound, selected or otherwise defined in the WHERE clause. "
+15,Defined mapping produces no values ,"Check that mapped attributes expected to produce triples actually appear in the output, including values lost through invalid datatype conversion. "
+16,Source-to-target population mismatch ,"Compare expected source records or populated source attributes with the resulting entities and properties, subject to explicit filtering rules. "
+17,Required object property missing from a generated entity ,Check that generated entities contain object-property relationships required by the agreed graph pattern. 
+18,Generated graph uses an unexpected modelling pattern ,"Flag entities that conform syntactically but do not follow the agreed relationship pattern for their class or context, such as the expected magnitude structure. "
+,,
+,,
+,,
+,,
+,,
+,,
+,,

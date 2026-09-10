@@ -1,0 +1,23 @@
+@prefix unit: <https://example.org/water/units#> .
+@prefix gist: <https://w3id.org/semanticarts/ns/ontology/gist/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+
+# The units this project recognises. CMP-021 pairs each magnitude class with
+# the units that are legitimate for it; anything else is a category error
+# rather than a missing value.
+
+unit:LitrePerSecond a gist:UnitOfMeasure ;
+    skos:prefLabel "litre per second"@en ;
+    skos:definition "Volumetric flow: litres passing a point each second."@en .
+
+unit:Bar a gist:UnitOfMeasure ;
+    skos:prefLabel "bar"@en ;
+    skos:definition "Pressure equal to 100 kilopascals."@en .
+
+unit:Litre a gist:UnitOfMeasure ;
+    skos:prefLabel "litre"@en ;
+    skos:definition "Volume equal to one cubic decimetre."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

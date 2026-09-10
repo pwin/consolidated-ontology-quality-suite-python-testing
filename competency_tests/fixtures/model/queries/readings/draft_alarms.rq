@@ -1,0 +1,15 @@
+# Draft alarm mapping -- not yet wired to a CSV, so it is never triplified.
+# It is still read by every static check, which is the point: these two
+# defects are catchable before the mapping has ever run.
+prefix : <https://example.org/water/model#>
+
+CONSTRUCT {
+  ?alarm_IRI a :Reading ;
+    # SEEDS TQL-002: ?site_IRI is used here but bound nowhere below.
+    :atSite ?site_IRI .
+}
+WHERE {
+  # SEEDS TQL-004: CONCAT returns a string. Without IRI() around it the
+  # variable is bound, looks right, and every triple using it is dropped.
+  BIND(CONCAT("https://example.org/water/data/alarm-", ?alarmid) AS ?alarm_IRI)
+}

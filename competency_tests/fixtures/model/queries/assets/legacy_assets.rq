@@ -1,0 +1,21 @@
+# Legacy asset-register import, written before the magnitude pattern was
+# agreed. Kept in the folder because it still runs nightly.
+prefix :      <https://example.org/water/model#>
+prefix gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+prefix vocab: <https://example.org/water/vocab#>
+
+CONSTRUCT {
+  # SEEDS CT-2: this is the IRI template assets.rq uses for :PumpStation.
+  # The same IRI therefore denotes both an asset and a reading.
+  ?legacy_IRI a :Reading ;
+    # SEEDS CT-18: the agreed pattern puts the number on a :FlowRate
+    # magnitude node reached by :hasFlowRate. This flattens it onto the
+    # reading, so the value has no unit and no quantity kind.
+    gist:numericValue ?flow ;
+    # SEEDS CT-4 (static): the taxonomy declares vocab:Reservoir. This is a
+    # hard-coded reference to a term that does not exist.
+    gist:isCategorizedBy vocab:Resevoir .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?legacy_IRI)
+}

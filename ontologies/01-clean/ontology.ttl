@@ -18,36 +18,42 @@
     a               owl:Class ;
     rdfs:subClassOf owl:Thing ;
     rdfs:label      "Agent"@en ;
-    skos:prefLabel  "Agent"@en .
+    skos:prefLabel  "Agent"@en ;
+    skos:definition "Something capable of acting: a person or an organization."@en .
 
 :Person
     a               owl:Class ;
     rdfs:subClassOf :Agent ;
     rdfs:label      "Person"@en ;
-    skos:prefLabel  "Person"@en .
+    skos:prefLabel  "Person"@en ;
+    skos:definition "A human being."@en .
 
 :Organization
     a               owl:Class ;
     rdfs:subClassOf :Agent ;
     rdfs:label      "Organization"@en ;
-    skos:prefLabel  "Organization"@en .
+    skos:prefLabel  "Organization"@en ;
+    skos:definition "A body of people organised for a shared purpose."@en .
 
 :worksFor
     a              owl:ObjectProperty ;
     rdfs:domain    :Person ;
     rdfs:range     :Organization ;
     rdfs:label     "works for"@en ;
-    skos:prefLabel "worksFor"@en .
+    skos:prefLabel "worksFor"@en ;
+    skos:definition "Links a person to the organization employing them."@en .
 
 :fullName
     a              owl:DatatypeProperty ;
     rdfs:domain    :Person ;
     rdfs:range     xsd:string ;
     rdfs:label     "full name"@en ;
-    skos:prefLabel "fullName"@en .
+    skos:prefLabel "fullName"@en ;
+    skos:definition "A person's name as they write it in full."@en .
 
 # skos:prefLabel is an external W3C term used above. Declaring it locally is
 # what keeps the referential-integrity check STR-002 ("undefined property
 # used") quiet about it -- STR-002 exempts only the rdf:/rdfs:/owl:
 # namespaces, not all of w3.org. See README.md, "Observations".
-skos:prefLabel a owl:AnnotationProperty .
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

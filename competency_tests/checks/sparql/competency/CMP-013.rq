@@ -1,0 +1,31 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+PREFIX unit:  <https://example.org/water/units#>
+
+# CMP-013 (CT-13): a declared property no mapping ever uses. CNF-005 asks the
+# same question about classes; this is its property half. Run against
+# ontology + output data merged.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Info ;
+    sh:focusNode ?p ;
+    sh:sourceConstraintComponent oq:CMP-013 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  { ?p a owl:ObjectProperty } UNION { ?p a owl:DatatypeProperty }
+  FILTER(isIRI(?p))
+  FILTER(!STRSTARTS(STR(?p), "http://www.w3.org/"))
+  FILTER(!STRSTARTS(STR(?p), "http://purl.org/"))
+  FILTER NOT EXISTS { ?s ?p ?o }
+  BIND(CONCAT("Property ", STR(?p), " is declared in the ontology but never used in the ",
+              "resulting graph. Confirm this is an intentional omission rather than a ",
+              "mapping that was never written.") AS ?msg)
+}

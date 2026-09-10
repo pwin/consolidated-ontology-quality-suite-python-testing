@@ -1,0 +1,43 @@
+Ontology version diff: C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\ontology\water-v1.ttl -> C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\ontology\water-v2.ttl
+
+Removed classes [MAJOR]:
+  - https://example.org/water/model#PumpStation
+
+Removed properties [MAJOR]:
+  - https://example.org/water/model#hasFlowRate
+
+Removed subclass edges [MAJOR]:
+  - https://example.org/water/model#PumpStation no longer rdfs:subClassOf http://www.w3.org/2002/07/owl#Thing
+
+Narrowed/changed property domains [MAJOR]:
+  - https://example.org/water/model#atSite: {https://example.org/water/model#PumpStation} -> {https://example.org/water/model#PumpingStation}
+  - https://example.org/water/model#hasReading: {https://example.org/water/model#PumpStation} -> {https://example.org/water/model#PumpingStation}
+  - https://example.org/water/model#legacyRef: {https://example.org/water/model#PumpStation} -> {https://example.org/water/model#PumpingStation}
+
+Added classes [minor]:
+  - https://example.org/water/model#PumpingStation
+
+Added properties [minor]:
+  - http://purl.org/dc/terms/isReplacedBy
+  - https://example.org/water/model#flowRate
+
+Added subclass edges [minor]:
+  - https://example.org/water/model#PumpingStation rdfs:subClassOf http://www.w3.org/2002/07/owl#Thing
+
+Suggested version bump: MAJOR
+
+5 prefix/namespace misalignment(s):
+  [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\assets\assets.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
+  [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\assets\legacy_assets.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
+  [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\assets\sites.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
+  [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\readings\draft_alarms.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
+  [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\readings\readings.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
+1 class(es) used in TARQL but not declared in the ontology set:
+  [undeclared_class] https://example.org/water/model#PumpStation
+2 propert(y/ies) used in TARQL but not declared in the ontology set:
+  [undeclared_property] https://example.org/water/model#hasFlowRate
+  [undeclared_property] https://example.org/water/model#isRepresentedBy
+
+1 suggested repair(s):
+  [insert_ontology_stub] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\ontology\water-v2.ttl (confidence 70%)
+    Declare 1 term(s) used in TARQL/oxi-gen queries but never declared: https://example.org/water/model#isRepresentedBy

@@ -1,0 +1,39 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+PREFIX unit:  <https://example.org/water/units#>
+
+# CMP-021 (CT-21): a unit that cannot measure the quantity it is attached to.
+# The VALUES table is the project's allowed-unit rule; a magnitude class not
+# named in it is not governed and is left alone.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?m ;
+    sh:resultPath gist:hasUnitOfMeasure ;
+    sh:value ?unit ;
+    sh:sourceConstraintComponent oq:CMP-021 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  VALUES ?class { water:FlowRate water:Pressure }
+  ?m a ?class ;
+     gist:hasUnitOfMeasure ?unit .
+  FILTER(isIRI(?m))
+  FILTER NOT EXISTS {
+    VALUES (?okClass ?okUnit) {
+      (water:FlowRate unit:LitrePerSecond)
+      (water:Pressure unit:Bar)
+    }
+    ?m a ?okClass ;
+       gist:hasUnitOfMeasure ?okUnit .
+  }
+  BIND(CONCAT("Magnitude ", STR(?m), " is a ", STR(?class), " measured in ", STR(?unit),
+              ", which is not an allowed unit for that quantity.") AS ?msg)
+}

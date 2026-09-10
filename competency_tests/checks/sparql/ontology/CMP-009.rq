@@ -1,0 +1,35 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+PREFIX unit:  <https://example.org/water/units#>
+
+# CMP-009 (CT-9): a locally defined class with no place in the hierarchy.
+# Stricter than STR-004, which accepts any defining axiom: a class can be
+# owl:disjointWith something and still hang outside the tree entirely.
+# Imported content is excluded by namespace -- edit the FILTERs below to
+# match the vocabularies your project imports.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Warning ;
+    sh:focusNode ?c ;
+    sh:resultPath rdfs:subClassOf ;
+    sh:sourceConstraintComponent oq:CMP-009 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?c a owl:Class .
+  FILTER(isIRI(?c))
+  FILTER(!STRSTARTS(STR(?c), "http://www.w3.org/"))
+  FILTER(!STRSTARTS(STR(?c), "http://purl.org/"))
+  FILTER(!STRSTARTS(STR(?c), "https://w3id.org/semanticarts/"))
+  FILTER NOT EXISTS { ?c rdfs:subClassOf ?parent }
+  FILTER NOT EXISTS { ?c owl:equivalentClass ?eq }
+  BIND(CONCAT("Class ", STR(?c), " has no rdfs:subClassOf and no owl:equivalentClass, so it sits ",
+              "outside the class hierarchy entirely.") AS ?msg)
+}

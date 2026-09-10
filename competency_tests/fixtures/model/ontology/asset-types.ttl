@@ -1,0 +1,24 @@
+@prefix vocab: <https://example.org/water/vocab#> .
+@prefix :      <https://example.org/water/model#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+
+# The taxonomy layer: the controlled vocabulary of :AssetType values that
+# data is actually allowed to use. Authoritative for these terms' own
+# labels -- which is what makes a mapping minting labels for them a
+# defect (CT-12).
+
+vocab:Borehole a :AssetType ;
+    skos:prefLabel "Borehole"@en ;
+    skos:definition "A shaft sunk to abstract water from an aquifer."@en .
+
+vocab:Reservoir a :AssetType ;
+    skos:prefLabel "Reservoir"@en ;
+    skos:definition "An impounding structure storing raw or treated water."@en .
+
+vocab:TreatmentWorks a :AssetType ;
+    skos:prefLabel "Treatment works"@en ;
+    skos:definition "A plant treating raw water to drinking-water standard."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

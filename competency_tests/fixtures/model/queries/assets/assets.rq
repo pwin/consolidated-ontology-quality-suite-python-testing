@@ -1,0 +1,27 @@
+# Assets domain -- pump stations, their site, and their asset-type category.
+prefix :      <https://example.org/water/model#>
+prefix gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+prefix skos:  <http://www.w3.org/2004/02/skos/core#>
+prefix vocab: <https://example.org/water/vocab#>
+
+CONSTRUCT {
+  # :PumpStation is the 1.0.0 name. water-v2.ttl renamed it to
+  # :PumpingStation and this mapping was never updated -- SEEDS CT-3/CT-6/CT-7.
+  ?asset_IRI a :PumpStation ;
+    :atSite ?site_IRI ;
+    gist:isCategorizedBy ?assettype_IRI .
+
+  # SEEDS CT-12: vocab:Reservoir is a taxonomy term. Its preferred label is
+  # the taxonomy's to state, not this mapping's to mint.
+  vocab:Reservoir skos:prefLabel "Reservoir"@en .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?asset_IRI)
+  # SEEDS CT-17: assets.csv row A3 has an empty siteid, so CONCAT errors,
+  # ?site_IRI stays unbound, and that asset alone loses its :atSite link.
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", ?siteid)) AS ?site_IRI)
+  # SEEDS CT-4 (dynamic): row A4's assettype is "Culvert", which the
+  # taxonomy never declares. No literal IRI appears in the query text, so
+  # only a check against real output can see it.
+  BIND(IRI(CONCAT("https://example.org/water/vocab#", ?assettype)) AS ?assettype_IRI)
+}

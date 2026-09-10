@@ -1,0 +1,129 @@
+@prefix :        <https://example.org/water/model#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix gist:    <https://w3id.org/semanticarts/ns/ontology/gist/> .
+
+# Acme Water monitoring model, version 1.0.0.
+#
+# The authoritative TBox for the competency-test worked example. Deliberately
+# clean: every declared term carries a skos:prefLabel and a skos:definition,
+# so the completeness checks (QUA-004/009/010) stay quiet here and the
+# completeness defects live in their own fixture (fixtures/completeness/).
+#
+# Two seeded conditions do live here, both about *use* rather than authoring:
+#   :DecommissionedSite -- declared, never populated by any mapping  -> CT-13 (CNF-005)
+#   :legacyRef          -- declared, never used by any mapping       -> CT-13 (CMP-013)
+
+<https://example.org/water/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/model/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Acme Water monitoring model"@en ;
+    dcterms:title   "Acme Water monitoring model" .
+
+# --- gist terms used by this model -------------------------------------
+# Declared locally rather than imported, so the fixture runs offline. The
+# namespace is gist's exact IRI, which is what DAT-004 keys on.
+
+gist:Magnitude      a owl:Class ; rdfs:label "Magnitude"@en ; skos:prefLabel "Magnitude"@en ;
+    skos:definition "A quantity: a numeric value together with the unit it is measured in."@en .
+gist:UnitOfMeasure  a owl:Class ; rdfs:label "Unit of measure"@en ; skos:prefLabel "UnitOfMeasure"@en ;
+    skos:definition "A standard quantity used to express the magnitude of a measurement."@en .
+gist:Category       a owl:Class ; rdfs:label "Category"@en ; skos:prefLabel "Category"@en ;
+    skos:definition "A member of a controlled vocabulary used to classify other things."@en .
+
+gist:hasUnitOfMeasure a owl:ObjectProperty ;
+    rdfs:domain gist:Magnitude ; rdfs:range gist:UnitOfMeasure ;
+    rdfs:label "has unit of measure"@en ; skos:prefLabel "hasUnitOfMeasure"@en ;
+    skos:definition "Links a magnitude to the unit its numeric value is expressed in."@en .
+gist:numericValue a owl:DatatypeProperty ;
+    rdfs:domain gist:Magnitude ; rdfs:range xsd:decimal ;
+    rdfs:label "numeric value"@en ; skos:prefLabel "numericValue"@en ;
+    skos:definition "The number part of a magnitude, without its unit."@en .
+gist:isCategorizedBy a owl:ObjectProperty ;
+    rdfs:range gist:Category ;
+    rdfs:label "is categorized by"@en ; skos:prefLabel "isCategorizedBy"@en ;
+    skos:definition "Links a thing to the controlled-vocabulary member that classifies it."@en .
+
+# --- domain classes ----------------------------------------------------
+
+:Site a owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label "Site"@en ; skos:prefLabel "Site"@en ;
+    skos:definition "A geographic location at which Acme Water operates equipment."@en .
+
+:PumpStation a owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label "Pump station"@en ; skos:prefLabel "PumpStation"@en ;
+    skos:definition "An installation that moves water through the network under pressure."@en .
+
+:Reading a owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label "Reading"@en ; skos:prefLabel "Reading"@en ;
+    skos:definition "A single observation of a pump station's operating condition at a point in time."@en .
+
+:AssetType a owl:Class ;
+    rdfs:subClassOf gist:Category ;
+    rdfs:label "Asset type"@en ; skos:prefLabel "AssetType"@en ;
+    skos:definition "A controlled-vocabulary member classifying an asset by the kind of installation it is."@en .
+
+:FlowRate a owl:Class ;
+    rdfs:subClassOf gist:Magnitude ;
+    rdfs:label "Flow rate"@en ; skos:prefLabel "FlowRate"@en ;
+    skos:definition "The volume of water passing a point per unit of time."@en .
+
+:Pressure a owl:Class ;
+    rdfs:subClassOf gist:Magnitude ;
+    rdfs:label "Pressure"@en ; skos:prefLabel "Pressure"@en ;
+    skos:definition "The force per unit area exerted by water in the network."@en .
+
+# SEEDS CT-13: declared here, never populated by any mapping -> CNF-005.
+:DecommissionedSite a owl:Class ;
+    rdfs:subClassOf :Site ;
+    rdfs:label "Decommissioned site"@en ; skos:prefLabel "DecommissionedSite"@en ;
+    skos:definition "A site withdrawn from service and retained only for historical reporting."@en .
+
+# --- domain properties -------------------------------------------------
+
+:atSite a owl:ObjectProperty ;
+    rdfs:domain :PumpStation ; rdfs:range :Site ;
+    rdfs:label "at site"@en ; skos:prefLabel "atSite"@en ;
+    skos:definition "Links a pump station to the site it stands on."@en .
+
+:hasReading a owl:ObjectProperty ;
+    rdfs:domain :PumpStation ; rdfs:range :Reading ;
+    rdfs:label "has reading"@en ; skos:prefLabel "hasReading"@en ;
+    skos:definition "Links a pump station to an observation made of it."@en .
+
+:hasFlowRate a owl:ObjectProperty ;
+    rdfs:domain :Reading ; rdfs:range :FlowRate ;
+    rdfs:label "has flow rate"@en ; skos:prefLabel "hasFlowRate"@en ;
+    skos:definition "Links a reading to the flow rate magnitude it recorded."@en .
+
+:hasPressure a owl:ObjectProperty ;
+    rdfs:domain :Reading ; rdfs:range :Pressure ;
+    rdfs:label "has pressure"@en ; skos:prefLabel "hasPressure"@en ;
+    skos:definition "Links a reading to the pressure magnitude it recorded."@en .
+
+:siteName a owl:DatatypeProperty ;
+    rdfs:domain :Site ; rdfs:range xsd:string ;
+    rdfs:label "site name"@en ; skos:prefLabel "siteName"@en ;
+    skos:definition "The name by which operational staff refer to a site."@en .
+
+:takenAt a owl:DatatypeProperty ;
+    rdfs:domain :Reading ; rdfs:range xsd:dateTime ;
+    rdfs:label "taken at"@en ; skos:prefLabel "takenAt"@en ;
+    skos:definition "The instant at which a reading was recorded."@en .
+
+# SEEDS CT-13: declared here, never used by any mapping -> CMP-013.
+:legacyRef a owl:DatatypeProperty ;
+    rdfs:domain :PumpStation ; rdfs:range xsd:string ;
+    rdfs:label "legacy reference"@en ; skos:prefLabel "legacyRef"@en ;
+    skos:definition "The identifier this asset carried in the pre-migration asset register."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .
+dcterms:title   a owl:AnnotationProperty .

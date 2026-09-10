@@ -1,0 +1,12 @@
+# Sites domain -- the reference mapping for the shared :Site concept.
+# Deliberately correct: every other query's ?site_IRI is compared against
+# this one by TQL-001.
+prefix :    <https://example.org/water/model#>
+
+CONSTRUCT {
+  ?site_IRI a :Site ;
+    :siteName ?sitename .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", ?siteid)) AS ?site_IRI)
+}

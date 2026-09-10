@@ -85,14 +85,42 @@ Which subcommand does what here:
 * `ontology --ontology <ont.ttl>` — as-authored evaluation; the only stage that
   checks OWL2 profile membership, and only when `--profile` is passed.
 
-## 4. Experiments behind the observations in README.md
+## 4. Competency tests
+
+The 28 numbered competency tests in [competency_tests/](competency_tests/) are a
+separate exercise with their own fixtures, project-local checks and generated
+report.
+
+```powershell
+uv run python competency_tests/run_competency_checks.py   # runs all 28, regenerates COMPETENCY_COVERAGE.md
+uv run pytest competency_tests -q                          # the same expectations as pass/fail tests
+uv run pytest "competency_tests/test_competency.py::test_competency_test_is_evidenced[16]" -q   # one competency test
+```
+
+Individual stages of that worked example, if you want to see one on its own:
+
+```powershell
+uv run ontology-quality-suite sketch --queries competency_tests/fixtures/model/queries --file-pattern "**/*.rq" --ontology competency_tests/fixtures/model/ontology/water-v1.ttl --out-dir out/ct/sketch
+uv run ontology-quality-suite consistency --old competency_tests/fixtures/model/ontology/water-v1.ttl --new competency_tests/fixtures/model/ontology/water-v2.ttl --queries competency_tests/fixtures/model/queries --file-pattern "**/*.rq" --out-dir out/ct/consistency
+uv run ontology-quality-suite pattern-consistency --queries competency_tests/fixtures/model/queries --ontology competency_tests/fixtures/model/ontology/water-v1.ttl --taxonomy competency_tests/fixtures/model/ontology/asset-types.ttl --taxonomy competency_tests/fixtures/model/ontology/units.ttl --file-pattern "**/*.rq" --out-dir out/ct/pattern
+uv run ontology-quality-suite triplify --csv-dir competency_tests/fixtures/model/csv --queries competency_tests/fixtures/model/queries/readings --out-dir out/ct/triplify
+```
+
+The three checks only the VS Code extension implements have their own dataset:
+
+```powershell
+uv run ontology-quality-suite checks --ontology competency_tests/fixtures/vsix/extension-only.ttl --out-dir out/ct/vsix
+# then open the same file in VS Code and run "Ontology Suite: Run Local Checks"
+```
+
+## 5. Experiments behind the observations in README.md
 
 ```powershell
 uv run python experiments/severity_probe.py         # pyshacl reports every finding as Violation
 uv run python experiments/illtyped_boolean_probe.py # DAT-001 can't see an invalid xsd:boolean
 ```
 
-## 5. Useful variations
+## 6. Useful variations
 
 ```powershell
 # faster: portable SPARQL engine only (skips pyshacl)

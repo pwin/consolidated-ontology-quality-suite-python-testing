@@ -1,0 +1,94 @@
+{
+  "_comment": "Project-local checks for the competency tests the shipped registry does not cover. Merged with the installed registry at run time by run_competency_checks.py, so the suite's own 61 checks stay current. Ids follow the suite's <CATEGORY-PREFIX>-<NNN> convention; the number is deliberately the competency-test number, so CMP-019 answers CT-19.",
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "CMP-002",
+      "category": "competency",
+      "metric": "identifier uniqueness across mappings",
+      "default_severity": "Violation",
+      "title": "Same IRI used for two unrelated concepts",
+      "description": "One IRI is typed with two classes where neither is a specialisation of the other, so two mappings are minting the same identifier for different things. Distinct from TQL-001, which compares BIND expressions in query text: this asks the question of the real output, where a collision built from differently-named columns still shows up.",
+      "remediation": "Decide which concept owns the IRI template and change the other mapping's BIND, or add the discriminator (an entity-type token, a source-system prefix) that keeps the two apart.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "No IRI denotes two unrelated concepts"
+    },
+    {
+      "id": "CMP-009",
+      "category": "competency",
+      "metric": "class hierarchy placement",
+      "default_severity": "Warning",
+      "title": "Locally defined class has no place in the class hierarchy",
+      "description": "A class declared in a namespace this project owns has neither rdfs:subClassOf nor owl:equivalentClass, so it hangs outside the hierarchy entirely. Stricter than STR-004, which is satisfied by any defining axiom including owl:disjointWith: a class can be formally constrained and still be unreachable by any hierarchy traversal. Imported vocabularies are excluded by namespace.",
+      "remediation": "Give the class a superclass, or an equivalentClass axiom that places it. If it is genuinely a top-level concept, say so explicitly with rdfs:subClassOf owl:Thing.",
+      "cucumber_feature": "Model Completeness",
+      "cucumber_scenario": "Every locally defined class is placed in the hierarchy"
+    },
+    {
+      "id": "CMP-012",
+      "category": "competency",
+      "metric": "authoritative source of term metadata",
+      "default_severity": "Warning",
+      "title": "Label or definition minted by the transformation",
+      "description": "A CONSTRUCT template attaches skos:prefLabel, skos:altLabel or skos:definition to a term that is not a per-row instance -- a class, property or controlled-vocabulary member the model owns. Two artefacts then state the same term's label and nothing keeps them in step. Run against the sketch graph, where per-row entities are recognisable by the sketch's own scratch namespace.",
+      "remediation": "Move the label or definition into the ontology or taxonomy that declares the term, and drop the triple from the mapping.",
+      "cucumber_feature": "Model Completeness",
+      "cucumber_scenario": "Term metadata is stated only by the artefact that declares the term"
+    },
+    {
+      "id": "CMP-013",
+      "category": "competency",
+      "metric": "vocabulary utilisation",
+      "default_severity": "Info",
+      "title": "Declared property never used in the resulting graph",
+      "description": "An owl:ObjectProperty or owl:DatatypeProperty is declared in the ontology but appears as a predicate nowhere in the output. The property half of CNF-005, which asks the same question about classes. Info rather than Warning because a property outside a given batch's scope is legitimately unused.",
+      "remediation": "Confirm the omission is intentional. If the property should be populated, the mapping for it is missing; if it is obsolete, deprecate or remove it.",
+      "cucumber_feature": "Model Completeness",
+      "cucumber_scenario": "Every declared property is either used or knowingly unused"
+    },
+    {
+      "id": "CMP-017",
+      "category": "competency",
+      "metric": "graph pattern completeness",
+      "default_severity": "Violation",
+      "title": "Generated entity missing a required object property",
+      "description": "An entity of a class the project's graph pattern governs has none of the object-property links that pattern requires. Typically an empty source cell: the row still produces the entity, and only the one link silently disappears. The required (class, property) pairs are a VALUES table in the check, which is where a project states its own rule.",
+      "remediation": "Trace the row back to source. If the source value is genuinely absent, decide whether the entity should be produced at all; if it is present, the BIND that builds the link is failing.",
+      "cucumber_feature": "Mapping Integrity",
+      "cucumber_scenario": "Every generated entity carries the object properties its pattern requires"
+    },
+    {
+      "id": "CMP-018",
+      "category": "competency",
+      "metric": "modelling pattern conformance",
+      "default_severity": "Violation",
+      "title": "Generated graph uses an unexpected modelling pattern",
+      "description": "An entity carries gist:numericValue directly instead of via a gist:Magnitude node. The output is syntactically fine and every triple parses; the number simply has nowhere to carry its unit or quantity kind, so it cannot be compared or converted.",
+      "remediation": "Rewrite the mapping to build a magnitude node between the entity and its number, and attach the unit to that node.",
+      "cucumber_feature": "Mapping Integrity",
+      "cucumber_scenario": "Quantities follow the agreed magnitude pattern"
+    },
+    {
+      "id": "CMP-019",
+      "category": "competency",
+      "metric": "quantity completeness",
+      "default_severity": "Violation",
+      "title": "Magnitude missing a numeric value",
+      "description": "An instance of gist:Magnitude, or any subclass, has no gist:numericValue. DAT-004 asks the same question about the unit; a magnitude needs both to be a quantity at all. Usually an empty source cell that still built the magnitude node, so the defect is invisible in the row count.",
+      "remediation": "Guard the magnitude node's construction on the value being present, or supply the missing source value.",
+      "cucumber_feature": "Magnitudes, Values and Units",
+      "cucumber_scenario": "Every magnitude carries its numeric value"
+    },
+    {
+      "id": "CMP-021",
+      "category": "competency",
+      "metric": "unit compatibility",
+      "default_severity": "Violation",
+      "title": "Unit of measure incompatible with the quantity",
+      "description": "A magnitude is measured in a unit that cannot express its quantity kind -- a pressure in litres, a length in seconds. DAT-004 confirms a unit is present and is a gist:UnitOfMeasure; this asks whether it is the right kind of unit. The allowed (magnitude class, unit) pairs are a VALUES table in the check; a class not named there is not governed.",
+      "remediation": "Correct the unit in the mapping. If the unit is right and the quantity kind is wrong, the magnitude's class is what needs changing.",
+      "cucumber_feature": "Magnitudes, Values and Units",
+      "cucumber_scenario": "Every magnitude's unit can express its quantity"
+    }
+  ]
+}

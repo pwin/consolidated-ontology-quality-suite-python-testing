@@ -27,11 +27,13 @@ uv run pytest -q            # same expectations, as pass/fail tests
 
 ## Results
 
-All 13 fixtures pass: **35 of the registry's 50 checks** are asserted (39
+All 13 fixtures pass: **35 of the registry's 61 checks** are asserted (41
 distinct check ids appear in the output, once incidental advisory findings are
 counted) and every seeded error is detected. Counts below are from
-`uv run python report.py` against suite 0.6.0 — 82 findings in total,
-identical across runs.
+`uv run python report.py` against suite 0.14.2 — 127 findings in total,
+identical across runs. The rise from 82 under 0.6.0 is entirely `QUA-010`
+("class or property without a skos:definition"), a check added since, firing
+across the error fixtures.
 
 | Fixture | Seeded error | Detected |
 |---|---|---|
@@ -49,10 +51,12 @@ identical across runs.
 | `09-profile-violations` | `unionOf`, `complementOf`, `allValuesFrom`, `minCardinality 4`, transitive + functional properties | `REA-010` ×6, `REA-011` ×5, `REA-012` ×3 |
 | `10-efficiency` | 6-hop `subClassOf` chain; blank nodes >20% of all nodes | `EFF-001` ×2, `EFF-002` |
 
-The clean control is the important negative case: it declares labels, domains,
-ranges and metadata properly, and produces **no Violation or Warning at all** —
-so the findings in the other fixtures are attributable to the seeded errors,
-not to background noise.
+The clean control is the important negative case: it declares labels,
+definitions, domains, ranges and metadata properly, and produces **no Violation
+or Warning at all** — so the findings in the other fixtures are attributable to
+the seeded errors, not to background noise. It needed one edit to stay that way
+across the 0.6.0 → 0.14.2 upgrade: `skos:definition` on each term, for the
+`QUA-010` check added in between.
 
 ## Issues found
 
@@ -185,6 +189,19 @@ reports `x2` on three consecutive runs.
 * The suite falls back to owlrl-only for fixture 06 (`REA-022` is reported):
   owlready2's RDF/XML parser rejects the ill-typed literals. The degradation is
   visible in the report rather than silent, which is the designed behaviour.
+
+## Competency tests
+
+[competency_tests/](competency_tests/) is a second, larger exercise over the
+same suite: 28 numbered competency tests supplied as CSVs, each one seeded into
+a worked example spanning an ontology, a taxonomy, four TARQL mappings, the CSVs
+they read and two comparable outputs. All 28 are evidenced;
+[competency_tests/COMPETENCY_COVERAGE.md](competency_tests/COMPETENCY_COVERAGE.md)
+is the generated record of how each is checked and what the run found.
+
+```bash
+uv run python competency_tests/run_competency_checks.py
+```
 
 ## Licence
 

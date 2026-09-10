@@ -1,0 +1,31 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+PREFIX unit:  <https://example.org/water/units#>
+
+# CMP-018 (CT-18): output that parses cleanly but does not follow the agreed
+# magnitude pattern -- a number hung straight off the entity instead of on a
+# gist:Magnitude node carrying its unit.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?entity ;
+    sh:resultPath gist:numericValue ;
+    sh:value ?v ;
+    sh:sourceConstraintComponent oq:CMP-018 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?entity gist:numericValue ?v .
+  FILTER(isIRI(?entity))
+  FILTER NOT EXISTS { ?entity rdf:type/rdfs:subClassOf* gist:Magnitude }
+  BIND(CONCAT("Entity ", STR(?entity), " carries gist:numericValue ", STR(?v),
+              " directly, but is not a gist:Magnitude. The agreed pattern puts the number on a ",
+              "magnitude node so it can carry a unit and a quantity kind.") AS ?msg)
+}

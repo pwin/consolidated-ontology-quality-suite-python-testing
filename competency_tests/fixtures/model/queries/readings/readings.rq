@@ -1,0 +1,45 @@
+# Readings domain -- the mapping under review.
+prefix :     <https://example.org/water/model#>
+prefix gist: <https://w3id.org/semanticarts/ns/ontology/gist/>
+prefix unit: <https://example.org/water/units#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+  ?reading_IRI a :Reading ;
+    :takenAt ?taken ;
+    :hasFlowRate ?flow_IRI ;
+    :hasPressure ?pressure_IRI ;
+    # SEEDS TQL-003: a CSV column that does not exist in readings.csv.
+    rdfs:comment ?note .
+
+  ?site_IRI a :Site .
+
+  ?flow_IRI a :FlowRate ;
+    # SEEDS TQL-005 / CT-22: the _DT suffix promises a datatype and the
+    # binding never gives it one, so the number lands as a plain string.
+    gist:numericValue ?flowvalue_DT ;
+    # SEEDS TQL-002 / CT-15 / CT-20: ?unit_IRI is never bound anywhere, so
+    # every flow magnitude is emitted with no unit at all.
+    gist:hasUnitOfMeasure ?unit_IRI .
+
+  ?pressure_IRI a :Pressure ;
+    gist:numericValue ?pressure ;
+    # SEEDS CT-21: litres measure volume, not pressure.
+    gist:hasUnitOfMeasure unit:Litre .
+}
+WHERE {
+  # SEEDS CT-16: the key is the site, not the site *and* the timestamp, so
+  # the six source rows collapse onto three reading entities.
+  BIND(IRI(CONCAT("https://example.org/water/data/reading-", ?siteid)) AS ?reading_IRI)
+  # SEEDS TQL-001 / CT-1 / CT-5: sites.rq and assets.rq mint the shared
+  # :Site IRI without the REPLACE. Same concept, two templates.
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", REPLACE(?siteid, " ", "_"))) AS ?site_IRI)
+  BIND(REPLACE(?taken, ":", "") AS ?stamp)
+  BIND(IRI(CONCAT("https://example.org/water/data/flow-", ?siteid, "-", ?stamp)) AS ?flow_IRI)
+  # SEEDS CT-19: readings.csv row 4 has an empty pressure cell, so this
+  # magnitude node is built and typed but never gets its number.
+  BIND(IRI(CONCAT("https://example.org/water/data/pressure-", ?siteid, "-", ?stamp)) AS ?pressure_IRI)
+  # SEEDS CT-22: an unnecessary string conversion. The number arrives as
+  # a plain string, so :FlowRate's xsd:decimal range is silently missed.
+  BIND(CONCAT(?flow, "") AS ?flowvalue_DT)
+}

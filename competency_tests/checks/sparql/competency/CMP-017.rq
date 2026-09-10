@@ -1,0 +1,33 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+PREFIX unit:  <https://example.org/water/units#>
+
+# CMP-017 (CT-17): a generated entity missing an object property the agreed
+# graph pattern requires. The VALUES table is the project rule -- add a row
+# per (class, required property) pair your pattern mandates.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?entity ;
+    sh:resultPath ?required ;
+    sh:value ?class ;
+    sh:sourceConstraintComponent oq:CMP-017 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  VALUES (?class ?required) {
+    (water:PumpStation water:atSite)
+  }
+  ?entity a ?class .
+  FILTER(isIRI(?entity))
+  FILTER NOT EXISTS { ?entity ?required ?anything }
+  BIND(CONCAT("Generated ", STR(?class), " ", STR(?entity), " has no ", STR(?required),
+              " link, which the agreed graph pattern requires for every entity of this class.") AS ?msg)
+}

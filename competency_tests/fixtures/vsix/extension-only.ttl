@@ -1,0 +1,48 @@
+@prefix :     <https://example.org/water/vsix#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# Dataset for the three checks the Python CLI declares in registry.json but
+# does not implement -- REA-005, REA-006 and VOC-001 are computed by the
+# VS Code extension only (see docs/CHECKS.md, "Not available in the CLI").
+#
+# To check them: open this file in VS Code with the Ontology Development
+# Suite extension installed, then run
+#   Ontology Suite: Run Local Checks
+# and read the Problems panel. Running the Python CLI over this same file
+# reports neither REA-005 nor VOC-001, which is the point of the fixture.
+
+<https://example.org/water/vsix>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/vsix/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Extension-only check fixture"@en .
+
+:Pump a owl:Class ;
+    # SEEDS VOC-001: :Machnie is a typo for :Machine and is declared
+    # nowhere. SHACL's open-world semantics cannot flag this -- nothing
+    # contradicts an undeclared class, it is simply never asserted.
+    rdfs:subClassOf :Machnie ;
+    rdfs:label      "Pump"@en ;
+    skos:prefLabel  "Pump"@en ;
+    skos:definition "A machine that moves water by mechanical action."@en .
+
+:Machine a owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Machine"@en ;
+    skos:prefLabel  "Machine"@en ;
+    skos:definition "A powered device performing mechanical work."@en .
+
+# SEEDS REA-005: the two assertions are direct contradictions -- sameAs says
+# one thing, differentFrom says two, and no model satisfies both.
+:pump-17 a :Pump , owl:NamedIndividual ;
+    rdfs:label "Pump 17"@en ;
+    owl:sameAs :pump-seventeen ;
+    owl:differentFrom :pump-seventeen .
+
+:pump-seventeen a :Pump , owl:NamedIndividual ;
+    rdfs:label "Pump seventeen"@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

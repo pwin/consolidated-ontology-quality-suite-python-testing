@@ -1,0 +1,5 @@
+﻿# ,Issue ,Summary 
+19,Magnitude missing a numeric value ,Check that each magnitude expected to represent a measurement contains its numeric value. 
+20,Magnitude missing a unit of measure ,Check that each applicable magnitude has an associated unit of measure. 
+21,Unit of measure incompatible with the quantity ,"Validate that the unit makes sense for the type of measurement, using project-specific allowed-unit rules. "
+22,Numeric datatype or conversion error ,"Detect values lost or altered because the mapping applies an invalid, unnecessary or incompatible datatype conversion. "

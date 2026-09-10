@@ -1,0 +1,28 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+PREFIX unit:  <https://example.org/water/units#>
+
+# CMP-019 (CT-19): a magnitude with no numeric value. DAT-004 is the same
+# question asked about the unit; a magnitude needs both to mean anything.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?m ;
+    sh:resultPath gist:numericValue ;
+    sh:sourceConstraintComponent oq:CMP-019 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?m rdf:type/rdfs:subClassOf* gist:Magnitude .
+  FILTER(isIRI(?m))
+  FILTER NOT EXISTS { ?m gist:numericValue ?v }
+  BIND(CONCAT("Magnitude ", STR(?m), " has no gist:numericValue. Usually an empty source cell ",
+              "that still built the magnitude node.") AS ?msg)
+}

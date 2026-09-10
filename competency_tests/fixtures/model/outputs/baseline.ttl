@@ -1,0 +1,39 @@
+@prefix water: <https://example.org/water/model#> .
+@prefix wdata: <https://example.org/water/data/> .
+@prefix unit:  <https://example.org/water/units#> .
+@prefix gist:  <https://w3id.org/semanticarts/ns/ontology/gist/> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+# Baseline: last accepted output of the asset pipeline. Compared against
+# candidate.ttl by review_aids.py -- see CT-23 to CT-28.
+
+wdata:asset-A1 a water:PumpStation ;
+    skos:notation "A1" ;
+    water:atSite wdata:site-S1 ;
+    water:hasReading wdata:reading-A1 .
+
+wdata:asset-A2 a water:PumpStation ;
+    skos:notation "A2" ;
+    water:atSite wdata:site-S2 ;
+    water:hasReading wdata:reading-A2 .
+
+wdata:asset-A3 a water:PumpStation ;
+    skos:notation "A3" ;
+    water:atSite wdata:site-S3 .
+
+wdata:asset-A4 a water:PumpStation ;
+    skos:notation "A4" ;
+    water:atSite wdata:site-S3 .
+
+wdata:site-S1 a water:Site ; water:siteName "Northgate" .
+wdata:site-S2 a water:Site ; water:siteName "Eastbrook" .
+wdata:site-S3 a water:Site ; water:siteName "Westfield" .
+
+wdata:reading-A1 a water:Reading ;
+    gist:numericValue "12.5"^^xsd:decimal ;
+    gist:hasUnitOfMeasure unit:LitrePerSecond .
+
+wdata:reading-A2 a water:Reading ;
+    gist:numericValue "8.0"^^xsd:decimal ;
+    gist:hasUnitOfMeasure unit:LitrePerSecond .

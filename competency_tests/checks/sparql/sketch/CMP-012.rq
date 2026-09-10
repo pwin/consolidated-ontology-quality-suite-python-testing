@@ -1,0 +1,49 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+PREFIX unit:  <https://example.org/water/units#>
+
+# CMP-012 (CT-12): a label or definition minted by the transformation for a
+# term the model owns. Run against the sketch graph merged with the *rdf:type
+# triples only* of the ontology and taxonomy (see run_competency_checks.py,
+# sketch_with_declarations). Merging those files whole would drown the check:
+# every term the ontology legitimately labels would match, because a single
+# merged graph cannot say which file a triple came from.
+#
+# A model-owned term is recognised by what it is *declared* as -- a class, a
+# property, or a member of a gist:Category subclass -- rather than by its
+# namespace. The sketch renders each per-row entity using the query's own ":"
+# prefix when the query declares one, so those entities land in the model's
+# namespace too and a namespace test cannot separate them. Their rdf:type is
+# a domain class, never owl:Class or a Category subclass, which is what makes
+# this formulation hold either way.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Warning ;
+    sh:focusNode ?term ;
+    sh:resultPath ?p ;
+    sh:value ?label ;
+    sh:sourceConstraintComponent oq:CMP-012 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?term ?p ?label .
+  FILTER(?p IN (skos:prefLabel, skos:definition, skos:altLabel))
+  FILTER(isIRI(?term))
+  {
+    { ?term rdf:type/rdfs:subClassOf* gist:Category }
+    UNION { ?term a owl:Class }
+    UNION { ?term a owl:ObjectProperty }
+    UNION { ?term a owl:DatatypeProperty }
+    UNION { ?term a owl:AnnotationProperty }
+  }
+  BIND(CONCAT("The transformation mints ", STR(?p), " for ", STR(?term),
+              ", a term declared in the model rather than a per-row instance. Its ",
+              "label belongs in the authoritative ontology or taxonomy.") AS ?msg)
+}

@@ -1,0 +1,54 @@
+@prefix :     <https://example.org/water/completeness#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Documentation-completeness defects, isolated from the worked example so
+# each one is attributable. Four seeded conditions, one per competency test.
+
+<https://example.org/water/completeness>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/completeness/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Completeness fixture"@en .
+
+# SEEDS CT-8: no skos:definition -> QUA-010. Everything else is present, so
+# nothing else should fire on it.
+:Turbine a owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label     "Turbine"@en ;
+    skos:prefLabel "Turbine"@en .
+
+# SEEDS CT-9: declared, documented, and standing entirely outside the class
+# hierarchy -- no rdfs:subClassOf at all -> CMP-009 (and STR-004).
+:Orphan a owl:Class ;
+    rdfs:label      "Orphan"@en ;
+    skos:prefLabel  "Orphan"@en ;
+    skos:definition "A class nobody placed under a parent."@en .
+
+# SEEDS CT-10: rdfs:label only, no skos:prefLabel -> QUA-004.
+:Valve a owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Valve"@en ;
+    skos:definition "A device controlling flow through a pipe."@en .
+
+# SEEDS CT-11: two skos:prefLabel values sharing the language tag @en
+# -> QUA-009. A second label in another language would be correct SKOS.
+:Pipe a owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Pipe"@en ;
+    skos:prefLabel  "Pipe"@en ;
+    skos:prefLabel  "Conduit"@en ;
+    skos:prefLabel  "Bibell"@cy ;
+    skos:definition "A closed conduit carrying water between two points."@en .
+
+# SEEDS CT-10: no label of any kind -- neither skos:prefLabel nor
+# rdfs:label -> QUA-004 (and QUA-009, which asks for a prefLabel
+# specifically, and QUA-001, which accepts either).
+:Coupling a owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    skos:definition "A fitting joining two lengths of pipe."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .
