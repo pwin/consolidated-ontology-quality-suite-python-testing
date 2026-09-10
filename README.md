@@ -259,9 +259,11 @@ holds whichever binding won.
 [competency_tests/](competency_tests/) is a second, larger exercise over the
 same suite: 28 numbered competency tests supplied as CSVs, each one seeded into
 a worked example spanning an ontology, a taxonomy, four TARQL mappings, the CSVs
-they read and two comparable outputs. All 28 are evidenced;
-[competency_tests/COMPETENCY_COVERAGE.md](competency_tests/COMPETENCY_COVERAGE.md)
-is the generated record of how each is checked and what the run found.
+they read and two comparable outputs. All 28 are evidenced. Two generated documents record it:
+[COMPETENCY_COVERAGE.md](competency_tests/COMPETENCY_COVERAGE.md), how each test
+is checked and what the run found, and
+[COMPETENCY_CHECK_MATRIX.md](competency_tests/COMPETENCY_CHECK_MATRIX.md), every
+(test, check) pair joined to its registry entry with the command to run it.
 
 ```bash
 uv run python competency_tests/run_competency_checks.py

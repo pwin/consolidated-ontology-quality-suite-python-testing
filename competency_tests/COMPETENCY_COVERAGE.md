@@ -30,6 +30,8 @@ The run needs `oxi-gen` on the path or built in a sibling checkout: CT-2, CT-4, 
 | `review_aids.py` | CT-23 to CT-28 -- comparisons between two outputs |
 | `mapping_integrity.py` | CT-15 and CT-16 -- source records and defined mappings vs real output |
 | `competency.py` | the coverage table: how each test is answered and what evidence proves it |
+| `runspecs.py` | one entry per run: its title and the shell command that reproduces it |
+| [COMPETENCY_CHECK_MATRIX.md](COMPETENCY_CHECK_MATRIX.md) | the companion table -- every (test, check) pair joined to its registry entry, with the command as a footnote |
 | `results/` | this run's findings and each stage's verbatim report |
 
 Every seeded defect is marked in its fixture with an `# ERROR:` or `# SEEDS CT-n` comment naming the test it is there for.
@@ -507,7 +509,7 @@ TQL-005 catches it in the query, before the pipeline runs. CNF-004 catches the c
 **Observed**
 
 - `TQL-005` x1 in run `sketch` -- ?flowvalue_DT is named as a typed value but produces a String (readings.rq:44). The triple will load and carry an untyped string. Wrap the expression...
-- `CNF-004` x13 in run `data` -- Value 2026-01-05T08:00:00 of property https://example.org/water/model#takenAt doesn't match any of the property's declared range classes/datatypes --...
+- `CNF-004` x13 in run `data` -- Value 1.8 of property https://w3id.org/semanticarts/ns/ontology/gist/numericValue doesn't match any of the property's declared range classes/datatype...
 
 ### CT-23 -- Prefix and namespace declarations differ between outputs
 
@@ -625,17 +627,17 @@ Needs a business key to align on. Without one, a renamed subject is indistinguis
 
 | Run | What it covers | Findings | Command |
 |---|---|---|---|
-| `sketch` | Query source and shape vs ontology 1.0.0 | 18 | `ontology-quality-suite sketch --queries fixtures/model/queries --file-pattern '**/*.rq' --ontology fixtures/model/ontology/water-v1.ttl` |
-| `sketch-v2` | Query shape vs ontology 2.0.0 (mappings not updated) | 22 | `ontology-quality-suite sketch --queries fixtures/model/queries --file-pattern '**/*.rq' --ontology fixtures/model/ontology/water-v2.ttl` |
-| `data` | Triplified output vs ontology 1.0.0 | 61 | `ontology-quality-suite data <triplified output> fixtures/model/ontology/asset-types.ttl fixtures/model/ontology/units.ttl --ontology fixtures/model/ontology/water-v1.ttl` |
-| `completeness` | Documentation completeness of an authored ontology | 10 | `ontology-quality-suite checks --ontology fixtures/completeness/incomplete-model.ttl` |
-| `project-output` | Project-local checks over output + model | 14 | `run_competency_checks.py -> project_checks(output + ontology + taxonomy + units)` |
-| `project-sketch` | Project-local checks over the CONSTRUCT-template sketch | 1 | `run_competency_checks.py -> project_checks(build_sketch_graph(queries))` |
-| `pattern-consistency` | Taxonomy boundaries (query text and real output) | 3 | `ontology-quality-suite pattern-consistency --queries fixtures/model/queries --ontology fixtures/model/ontology/water-v1.ttl --taxonomy fixtures/model/ontology/asset-types.ttl --taxonomy fixtures/model/ontology/units.ttl --output-data <triplified output> --file-pattern '**/*.rq'` |
-| `consistency` | Ontology 1.0.0 -> 2.0.0 vs the mappings | 6 | `ontology-quality-suite consistency --old fixtures/model/ontology/water-v1.ttl --new fixtures/model/ontology/water-v2.ttl --queries fixtures/model/queries --file-pattern '**/*.rq'` |
-| `version-diff` | Semver bump implied by the ontology change | 1 | `ontology-quality-suite version-diff fixtures/model/ontology/water-v1.ttl fixtures/model/ontology/water-v2.ttl` |
-| `mapping-integrity` | Source records and defined mappings vs real output | 3 | `run_competency_checks.py -> mapping_integrity.*` |
-| `review-aids` | Baseline output vs candidate output | 21 | `run_competency_checks.py -> review_aids.compare_outputs(fixtures/model/outputs/baseline.ttl, fixtures/model/outputs/candidate.ttl)` |
+| `sketch` | Query source and shape vs ontology 1.0.0 | 18 | `uv run ontology-quality-suite sketch \   --queries competency_tests/fixtures/model/queries --file-pattern "**/*.rq" \   --ontology competency_tests/fixtures/model/ontology/water-v1.ttl \   --out-dir out/ct/sketch` |
+| `sketch-v2` | Query shape vs ontology 2.0.0, which the mappings were never updated for | 22 | `uv run ontology-quality-suite sketch \   --queries competency_tests/fixtures/model/queries --file-pattern "**/*.rq" \   --ontology competency_tests/fixtures/model/ontology/water-v2.ttl \   --out-dir out/ct/sketch-v2` |
+| `data` | Triplified output vs ontology 1.0.0 | 61 | `uv run ontology-quality-suite data \   competency_tests/results/triplified \   competency_tests/fixtures/model/ontology/asset-types.ttl competency_tests/fixtures/model/ontology/units.ttl \   --ontology competency_tests/fixtures/model/ontology/water-v1.ttl \   --reasoner owlrl-only --out-dir out/ct/data` |
+| `completeness` | Documentation completeness of an authored ontology | 10 | `uv run ontology-quality-suite checks \   --ontology competency_tests/fixtures/completeness/incomplete-model.ttl \   --out-dir out/ct/completeness` |
+| `project-output` | Project-local checks over output + model | 14 | `uv run ontology-quality-suite data \   competency_tests/results/triplified \   competency_tests/fixtures/model/ontology/asset-types.ttl competency_tests/fixtures/model/ontology/units.ttl \   --ontology competency_tests/fixtures/model/ontology/water-v1.ttl \   --registry competency_tests/results/merged-registry.json \   --sparql competency_tests/checks/sparql/competency \   --reasoner owlrl-only --out-dir out/ct/project-output` |
+| `project-sketch` | Project-local checks over the CONSTRUCT-template sketch | 1 | `uv run python competency_tests/run_competency_checks.py` |
+| `pattern-consistency` | Taxonomy boundaries, in query text and in real output | 3 | `uv run ontology-quality-suite pattern-consistency \   --queries competency_tests/fixtures/model/queries \   --ontology competency_tests/fixtures/model/ontology/water-v1.ttl \   --taxonomy competency_tests/fixtures/model/ontology/asset-types.ttl \   --taxonomy competency_tests/fixtures/model/ontology/units.ttl \   --output-data competency_tests/results/triplified \   --file-pattern "**/*.rq" --out-dir out/ct/pattern-consistency` |
+| `consistency` | Ontology 1.0.0 -> 2.0.0 vs the mappings | 6 | `uv run ontology-quality-suite consistency \   --old competency_tests/fixtures/model/ontology/water-v1.ttl \   --new competency_tests/fixtures/model/ontology/water-v2.ttl \   --queries competency_tests/fixtures/model/queries \   --file-pattern "**/*.rq" --out-dir out/ct/consistency` |
+| `version-diff` | Semver bump implied by the ontology change | 1 | `uv run ontology-quality-suite version-diff \   competency_tests/fixtures/model/ontology/water-v1.ttl \   competency_tests/fixtures/model/ontology/water-v2.ttl \   --out-dir out/ct/version-diff` |
+| `mapping-integrity` | Source records and defined mappings vs real output | 3 | `uv run python competency_tests/mapping_integrity.py \   --queries competency_tests/fixtures/model/queries/assets \   --queries competency_tests/fixtures/model/queries/readings/readings.rq \   --output competency_tests/results/triplified \   --population competency_tests/fixtures/model/csv/readings.csv \                competency_tests/results/triplified/readings.ttl \                https://example.org/water/model#Reading` |
+| `review-aids` | Baseline output vs candidate output | 21 | `uv run python competency_tests/review_aids.py \   competency_tests/fixtures/model/outputs/baseline.ttl \   competency_tests/fixtures/model/outputs/candidate.ttl` |
 
 ### Run `sketch`
 

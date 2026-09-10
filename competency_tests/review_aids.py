@@ -272,3 +272,31 @@ def compare_outputs(baseline_path, candidate_path,
     rows.append(suppression_row(values))
     rows += compare_identifiers(baseline, candidate, identity_predicate)
     return rows, values
+
+
+def main(argv=None) -> int:
+    """Command-line entry point, so CT-23 to CT-28 can be reproduced without
+    running the whole competency harness.
+
+        uv run python competency_tests/review_aids.py BASELINE CANDIDATE
+    """
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Compare two triplified outputs -- competency tests CT-23 to CT-28.")
+    parser.add_argument("baseline")
+    parser.add_argument("candidate")
+    parser.add_argument(
+        "--identity-predicate", default=str(SKOS.notation),
+        help="the business key CT-28 aligns subjects on (default: skos:notation)")
+    args = parser.parse_args(argv)
+
+    rows, _values = compare_outputs(args.baseline, args.candidate, URIRef(args.identity_predicate))
+    for row in rows:
+        print("{:<8} {:<9} {}".format(row.check_id, row.severity, row.message))
+    print("\n{} finding(s) across CT-23..CT-28.".format(len(rows)))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

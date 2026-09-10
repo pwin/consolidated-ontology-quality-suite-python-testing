@@ -106,3 +106,55 @@ def check_source_target_population(csv_path, output: Graph, entity_class: URIRef
                 "expected; the output has {}. Rows are being merged onto a shared IRI or dropped "
                 "entirely.".format(Path(csv_path).name, rows_in, expected_filtered, expected,
                                    entity_class, produced))]
+
+
+def main(argv=None) -> int:
+    """Command-line entry point, so CT-15 and CT-16 can be reproduced without
+    running the whole competency harness.
+
+        uv run python competency_tests/mapping_integrity.py \
+            --queries competency_tests/fixtures/model/queries \
+            --output competency_tests/results/triplified \
+            --population competency_tests/fixtures/model/csv/readings.csv \
+                         competency_tests/results/triplified/readings.ttl \
+                         https://example.org/water/model#Reading
+    """
+    import argparse
+
+    from ontology_suite.sketch import prefix_alignment as pa
+
+    parser = argparse.ArgumentParser(
+        description="Compare a mapping's intent with its real output -- CT-15 and CT-16.")
+    parser.add_argument("--queries", action="append", required=True,
+                        help="a query file or folder (repeatable). Pass only the queries that were "
+                             "actually run: a draft mapping wired to no CSV would otherwise report "
+                             "every pair it defines as producing nothing.")
+    parser.add_argument("--output", action="append", required=True,
+                        help="a triplified output file or folder (repeatable)")
+    parser.add_argument("--file-pattern", default="**/*.rq")
+    parser.add_argument("--population", nargs=3, action="append", default=[],
+                        metavar=("CSV", "OUTPUT_FILE", "CLASS_IRI"),
+                        help="a CT-16 source-to-target check (repeatable)")
+    parser.add_argument("--filtered", type=int, default=0,
+                        help="rows the mapping is expected to drop, per --population check")
+    args = parser.parse_args(argv)
+
+    sketch = pa.build_sketch_graph(args.queries, args.file_pattern)
+    output = Graph()
+    for path in args.output:
+        for resolved in sorted(Path(path).rglob("*.ttl")) if Path(path).is_dir() else [Path(path)]:
+            output.parse(resolved)
+
+    rows = check_mapping_output_coverage(sketch, output)
+    for csv_path, output_file, class_iri in args.population:
+        rows += check_source_target_population(
+            csv_path, Graph().parse(output_file), URIRef(class_iri), args.filtered)
+
+    for row in rows:
+        print("{:<8} {:<9} {}".format(row.check_id, row.severity, row.message))
+    print("\n{} finding(s) across CT-15 and CT-16.".format(len(rows)))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

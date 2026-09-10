@@ -29,6 +29,7 @@ from rdflib.namespace import RDF, RDFS
 import competency
 import mapping_integrity
 import review_aids
+import runspecs
 from ontology_suite import config, consistency as consistency_api, pattern_consistency, pipeline
 from ontology_suite.checks.merge import ResultRow, build_unified_results
 from ontology_suite.checks.registry import Registry
@@ -87,6 +88,13 @@ class Run:
         return {r.check_id for r in self.rows}
 
 
+def _run(key: str, rows: List[ResultRow], text: Optional[str] = None) -> Run:
+    """Build a Run from its spec, so the title and command a report shows are
+    the same strings the check matrix quotes -- see runspecs.py."""
+    spec = runspecs.RUNS[key]
+    return Run(key, spec.title, spec.command or spec.project_command or runspecs.HARNESS, rows, text)
+
+
 def _synthetic(check_id: str, severity: str, focus: str, message: str,
                category: str, source: str) -> ResultRow:
     return ResultRow(check_id=check_id, category=category, title=None, severity=severity,
@@ -101,8 +109,12 @@ def merged_registry() -> Registry:
     shipped = json.loads(Path(config.DEFAULT_REGISTRY_PATH).read_text(encoding="utf-8"))
     local = json.loads(PROJECT_REGISTRY.read_text(encoding="utf-8"))
     shipped["checks"] = shipped["checks"] + local["checks"]
-    WORK.mkdir(parents=True, exist_ok=True)
-    merged_path = WORK / "merged-registry.json"
+    RESULTS.mkdir(parents=True, exist_ok=True)
+    # Written into results/ rather than the work dir because it is an input a
+    # person needs to reproduce any project-local check from the command line:
+    # `data --registry results/merged-registry.json --sparql checks/sparql/...`
+    # resolves CMP-* ids only against this file.
+    merged_path = RESULTS / "merged-registry.json"
     merged_path.write_text(json.dumps(shipped, indent=2), encoding="utf-8")
     return Registry.load(merged_path)
 
@@ -179,18 +191,12 @@ def run_everything() -> List[Run]:
     # ---- sketch: the query source, against v1 ---------------------------
     sketch_v1 = pipeline.run_sketch_stage(
         QUERIES, WORK / "sketch", ontology_path=str(ONTOLOGY_V1), query_pattern=RECURSIVE_QUERIES)
-    runs.append(Run("sketch", "Query source and shape vs ontology 1.0.0",
-                    "ontology-quality-suite sketch --queries fixtures/model/queries "
-                    "--file-pattern '**/*.rq' --ontology fixtures/model/ontology/water-v1.ttl",
-                    sketch_v1.rows))
+    runs.append(_run("sketch", sketch_v1.rows))
 
     # ---- sketch: the same queries against v2, which they were never updated for
     sketch_v2 = pipeline.run_sketch_stage(
         QUERIES, WORK / "sketch-v2", ontology_path=str(ONTOLOGY_V2), query_pattern=RECURSIVE_QUERIES)
-    runs.append(Run("sketch-v2", "Query shape vs ontology 2.0.0 (mappings not updated)",
-                    "ontology-quality-suite sketch --queries fixtures/model/queries "
-                    "--file-pattern '**/*.rq' --ontology fixtures/model/ontology/water-v2.ttl",
-                    sketch_v2.rows))
+    runs.append(_run("sketch-v2", sketch_v2.rows))
 
     # ---- data: the real output against the model ------------------------
     # The taxonomy and units are reference data the output points into: without
@@ -199,31 +205,20 @@ def run_everything() -> List[Run]:
     data_stage = pipeline.run_data_stage(
         [str(p) for p in output_paths] + [str(TAXONOMY), str(UNITS)], WORK / "data",
         ontology_path=str(ONTOLOGY_V1), registry=registry, reasoner="owlrl-only")
-    runs.append(Run("data", "Triplified output vs ontology 1.0.0",
-                    "ontology-quality-suite data <triplified output> "
-                    "fixtures/model/ontology/asset-types.ttl fixtures/model/ontology/units.ttl "
-                    "--ontology fixtures/model/ontology/water-v1.ttl",
-                    data_stage.rows))
+    runs.append(_run("data", data_stage.rows))
 
     # ---- checks: the completeness fixture -------------------------------
     completeness = pipeline.run_checks_stage(registry, WORK / "completeness", ontology_path=str(COMPLETENESS))
-    runs.append(Run("completeness", "Documentation completeness of an authored ontology",
-                    "ontology-quality-suite checks --ontology "
-                    "fixtures/completeness/incomplete-model.ttl",
-                    completeness.rows))
+    runs.append(_run("completeness", completeness.rows))
     runs[-1].rows += project_checks(load_graph(COMPLETENESS), registry, "ontology")
 
     # ---- project-local checks over the output ---------------------------
     output_plus_model = load_graph(*output_paths, ONTOLOGY_V1, TAXONOMY, UNITS)
-    runs.append(Run("project-output", "Project-local checks over output + model",
-                    "run_competency_checks.py -> project_checks(output + ontology + taxonomy + units)",
-                    project_checks(output_plus_model, registry)))
+    runs.append(_run("project-output", project_checks(output_plus_model, registry)))
 
     # ---- project-local checks over the CONSTRUCT-template sketch --------
     sketch_graph = sketch_with_declarations()
-    runs.append(Run("project-sketch", "Project-local checks over the CONSTRUCT-template sketch",
-                    "run_competency_checks.py -> project_checks(build_sketch_graph(queries))",
-                    project_checks(sketch_graph, registry, "sketch")))
+    runs.append(_run("project-sketch", project_checks(sketch_graph, registry, "sketch")))
 
     # ---- pattern-consistency: the taxonomy boundaries -------------------
     four_layer = pattern_consistency.check_four_layer_consistency(
@@ -243,14 +238,8 @@ def run_everything() -> List[Run]:
             "Real output references {} via {}, which the taxonomy never declares. {}".format(
                 gap.term, gap.property, gap.detail),
             "pattern-consistency", "pattern-consistency"))
-    runs.append(Run("pattern-consistency", "Taxonomy boundaries (query text and real output)",
-                    "ontology-quality-suite pattern-consistency --queries fixtures/model/queries "
-                    "--ontology fixtures/model/ontology/water-v1.ttl "
-                    "--taxonomy fixtures/model/ontology/asset-types.ttl "
-                    "--taxonomy fixtures/model/ontology/units.ttl "
-                    "--output-data <triplified output> --file-pattern '**/*.rq'",
-                    pattern_rows,
-                    pattern_consistency.format_four_layer_report(four_layer)))
+    runs.append(_run("pattern-consistency", pattern_rows,
+                     pattern_consistency.format_four_layer_report(four_layer)))
 
     # ---- consistency: v1 -> v2 with the mappings left behind ------------
     report = consistency_api.check_consistency(
@@ -276,24 +265,17 @@ def run_everything() -> List[Run]:
             "repair-suggested", "Info", Path(repair.target_file).name,
             "{} (confidence {:.0%})".format(repair.description, repair.confidence),
             "consistency", "consistency"))
-    runs.append(Run("consistency", "Ontology 1.0.0 -> 2.0.0 vs the mappings",
-                    "ontology-quality-suite consistency --old fixtures/model/ontology/water-v1.ttl "
-                    "--new fixtures/model/ontology/water-v2.ttl --queries fixtures/model/queries "
-                    "--file-pattern '**/*.rq'",
-                    consistency_rows,
-                    consistency_api.format_consistency_report(report)))
+    runs.append(_run("consistency", consistency_rows,
+                     consistency_api.format_consistency_report(report)))
 
     # ---- version-diff ---------------------------------------------------
     diff, bump = version_diff.diff_ontologies(load_graph(ONTOLOGY_V1), load_graph(ONTOLOGY_V2))
     diff_text = version_diff.format_report(diff, bump, str(ONTOLOGY_V1), str(ONTOLOGY_V2))
-    runs.append(Run("version-diff", "Semver bump implied by the ontology change",
-                    "ontology-quality-suite version-diff fixtures/model/ontology/water-v1.ttl "
-                    "fixtures/model/ontology/water-v2.ttl",
-                    [_synthetic(bump.value, "Warning", str(ONTOLOGY_V2),
-                                "The ontology change implies a {} bump. The mapping set carries no "
-                                "version of its own and was not changed at all.".format(bump.value.upper()),
-                                "version-diff", "version-diff")],
-                    diff_text))
+    runs.append(_run("version-diff", [_synthetic(
+        bump.value, "Warning", str(ONTOLOGY_V2),
+        "The ontology change implies a {} bump. The mapping set carries no version of its own "
+        "and was not changed at all.".format(bump.value.upper()),
+        "version-diff", "version-diff")], diff_text))
 
     # ---- mapping integrity ----------------------------------------------
     executed_sketch = pa.build_sketch_graph([str(p) for p in EXECUTED_QUERIES], RECURSIVE_QUERIES)
@@ -302,16 +284,11 @@ def run_everything() -> List[Run]:
         if output_name in outputs:
             mapping_rows += mapping_integrity.check_source_target_population(
                 CSV_DIR / csv_name, load_graph(outputs[output_name]), URIRef(cls))
-    runs.append(Run("mapping-integrity", "Source records and defined mappings vs real output",
-                    "run_competency_checks.py -> mapping_integrity.*",
-                    mapping_rows))
+    runs.append(_run("mapping-integrity", mapping_rows))
 
     # ---- review aids ------------------------------------------------------
     review_rows, _values = review_aids.compare_outputs(BASELINE, CANDIDATE)
-    runs.append(Run("review-aids", "Baseline output vs candidate output",
-                    "run_competency_checks.py -> review_aids.compare_outputs("
-                    "fixtures/model/outputs/baseline.ttl, fixtures/model/outputs/candidate.ttl)",
-                    review_rows))
+    runs.append(_run("review-aids", review_rows))
 
     return runs
 
@@ -403,6 +380,9 @@ def render_document(runs: List[Run], results) -> str:
     add("| `review_aids.py` | CT-23 to CT-28 -- comparisons between two outputs |")
     add("| `mapping_integrity.py` | CT-15 and CT-16 -- source records and defined mappings vs real output |")
     add("| `competency.py` | the coverage table: how each test is answered and what evidence proves it |")
+    add("| `runspecs.py` | one entry per run: its title and the shell command that reproduces it |")
+    add("| [COMPETENCY_CHECK_MATRIX.md](COMPETENCY_CHECK_MATRIX.md) | the companion table -- every "
+        "(test, check) pair joined to its registry entry, with the command as a footnote |")
     add("| `results/` | this run's findings and each stage's verbatim report |")
     add("")
     add("Every seeded defect is marked in its fixture with an `# ERROR:` or `# SEEDS CT-n` comment "
@@ -633,6 +613,11 @@ def main() -> int:
     findings_path = write_findings_csv(runs)
     document = HERE / "COMPETENCY_COVERAGE.md"
     document.write_text(render_document(runs, results), encoding="utf-8")
+
+    # The check matrix reads the findings.csv just written, so it goes last and
+    # its Fired column always reflects this run rather than the previous one.
+    import build_check_matrix
+    build_check_matrix.main()
 
     print()
     failures = 0

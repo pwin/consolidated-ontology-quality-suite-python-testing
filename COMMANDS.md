@@ -95,7 +95,8 @@ separate exercise with their own fixtures, project-local checks and generated
 report.
 
 ```powershell
-uv run python competency_tests/run_competency_checks.py   # runs all 28, regenerates COMPETENCY_COVERAGE.md
+uv run python competency_tests/run_competency_checks.py   # runs all 28, regenerates both documents
+uv run python competency_tests/build_check_matrix.py      # regenerates the check matrix alone (runs nothing)
 uv run pytest competency_tests -q                          # the same expectations as pass/fail tests
 uv run pytest "competency_tests/test_competency.py::test_competency_test_is_evidenced[16]" -q   # one competency test
 ```

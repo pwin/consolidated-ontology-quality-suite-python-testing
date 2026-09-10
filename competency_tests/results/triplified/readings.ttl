@@ -12,16 +12,6 @@
 	:hasPressure <https://example.org/water/data/pressure-S1-2026-01-05T120000> ;
 	:takenAt "2026-01-05T12:00:00" .
 <https://example.org/water/data/site-S1> a :Site .
-<https://example.org/water/data/flow-S2-2026-01-05T080000> a :FlowRate ;
-	gist:numericValue "88.0" .
-<https://example.org/water/data/pressure-S2-2026-01-05T080000> a :Pressure ;
-	gist:hasUnitOfMeasure unit:Litre ;
-	gist:numericValue "2.9" .
-<https://example.org/water/data/reading-S2> a :Reading ;
-	:hasFlowRate <https://example.org/water/data/flow-S2-2026-01-05T080000> ;
-	:hasPressure <https://example.org/water/data/pressure-S2-2026-01-05T080000> ;
-	:takenAt "2026-01-05T08:00:00" .
-<https://example.org/water/data/site-S2> a :Site .
 <https://example.org/water/data/flow-S1-2026-01-05T080000> a :FlowRate ;
 	gist:numericValue "120.5" .
 <https://example.org/water/data/pressure-S1-2026-01-05T080000> a :Pressure ;
@@ -32,6 +22,16 @@
 	:hasPressure <https://example.org/water/data/pressure-S1-2026-01-05T080000> ;
 	:takenAt "2026-01-05T08:00:00" .
 <https://example.org/water/data/site-S1> a :Site .
+<https://example.org/water/data/flow-S3-2026-01-05T080000> a :FlowRate ;
+	gist:numericValue "45.0" .
+<https://example.org/water/data/pressure-S3-2026-01-05T080000> a :Pressure ;
+	gist:hasUnitOfMeasure unit:Litre ;
+	gist:numericValue "1.8" .
+<https://example.org/water/data/reading-S3> a :Reading ;
+	:hasFlowRate <https://example.org/water/data/flow-S3-2026-01-05T080000> ;
+	:hasPressure <https://example.org/water/data/pressure-S3-2026-01-05T080000> ;
+	:takenAt "2026-01-05T08:00:00" .
+<https://example.org/water/data/site-S3> a :Site .
 <https://example.org/water/data/flow-S2-2026-01-05T120000> a :FlowRate ;
 	gist:numericValue "91.5" .
 <https://example.org/water/data/pressure-S2-2026-01-05T120000> a :Pressure ;
@@ -51,13 +51,13 @@
 	:hasPressure <https://example.org/water/data/pressure-S3-2026-01-05T120000> ;
 	:takenAt "2026-01-05T12:00:00" .
 <https://example.org/water/data/site-S3> a :Site .
-<https://example.org/water/data/flow-S3-2026-01-05T080000> a :FlowRate ;
-	gist:numericValue "45.0" .
-<https://example.org/water/data/pressure-S3-2026-01-05T080000> a :Pressure ;
+<https://example.org/water/data/flow-S2-2026-01-05T080000> a :FlowRate ;
+	gist:numericValue "88.0" .
+<https://example.org/water/data/pressure-S2-2026-01-05T080000> a :Pressure ;
 	gist:hasUnitOfMeasure unit:Litre ;
-	gist:numericValue "1.8" .
-<https://example.org/water/data/reading-S3> a :Reading ;
-	:hasFlowRate <https://example.org/water/data/flow-S3-2026-01-05T080000> ;
-	:hasPressure <https://example.org/water/data/pressure-S3-2026-01-05T080000> ;
+	gist:numericValue "2.9" .
+<https://example.org/water/data/reading-S2> a :Reading ;
+	:hasFlowRate <https://example.org/water/data/flow-S2-2026-01-05T080000> ;
+	:hasPressure <https://example.org/water/data/pressure-S2-2026-01-05T080000> ;
 	:takenAt "2026-01-05T08:00:00" .
-<https://example.org/water/data/site-S3> a :Site .
+<https://example.org/water/data/site-S2> a :Site .
