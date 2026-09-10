@@ -1,0 +1,34 @@
+@prefix :     <https://example.org/test/unsat#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# rdfs:subClassOf owl:Nothing is what a DL reasoner writes back when it has
+# classified a class as unsatisfiable, so an ontology that has been round-
+# tripped through one carries these. It is also the shape that makes REA-004
+# reachable: OWL2 RL's cax-sco rule propagates the owl:Nothing type down to
+# every individual of the class, which is the inference REA-004 looks for.
+# A plain pair of disjoint classes does not produce it -- that surfaces as
+# REA-001 instead (see ontologies/03-disjoint-classes/).
+
+<https://example.org/test/unsat>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/test/unsat/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Unsatisfiable-class fixture"@en .
+
+:Vehicle a owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label "Vehicle"@en ; skos:prefLabel "Vehicle"@en ;
+    skos:definition "A machine for carrying people or goods."@en .
+
+# ERROR: nothing can be an instance of this class, and the ontology says so
+#        outright. Any individual typed with it is inferred a member of
+#        owl:Nothing -> REA-004
+:PerpetualMotionVehicle a owl:Class ;
+    rdfs:subClassOf :Vehicle , owl:Nothing ;
+    rdfs:label "Perpetual motion vehicle"@en ; skos:prefLabel "PerpetualMotionVehicle"@en ;
+    skos:definition "A vehicle that runs without an energy source; classified unsatisfiable."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

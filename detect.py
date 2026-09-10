@@ -172,6 +172,39 @@ FIXTURES: List[Fixture] = [
         profiles=("EL", "QL", "RL"),
     ),
     Fixture(
+        name="11-schema-gaps",
+        stage="data",
+        ontology="11-schema-gaps/ontology.ttl",
+        data="11-schema-gaps/data.ttl",
+        seeded_errors="redundant equivalentClass+subClassOf; property with no domain or range; "
+                      "domain and range IRIs never declared; an untyped subject",
+        expected=("LOG-003", "STR-003", "STR-005", "STR-008", "STR-009"),
+    ),
+    Fixture(
+        # Deliberately the `checks` stage rather than `data`: the data stage
+        # crashes on this fixture's language-tagged literals -- see README.md,
+        # "Issues found" #5, and experiments/langstring_crash_probe.py. `checks`
+        # runs the same registry over the same graph without the conformance
+        # layer that raises, so both seeded defects are still asserted. Move it
+        # back to `data` once the suite is fixed.
+        name="12-literal-volume",
+        stage="checks",
+        ontology="12-literal-volume/ontology.ttl",
+        data="12-literal-volume/data.ttl",
+        seeded_errors="60 values on one subject-predicate pair; the same lexical form twice under "
+                      "two language tags",
+        expected=("EFF-003", "DAT-003"),
+    ),
+    Fixture(
+        name="13-unsatisfiable-class",
+        stage="data",
+        ontology="13-unsatisfiable-class/ontology.ttl",
+        data="13-unsatisfiable-class/data.ttl",
+        seeded_errors="an individual typed with a class declared rdfs:subClassOf owl:Nothing",
+        expected=("REA-004",),
+        dl_only=("REA-020",),
+    ),
+    Fixture(
         name="10-efficiency",
         stage="checks",
         ontology="10-efficiency/ontology.ttl",
@@ -205,7 +238,9 @@ def run_fixture(name: str) -> tuple:
             ontology_path=str(fx.ontology_path), registry=registry, reasoner=REASONER,
         )
     elif fx.stage == "checks":
-        stage = pipeline.run_checks_stage(registry, out_dir, ontology_path=str(fx.ontology_path))
+        stage = pipeline.run_checks_stage(
+            registry, out_dir, ontology_path=str(fx.ontology_path),
+            data_path=str(fx.data_path) if fx.data else None)
     elif fx.stage == "ontology":
         stage = pipeline.run_ontology_stage(
             str(fx.ontology_path), out_dir,

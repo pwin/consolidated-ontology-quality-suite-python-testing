@@ -1,0 +1,55 @@
+@prefix :     <https://example.org/test/schema-gaps#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Schema-completeness gaps: the checks that ask whether a declaration is
+# complete enough to be useful, rather than whether it contradicts anything.
+
+<https://example.org/test/schema-gaps>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/test/schema-gaps/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Schema-gap fixture"@en .
+
+:Widget a owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label "Widget"@en ; skos:prefLabel "Widget"@en ;
+    skos:definition "A part held in stock."@en .
+
+:Gadget a owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label "Gadget"@en ; skos:prefLabel "Gadget"@en ;
+    skos:definition "A part with a mechanism."@en .
+
+# ERROR: equivalentClass and subClassOf assert the same pairing twice; the
+#        equivalence already implies the subclassing -> LOG-003
+:Doohickey a owl:Class ;
+    owl:equivalentClass :Widget ;
+    rdfs:subClassOf     :Widget ;
+    rdfs:label "Doohickey"@en ; skos:prefLabel "Doohickey"@en ;
+    skos:definition "Another name for a widget."@en .
+
+# ERROR: neither rdfs:domain nor rdfs:range, so nothing constrains how this
+#        property may be used -> STR-003
+:relatesTo a owl:ObjectProperty ;
+    rdfs:label "relates to"@en ; skos:prefLabel "relatesTo"@en ;
+    skos:definition "An unconstrained association between two things."@en .
+
+# ERROR: the domain IRI is never declared as a class anywhere -> STR-005
+:stockedAt a owl:ObjectProperty ;
+    rdfs:domain :Warehouse ;
+    rdfs:range  :Widget ;
+    rdfs:label "stocked at"@en ; skos:prefLabel "stockedAt"@en ;
+    skos:definition "Links a stock item to where it is held."@en .
+
+# ERROR: the range IRI is never declared as a class anywhere -> STR-008
+:supersededBy a owl:ObjectProperty ;
+    rdfs:domain :Widget ;
+    rdfs:range  :Replacement ;
+    rdfs:label "superseded by"@en ; skos:prefLabel "supersededBy"@en ;
+    skos:definition "Links a withdrawn part to the part replacing it."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

@@ -1,0 +1,8 @@
+@prefix :     <https://example.org/test/unsat#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# ERROR: an individual asserted into a class that cannot have members.
+:machine-1
+    a          :PerpetualMotionVehicle , owl:NamedIndividual ;
+    rdfs:label "Machine 1"@en .

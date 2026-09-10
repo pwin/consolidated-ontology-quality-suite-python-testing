@@ -1,0 +1,13 @@
+@prefix :     <https://example.org/test/schema-gaps#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:widget-1
+    a          :Widget , owl:NamedIndividual ;
+    rdfs:label "Widget 1"@en ;
+    :relatesTo :widget-2 .
+
+# ERROR: used as a subject and as an object, but never given an rdf:type
+#        -> STR-009 (and STR-006, which asks the same of the object position)
+:widget-2
+    rdfs:label "Widget 2"@en .

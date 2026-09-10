@@ -1,0 +1,32 @@
+@prefix :     <https://example.org/test/volume#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Two checks that only fire above a threshold, so both need bulk rather than
+# a single seeded triple.
+
+<https://example.org/test/volume>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/test/volume/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Literal-volume fixture"@en .
+
+:Batch a owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label "Batch"@en ; skos:prefLabel "Batch"@en ;
+    skos:definition "A run of parts produced together."@en .
+
+:hasSerialNumber a owl:DatatypeProperty ;
+    rdfs:domain :Batch ; rdfs:range xsd:string ;
+    rdfs:label "has serial number"@en ; skos:prefLabel "hasSerialNumber"@en ;
+    skos:definition "A serial number of one part in the batch."@en .
+
+:note a owl:DatatypeProperty ;
+    rdfs:domain :Batch ; rdfs:range xsd:string ;
+    rdfs:label "note"@en ; skos:prefLabel "note"@en ;
+    skos:definition "A free-text remark recorded against the batch."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

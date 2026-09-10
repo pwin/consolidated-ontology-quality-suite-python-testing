@@ -1,0 +1,78 @@
+@prefix :    <https://example.org/test/volume#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# ERROR: 60 values for one subject-predicate pair, over the check's
+#        threshold of 50 -> EFF-003. A list modelled as repeated
+#        properties rather than as its own entities.
+#
+# ERROR: the two :note values are distinct RDF terms -- one tagged @en,
+#        one @fr -- carrying the same lexical form, so a reader sees the
+#        same text twice -> DAT-003. rdflib would collapse two identical
+#        terms into one triple, so the duplication has to be of this
+#        shape to exist at all.
+:batch-1
+    a          :Batch , owl:NamedIndividual ;
+    rdfs:label "Batch 1"@en ;
+    :note      "Checked twice"@en , "Checked twice"@fr ;
+    :hasSerialNumber
+        "SN-0001",
+        "SN-0002",
+        "SN-0003",
+        "SN-0004",
+        "SN-0005",
+        "SN-0006",
+        "SN-0007",
+        "SN-0008",
+        "SN-0009",
+        "SN-0010",
+        "SN-0011",
+        "SN-0012",
+        "SN-0013",
+        "SN-0014",
+        "SN-0015",
+        "SN-0016",
+        "SN-0017",
+        "SN-0018",
+        "SN-0019",
+        "SN-0020",
+        "SN-0021",
+        "SN-0022",
+        "SN-0023",
+        "SN-0024",
+        "SN-0025",
+        "SN-0026",
+        "SN-0027",
+        "SN-0028",
+        "SN-0029",
+        "SN-0030",
+        "SN-0031",
+        "SN-0032",
+        "SN-0033",
+        "SN-0034",
+        "SN-0035",
+        "SN-0036",
+        "SN-0037",
+        "SN-0038",
+        "SN-0039",
+        "SN-0040",
+        "SN-0041",
+        "SN-0042",
+        "SN-0043",
+        "SN-0044",
+        "SN-0045",
+        "SN-0046",
+        "SN-0047",
+        "SN-0048",
+        "SN-0049",
+        "SN-0050",
+        "SN-0051",
+        "SN-0052",
+        "SN-0053",
+        "SN-0054",
+        "SN-0055",
+        "SN-0056",
+        "SN-0057",
+        "SN-0058",
+        "SN-0059",
+        "SN-0060" .

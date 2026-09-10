@@ -22,7 +22,7 @@ uv sync
 ## 2. Run everything
 
 ```powershell
-uv run python report.py        # detection matrix, all 13 fixtures  (~3 min with HermiT)
+uv run python report.py        # detection matrix, all 16 fixtures  (~3 min with HermiT)
 uv run pytest -q               # the same expectations as pass/fail tests
 ```
 
@@ -56,6 +56,9 @@ Remove-Item Env:\OWL2_TEST_REASONER
 | 08c | ontology IRI reused as namespace | `uv run python report.py 08c` | `uv run ontology-quality-suite checks --ontology ontologies/08-metadata/ontology-iri-reused.ttl --out-dir out/cli/08c` |
 | 09 | OWL2 profile violations | `uv run python report.py 09` | `uv run ontology-quality-suite ontology --ontology ontologies/09-profile-violations/ontology.ttl --profile EL --profile QL --profile RL --out-dir out/cli/09-profile-violations` |
 | 10 | efficiency | `uv run python report.py 10` | `uv run ontology-quality-suite checks --ontology ontologies/10-efficiency/ontology.ttl --out-dir out/cli/10-efficiency` |
+| 11 | schema gaps | `uv run python report.py 11` | `uv run ontology-quality-suite data ontologies/11-schema-gaps/data.ttl --ontology ontologies/11-schema-gaps/ontology.ttl --out-dir out/cli/11-schema-gaps` |
+| 12 | literal volume | `uv run python report.py 12` | `uv run ontology-quality-suite checks --ontology ontologies/12-literal-volume/ontology.ttl --data ontologies/12-literal-volume/data.ttl --out-dir out/cli/12-literal-volume` |
+| 13 | unsatisfiable class | `uv run python report.py 13` | `uv run ontology-quality-suite data ontologies/13-unsatisfiable-class/data.ttl --ontology ontologies/13-unsatisfiable-class/ontology.ttl --out-dir out/cli/13-unsatisfiable-class` |
 
 Several fixtures at once: `uv run python report.py 03 05 09`.
 
@@ -118,6 +121,7 @@ uv run ontology-quality-suite checks --ontology competency_tests/fixtures/vsix/e
 ```powershell
 uv run python experiments/severity_probe.py         # pyshacl reports every finding as Violation
 uv run python experiments/illtyped_boolean_probe.py # DAT-001 can't see an invalid xsd:boolean
+uv run python experiments/langstring_crash_probe.py # `data` crashes on a language-tagged literal (open)
 ```
 
 ## 6. Useful variations

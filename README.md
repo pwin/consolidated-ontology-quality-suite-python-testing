@@ -27,13 +27,16 @@ uv run pytest -q            # same expectations, as pass/fail tests
 
 ## Results
 
-All 13 fixtures pass: **35 of the registry's 61 checks** are asserted (41
-distinct check ids appear in the output, once incidental advisory findings are
-counted) and every seeded error is detected. Counts below are from
-`uv run python report.py` against suite 0.14.2 — 127 findings in total,
-identical across runs. The rise from 82 under 0.6.0 is entirely `QUA-010`
-("class or property without a skos:definition"), a check added since, firing
-across the error fixtures.
+All 16 fixtures pass: **43 of the registry's 61 checks** are asserted, and
+every seeded error is detected. Counts below are from `uv run python report.py`
+against suite 0.14.2 — 147 findings in total, identical across runs.
+
+Taken together with [competency_tests/](competency_tests/), **58 of the 61
+checks are exercised by some fixture**. The three that are not — `REA-005`,
+`REA-006` and `VOC-001` — are the ones the CLI does not implement at all; they
+are the VS Code extension's, and `competency_tests/fixtures/vsix/` holds a
+dataset for checking them by hand. So every check the CLI can produce now has
+a fixture that proves it fires.
 
 | Fixture | Seeded error | Detected |
 |---|---|---|
@@ -50,6 +53,9 @@ across the error fixtures.
 | `08c-ontology-iri-reused` | ontology IRI reused verbatim as the concept namespace | `QUA-006` |
 | `09-profile-violations` | `unionOf`, `complementOf`, `allValuesFrom`, `minCardinality 4`, transitive + functional properties | `REA-010` ×6, `REA-011` ×5, `REA-012` ×3 |
 | `10-efficiency` | 6-hop `subClassOf` chain; blank nodes >20% of all nodes | `EFF-001` ×2, `EFF-002` |
+| `11-schema-gaps` | redundant `equivalentClass`+`subClassOf`; property with no domain or range; domain and range IRIs never declared; untyped subject | `LOG-003`, `STR-003`, `STR-005`, `STR-008`, `STR-009` |
+| `12-literal-volume` | 60 values on one subject-predicate pair; one lexical form under two language tags | `EFF-003`, `DAT-003` |
+| `13-unsatisfiable-class` | individual typed with a class declared `rdfs:subClassOf owl:Nothing` | `REA-004`, `REA-020` (HermiT) |
 
 The clean control is the important negative case: it declares labels,
 definitions, domains, ranges and metadata properly, and produces **no Violation
@@ -60,12 +66,17 @@ across the 0.6.0 → 0.14.2 upgrade: `skos:definition` on each term, for the
 
 ## Issues found
 
-Building these fixtures surfaced four defects in the suite. **All four are
-fixed** in ontology-quality-suite 0.6.0 (commit `2f4950c`, which also credits
-three more found while fixing them); the sections below keep the original
+Building these fixtures surfaced five defects in the suite. **The first four
+are fixed** in ontology-quality-suite 0.6.0 (commit `2f4950c`, which also
+credits three more found while fixing them); those sections keep the original
 evidence and record how the fixed suite behaves now. The fixtures themselves
 did not need changing — they pin check ids, not finding counts, which is what
-let them survive the fix.
+let them survive the fix. **The fifth is open** against 0.14.2 and is a crash
+rather than a misreported finding.
+
+A sixth, in `pattern-consistency` rather than in a check, is recorded in
+[competency_tests/COMPETENCY_COVERAGE.md](competency_tests/COMPETENCY_COVERAGE.md)
+under "Observations", where the fixtures that demonstrate it live.
 
 ### 1. pyshacl reported every finding as a Violation, ignoring the declared severity — fixed
 
@@ -189,6 +200,46 @@ reports `x2` on three consecutive runs.
 * The suite falls back to owlrl-only for fixture 06 (`REA-022` is reported):
   owlready2's RDF/XML parser rejects the ill-typed literals. The degradation is
   visible in the report rather than silent, which is the designed behaviour.
+
+### 5. `data` crashes on a language-tagged literal — open
+
+Found while adding the `DAT-003` fixture, which needs two literals sharing a
+lexical form — most naturally the same text under two language tags.
+`dataquality/data_quality.py:356` computes a literal's effective datatype as:
+
+```python
+actual = o.datatype or (RDFS.langString if o.language else XSD.string)
+```
+
+`langString` is an RDF term, not an RDFS one, and rdflib's `RDFS` is a closed
+`DefinedNamespace`, so the attribute access raises instead of quietly yielding
+a wrong IRI:
+
+```
+AttributeError: term 'langString' not in namespace 'http://www.w3.org/2000/01/rdf-schema#'
+```
+
+This is a crash, not a misreported finding: the `data` stage stops, taking every
+other check in that run with it. Three ordinary conditions have to coincide — a
+property whose `rdfs:range` names an XSD datatype, a language-tagged value for
+it, and any stage that calls `check_conformance` (`data`, `sketch --ontology`,
+`run`). `rdfs:range xsd:string` with a `"..."@en` value is the everyday case.
+
+```
+$ uv run python experiments/langstring_crash_probe.py
+  "Checked" (untagged)         ok     0 range violation(s)
+  "Checked"@en (tagged)        CRASH  AttributeError: term 'langString' not in namespace '...rdf-schema#'
+```
+
+The fix is one word — `RDF.langString`, which that module already imports. Note
+it also changes the answer rather than just unblocking it: a `rdf:langString` is
+not an `xsd:string`, so once the term resolves, the tagged literal is a genuine
+`CNF-004` range violation and should be reported as one.
+
+Until it is fixed, `12-literal-volume` runs through the `checks` stage instead of
+`data`. That stage runs the same registry over the same graph without the
+conformance layer that raises, so both seeded defects are still asserted; the
+fixture carries a comment saying to move it back.
 
 ## Competency tests
 
