@@ -131,14 +131,14 @@ FIXTURES: List[Fixture] = [
         ontology="06-datatype-conformance/ontology.ttl",
         data="06-datatype-conformance/data.ttl",
         seeded_errors="ill-formed xsd:date/integer/boolean literals; rdfs:domain and rdfs:range violations",
-        expected=("DAT-001", "CNF-003", "CNF-004"),
+        expected=("DAT-001", "CNF-003", "CNF-004", "REA-022"),
     ),
     Fixture(
         name="07-naming-style",
         stage="checks",
         ontology="07-naming-style/ontology.ttl",
-        seeded_errors="snake_case class, hyphenated class, Upper_Snake property, untagged label, deprecated term still used",
-        expected=("STY-001", "STY-002", "STY-003", "STY-005", "QUA-001", "QUA-003"),
+        seeded_errors="snake_case class, hyphenated class, Upper_Snake property, untagged label, prefLabel drifted from local name, deprecated term still used",
+        expected=("STY-001", "STY-002", "STY-003", "STY-004", "STY-005", "QUA-001", "QUA-003"),
     ),
     Fixture(
         name="08a-no-version-metadata",
@@ -177,8 +177,10 @@ FIXTURES: List[Fixture] = [
         ontology="11-schema-gaps/ontology.ttl",
         data="11-schema-gaps/data.ttl",
         seeded_errors="redundant equivalentClass+subClassOf; property with no domain or range; "
-                      "domain and range IRIs never declared; an untyped subject",
-        expected=("LOG-003", "STR-003", "STR-005", "STR-008", "STR-009"),
+                      "domain and range IRIs never declared; an untyped subject and an "
+                      "untyped, never-declared object",
+        expected=("LOG-003", "STR-003", "STR-005", "STR-006", "STR-008", "STR-009",
+                  "DAT-002"),
     ),
     Fixture(
         # Back on the `data` stage since suite 0.14.3 fixed the crash this

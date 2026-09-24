@@ -43,6 +43,14 @@
     rdfs:label     "Legacy identifier" ;
     skos:prefLabel "legacyId"@en .
 
+# ERROR: skos:prefLabel and local name have drifted apart -- flattened to
+#        alphanumerics, "pumpinginstallation" is not "pumpstation" -> STY-004
+:PumpStation
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Pump station"@en ;
+    skos:prefLabel  "Pumping installation"@en .
+
 # ERROR: term is owl:deprecated but still used as a type below -> QUA-003
 :LegacyRecord
     a               owl:Class ;

@@ -225,11 +225,13 @@ COVERAGE: List[Coverage] = [
     Coverage(
         number=14, kind="registry",
         how="ontology-quality-suite sketch --queries fixtures/model/queries --file-pattern '**/*.rq'",
-        evidence=(("sketch", "TQL-002"), ("sketch", "TQL-003")),
+        evidence=(("sketch", "TQL-002"), ("sketch", "TQL-003"), ("sketch", "TQL-004")),
         fixtures=("queries/readings/readings.rq", "queries/readings/draft_alarms.rq"),
         notes="Split by naming convention rather than by severity guesswork: a ?x_IRI variable is "
               "built rather than read, so an unbound one is a Violation; anything else is probably "
-              "a CSV column and is Info.",
+              "a CSV column and is Info. TQL-004 is the third failure mode of the same variable: "
+              "draft_alarms.rq CONCATs an alarm IRI and never wraps it in IRI(), so the CONSTRUCT "
+              "emits a string where a subject was meant.",
     ),
     Coverage(
         number=15, kind="harness",

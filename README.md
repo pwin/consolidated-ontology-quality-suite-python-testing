@@ -27,16 +27,18 @@ uv run pytest -q            # same expectations, as pass/fail tests
 
 ## Results
 
-All 16 fixtures pass: **43 of the registry's 61 checks** are asserted, and
+All 16 fixtures pass: **47 of the registry's 61 checks** are asserted, and
 every seeded error is detected. Counts below are from `uv run python report.py`
-against suite 0.14.3 — 151 findings in total, identical across runs.
+against suite 0.14.4 — 153 findings in total, identical across runs.
 
 Taken together with [competency_tests/](competency_tests/), **58 of the 61
-checks are exercised by some fixture**. The three that are not — `REA-005`,
-`REA-006` and `VOC-001` — are the ones the CLI does not implement at all; they
-are the VS Code extension's, and `competency_tests/fixtures/vsix/` holds a
-dataset for checking them by hand. So every check the CLI can produce now has
-a fixture that proves it fires.
+checks are pinned by a test** — named as an expectation, so a suite regression
+that silenced one would fail rather than pass quietly. The three that are not —
+`REA-005`, `REA-006` and `VOC-001` — are the ones the CLI does not implement at
+all; they are the VS Code extension's, and `competency_tests/fixtures/vsix/`
+holds a dataset for checking them by hand. So every check the CLI can produce
+is pinned, and `test_extension_only_checks_are_not_reported_by_the_cli` guards
+the other three from the opposite direction.
 
 | Fixture | Seeded error | Detected |
 |---|---|---|
@@ -46,14 +48,14 @@ a fixture that proves it fires.
 | `03b-unsatisfiable-class` | same ontology, no data — contradiction is class-level only | `LOG-001`, `REA-021` (HermiT) |
 | `04-property-axioms` | functional property with 2 values; 2 inverses; self-inverse; symmetric/transitive with domain ≠ range | `LOG-002`, `LOG-004`, `LOG-005`, `LOG-006`, `LOG-007` |
 | `05-reasoning-violations` | asymmetric property both ways; irreflexive self-loop | `REA-002` ×4, `REA-003` ×2, `REA-020` (HermiT) |
-| `06-datatype-conformance` | ill-formed `xsd:date`/`integer`/`boolean`; domain and range violations | `DAT-001` ×3, `CNF-003`, `CNF-004` |
-| `07-naming-style` | `snake_case` class, hyphenated class, `Upper_Snake` property, untagged label, deprecated term still used | `STY-001` ×2, `STY-002`, `STY-003`, `STY-005`, `QUA-001`, `QUA-003` |
+| `06-datatype-conformance` | ill-formed `xsd:date`/`integer`/`boolean`; domain and range violations | `DAT-001` ×3, `CNF-003`, `CNF-004`, `REA-022` (reasoner fell back) |
+| `07-naming-style` | `snake_case` class, hyphenated class, `Upper_Snake` property, untagged label, `skos:prefLabel` drifted from local name, deprecated term still used | `STY-001` ×2, `STY-002`, `STY-003`, `STY-004`, `STY-005`, `QUA-001`, `QUA-003` |
 | `08a-no-version-metadata` | header with no version/title metadata, no `owl:versionIRI`, `http://` IRI | `QUA-002`, `QUA-007`, `QUA-008` |
 | `08b-no-ontology-header` | no `owl:Ontology` declaration at all | `QUA-005` |
 | `08c-ontology-iri-reused` | ontology IRI reused verbatim as the concept namespace | `QUA-006` |
 | `09-profile-violations` | `unionOf`, `complementOf`, `allValuesFrom`, `minCardinality 4`, transitive + functional properties | `REA-010` ×6, `REA-011` ×5, `REA-012` ×3 |
 | `10-efficiency` | 6-hop `subClassOf` chain; blank nodes >20% of all nodes | `EFF-001` ×2, `EFF-002` |
-| `11-schema-gaps` | redundant `equivalentClass`+`subClassOf`; property with no domain or range; domain and range IRIs never declared; untyped subject | `LOG-003`, `STR-003`, `STR-005`, `STR-008`, `STR-009` |
+| `11-schema-gaps` | redundant `equivalentClass`+`subClassOf`; property with no domain or range; domain and range IRIs never declared; untyped subject; untyped, never-declared object | `LOG-003`, `STR-003`, `STR-005`, `STR-006`, `STR-008`, `STR-009`, `DAT-002` ×2 |
 | `12-literal-volume` | 60 values on one subject-predicate pair; one lexical form under two language tags | `EFF-003`, `DAT-003` |
 | `13-unsatisfiable-class` | individual typed with a class declared `rdfs:subClassOf owl:Nothing` | `REA-004`, `REA-020` (HermiT) |
 
