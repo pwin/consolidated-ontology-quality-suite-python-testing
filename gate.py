@@ -100,11 +100,28 @@ def load_config(path: Path) -> Dict[str, Any]:
     for key, value in loaded.items():
         if key in PATH_KEYS and value is not None:
             if isinstance(value, list):
-                value = [str((base / str(v)).resolve()) for v in value]
+                value = [_resolve(base, v) for v in value]
             else:
-                value = str((base / str(value)).resolve())
+                value = _resolve(base, value)
         config[key] = value
     return config
+
+
+# Values the suite resolves for itself, which must be passed through as
+# written. `@builtin` is the suite's own query tree wherever this install put
+# it -- the source checkout for an editable install, site-packages for a
+# wheel. Resolving it here as a path produced `<repo>/@builtin`, a directory
+# that does not exist, and the run then reported that it had skipped every
+# built-in check. Which it had.
+PASSTHROUGH = {"@builtin"}
+
+
+def _resolve(base: Path, value: Any) -> str:
+    """A config path, made absolute against the config file's directory."""
+    text = str(value)
+    if text in PASSTHROUGH:
+        return text
+    return str((base / text).resolve())
 
 
 def to_argv(config: Dict[str, Any]) -> List[str]:
