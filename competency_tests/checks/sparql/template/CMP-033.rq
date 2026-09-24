@@ -1,0 +1,37 @@
+PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:     <http://www.w3.org/2002/07/owl#>
+PREFIX sh:      <http://www.w3.org/ns/shacl#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX oq:      <https://semantechs.co.uk/ontology-quality/>
+
+# CMP-033 (CT-33): a mapping still building a term the model has deprecated.
+#
+# QUA-003 asks this of an ontology and of data -- is a deprecated term still
+# in active use. Neither reaches the mappings, which are where the use
+# originates: the data is only deprecated because the transformation that
+# produced it is. Catching it here is the difference between fixing one query
+# and reprocessing a graph.
+#
+# Reports the replacement when the ontology names one, because "deprecated"
+# without "use this instead" is the half of the message that does not help.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Warning ;
+    sh:focusNode ?term ;
+    sh:resultPath ?used ;
+    sh:value ?replacement ;
+    sh:sourceConstraintComponent oq:CMP-033 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  { ?subject a ?term . BIND(rdf:type AS ?used) }
+  UNION
+  { ?subject ?term ?object . BIND(?term AS ?used) FILTER(?term != rdf:type) }
+  ?term owl:deprecated true .
+  OPTIONAL { ?term dcterms:isReplacedBy ?named }
+  BIND(COALESCE(?named, "none stated") AS ?replacement)
+  BIND(CONCAT("The transformation still builds ", STR(?term),
+              ", which the model marks owl:deprecated. Replacement: ", STR(?replacement),
+              ". Every run of this mapping adds more data that will have to be migrated.") AS ?msg)
+}

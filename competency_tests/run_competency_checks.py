@@ -27,6 +27,7 @@ from rdflib import Graph, URIRef
 from rdflib.namespace import RDF, RDFS
 
 import competency
+import mapping_drift
 import mapping_integrity
 import review_aids
 import runspecs
@@ -46,6 +47,7 @@ WORK = HERE.parent / "out" / "competency"
 ONTOLOGY_V1 = MODEL / "ontology" / "water-v1.ttl"
 ONTOLOGY_V2 = MODEL / "ontology" / "water-v2.ttl"
 ONTOLOGY_CORE = MODEL / "ontology" / "core-v1.ttl"
+INTEGRATION = MODEL / "ontology" / "integration.ttl"
 TAXONOMY = MODEL / "ontology" / "asset-types.ttl"
 UNITS = MODEL / "ontology" / "units.ttl"
 QUERIES = MODEL / "queries"
@@ -178,6 +180,25 @@ def query_source_with_agreed_patterns() -> Graph:
     return graph
 
 
+def template_with_declarations() -> Graph:
+    """The template sketch plus the declarations CMP-032 and CMP-033 need.
+
+    Domains, ranges, class declarations and the hierarchy from the model, and
+    core-v1.ttl whole, because its deprecations are the thing being checked.
+    Wider than sketch_with_declarations, which deliberately admits only types
+    so that CMP-012 can tell a model's label from a mapping's -- a distinction
+    these two checks do not make and do not need.
+    """
+    graph = pa.build_sketch_graph([QUERIES], RECURSIVE_QUERIES)
+    wanted = (RDF.type, RDFS.subClassOf, RDFS.domain, RDFS.range)
+    for reference in (ONTOLOGY_V1, TAXONOMY, UNITS):
+        for subject, predicate, obj in load_graph(reference):
+            if predicate in wanted:
+                graph.add((subject, predicate, obj))
+    graph += load_graph(ONTOLOGY_CORE)
+    return graph
+
+
 def project_checks(graph: Graph, registry: Registry, subdir: str = "competency") -> List[ResultRow]:
     """Run the project-local .rq checks over one graph, through the suite's
     own runner and result merge -- the documented extension mechanism, with
@@ -242,6 +263,15 @@ def run_everything() -> List[Run]:
 
     runs.append(_run("iri-pattern",
                      project_checks(query_source_with_agreed_patterns(), registry, "tarql")))
+
+    runs.append(_run("template-shape",
+                     project_checks(template_with_declarations(), registry, "template")))
+
+    runs.append(_run("mapping-drift", mapping_drift.run_all(
+        QUERIES, [ONTOLOGY_V1, TAXONOMY, UNITS], INTEGRATION,
+        golden=MODEL / "outputs" / "golden-legacy-assets.ttl",
+        produced=RESULTS / "triplified" / "legacy_assets.ttl",
+        import_dir=MODEL / "ontology")))
 
     # ---- pattern-consistency: the taxonomy boundaries -------------------
     four_layer = pattern_consistency.check_four_layer_consistency(
@@ -402,6 +432,8 @@ def render_document(runs: List[Run], results) -> str:
     add("| `checks/` | project-local `CMP-*` checks, one directory per graph they are asked of, plus their registry entries |")
     add("| `review_aids.py` | CT-23 to CT-28 -- comparisons between two outputs |")
     add("| `mapping_integrity.py` | CT-15 and CT-16 -- source records and defined mappings vs real output |")
+    add("| `mapping_drift.py` | CT-34 to CT-38 -- drift across a mapping *set*: per-file shapes and "
+        "datatypes, the import closure, prefix agreement, and the golden output |")
     add("| `competency.py` | the coverage table: how each test is answered and what evidence proves it |")
     add("| `runspecs.py` | one entry per run: its title and the shell command that reproduces it |")
     add("| [COMPETENCY_CHECK_MATRIX.md](COMPETENCY_CHECK_MATRIX.md) | the companion table -- every "

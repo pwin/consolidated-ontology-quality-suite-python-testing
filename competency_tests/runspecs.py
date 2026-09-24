@@ -152,13 +152,36 @@ RUNS: Dict[str, RunSpec] = {
     ),
     "iri-pattern": RunSpec(
         key="iri-pattern",
-        title="Instance IRI patterns in the mappings vs the shared core model",
+        title="Query-source facts: instance IRI patterns, and prefix agreement across files",
         runner="`run_competency_checks.py` (no single-command form -- see the note)",
-        note="No single-command form. CMP-029 is asked of three artefacts at once -- the BIND "
+        note="No single-command form for CMP-029, which is asked of three artefacts at once -- the BIND "
              "facts the sketch stage publishes, the CONSTRUCT-template sketch, and core-v1.ttl -- "
              "and no CLI stage merges that particular trio: --ontology would merge the core model "
              "into the conformance layer instead, which answers a different question. Run the "
              "harness.",
+    ),
+    "template-shape": RunSpec(
+        key="template-shape",
+        title="What the CONSTRUCT templates build vs what the model declares",
+        runner="`run_competency_checks.py` (no single-command form -- see the note)",
+        note="No single-command form. CMP-032 and CMP-033 are asked of the template sketch merged "
+             "with the model's declarations and core-v1.ttl's deprecations; --ontology would run "
+             "the conformance layer over the whole model instead, which answers the same question "
+             "of real output rather than of the query text. Run the harness.",
+    ),
+    "mapping-drift": RunSpec(
+        key="mapping-drift",
+        title="Drift across the mapping set: shapes, datatypes, imports, prefixes, golden output",
+        runner="`mapping_drift.py` in this folder",
+        command=f'''uv run python competency_tests/mapping_drift.py \
+  --queries {MODEL}/queries \
+  --ontology {MODEL}/ontology/water-v1.ttl \
+  --ontology {MODEL}/ontology/asset-types.ttl \
+  --ontology {MODEL}/ontology/units.ttl \
+  --integration {MODEL}/ontology/integration.ttl \
+  --import-dir {MODEL}/ontology \
+  --golden {MODEL}/outputs/golden-legacy-assets.ttl \
+  --output {OUTPUT}/legacy_assets.ttl''',
     ),
     "review-aids": RunSpec(
         key="review-aids",

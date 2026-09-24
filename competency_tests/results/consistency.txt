@@ -26,11 +26,12 @@ Added subclass edges [minor]:
 
 Suggested version bump: MAJOR
 
-5 prefix/namespace misalignment(s):
+6 prefix/namespace misalignment(s):
   [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\assets\assets.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
   [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\assets\legacy_assets.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
   [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\assets\sites.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
   [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\readings\draft_alarms.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
+  [namespace_mismatch] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\readings\draft_alarms.rq: 'gist:' is <https://w3id.org/semanticarts/ns/ontology/gist#> here, but the ontology set binds 'gist:' to: <https://w3id.org/semanticarts/ns/ontology/gist/> (in C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\ontology\water-v2.ttl)
   [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\readings\readings.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
 1 class(es) used in TARQL but not declared in the ontology set:
   [undeclared_class] https://example.org/water/model#PumpStation
@@ -38,6 +39,8 @@ Suggested version bump: MAJOR
   [undeclared_property] https://example.org/water/model#hasFlowRate
   [undeclared_property] https://example.org/water/model#isRepresentedBy
 
-1 suggested repair(s):
+2 suggested repair(s):
+  [update_prefix] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\readings\draft_alarms.rq (confidence 100%)
+    Update 'PREFIX gist:' to the ontology's <https://w3id.org/semanticarts/ns/ontology/gist/>
   [insert_ontology_stub] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\ontology\water-v2.ttl (confidence 70%)
     Declare 1 term(s) used in TARQL/oxi-gen queries but never declared: https://example.org/water/model#isRepresentedBy

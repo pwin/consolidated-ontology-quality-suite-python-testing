@@ -122,6 +122,83 @@
       "remediation": "Establish which source is authoritative for the link and drop the other mapping's triple; if both are legitimate, the property is not single-valued and the agreed pattern needs changing. Declaring it owl:FunctionalProperty afterwards moves the check to LOG-002.",
       "cucumber_feature": "Cross-artefact Consistency",
       "cucumber_scenario": "A single-valued relationship has one value"
+    },
+    {
+      "id": "CMP-032",
+      "category": "competency",
+      "metric": "template conformance to declared domains",
+      "default_severity": "Violation",
+      "title": "Template asserts a property outside its declared domain",
+      "description": "A CONSTRUCT template hangs a property off an entity whose class is not the property's rdfs:domain, nor a subclass of it. The suite reports the same condition as CNF-003, but of real output -- after the CSVs are read and the mappings run. Everything needed to know it earlier is in the query text, and a mapping wired to no CSV yet is never reported at all.",
+      "remediation": "Use the property the class actually has, or type the entity as the class the property expects. If both are right, the ontology's domain is wrong and should be widened.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Every property a template asserts belongs to the class it is asserted on"
+    },
+    {
+      "id": "CMP-033",
+      "category": "competency",
+      "metric": "deprecated term still built by a transformation",
+      "default_severity": "Warning",
+      "title": "Mapping still builds a deprecated term",
+      "description": "A mapping constructs a class or property the model marks owl:deprecated. QUA-003 asks this of an ontology and of data; neither reaches the mappings, which are where the use originates -- the data is deprecated because the transformation that made it is.",
+      "remediation": "Move the mapping to the replacement the ontology names, then decide what happens to the data already built with the old term.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "No mapping builds a term the model has deprecated"
+    },
+    {
+      "id": "CMP-034",
+      "category": "competency",
+      "metric": "class shape consistency across mappings",
+      "default_severity": "Warning",
+      "title": "One class built with different shapes by different mappings",
+      "description": "Two or more mappings build instances of the same class with different property sets, so the shape of an entity depends on which file made it. Invisible per file: each mapping builds a reasonable entity and only the union is lopsided.",
+      "remediation": "Decide which properties every instance of the class must carry, and either add them to the thinner mapping or split the class so the two populations are honestly different.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "A class has one shape however it was built"
+    },
+    {
+      "id": "CMP-035",
+      "category": "competency",
+      "metric": "datatype consistency across mappings",
+      "default_severity": "Violation",
+      "title": "One predicate filled with different datatypes by different mappings",
+      "description": "The value of one predicate is typed in one mapping and left untyped, or typed differently, in another. Values of a single property that will not compare, sort or aggregate against each other, with no individual file looking wrong.",
+      "remediation": "Type the value the same way in every mapping, at the datatype the property's rdfs:range declares.",
+      "cucumber_feature": "Magnitudes, Values and Units",
+      "cucumber_scenario": "A predicate carries one datatype across the mapping set"
+    },
+    {
+      "id": "CMP-036",
+      "category": "competency",
+      "metric": "import closure completeness",
+      "default_severity": "Violation",
+      "title": "Mapping builds a term outside the ontology's import closure",
+      "description": "A term the mappings build is declared in a file passed on the command line but is not reachable from the integration ontology through owl:imports. The checks pass because of how they were invoked rather than because the ontology is complete, and the first consumer to load the ontology as published gets neither the term nor a warning.",
+      "remediation": "Give the vocabulary an ontology IRI and import it, or state plainly that it is an external dependency the consumer must supply.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Every term a mapping builds is reachable through owl:imports"
+    },
+    {
+      "id": "CMP-037",
+      "category": "competency",
+      "metric": "prefix agreement across mappings",
+      "default_severity": "Violation",
+      "title": "One prefix bound to two namespaces across the mapping set",
+      "description": "Two mappings bind the same prefix to different namespaces. Each file is internally consistent, so no per-file check fires; downstream the term-level checks report an undeclared term, which names the symptom in one file rather than the disagreement between two. The hash-versus-slash slip on an external vocabulary is the everyday form.",
+      "remediation": "Agree one namespace per prefix across the mapping set, preferably in a shared PREFIX header the queries include rather than repeat.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "A prefix means the same thing in every mapping"
+    },
+    {
+      "id": "CMP-038",
+      "category": "competency",
+      "metric": "output stability across a model change",
+      "default_severity": "Violation",
+      "title": "Triplified output differs from the agreed golden copy",
+      "description": "The mapping set no longer produces triples a stored golden copy records, or now produces triples it does not. The review aids compare two outputs; this compares the current run against what was agreed, which is the comparison a reviewer wants at a version bump -- 'the ontology moved and the tests still pass' becomes a list of what moved with it.",
+      "remediation": "Review each difference and either fix the mapping or update the golden deliberately, in the same commit as the change that justifies it.",
+      "cucumber_feature": "Review Aids",
+      "cucumber_scenario": "The output changes only where a change was intended"
     }
   ]
 }

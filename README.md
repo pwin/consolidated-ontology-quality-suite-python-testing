@@ -270,11 +270,18 @@ holds whichever binding won.
 [competency_tests/](competency_tests/) is a second, larger exercise over the
 same suite: 28 numbered competency tests supplied as CSVs, each one seeded into
 a worked example spanning an ontology, a taxonomy, four TARQL mappings, the CSVs
-they read and two comparable outputs — plus three more written here where the
-supplied set left a gap (CT-29 to CT-31: an instance IRI pattern left behind by
-a concept moving into a shared namespace, one entity generated twice under two
-identifiers, and a single-valued link carrying two values). All 31 are
-evidenced. Two generated documents record it:
+they read and two comparable outputs — plus ten more written here where the
+supplied set left a gap. CT-29 to CT-31 cover an instance IRI pattern left
+behind by a concept moving into a shared namespace, one entity generated twice
+under two identifiers, and a single-valued link carrying two values. CT-32 to
+CT-38 cover drift between an ontology and a *set* of mappings, which is where
+a real project lives: a template asserting a property outside its domain
+before any data exists, a mapping still building a deprecated term, one class
+built with two shapes and one predicate with two datatypes depending on the
+file, a term that resolves only because every file was named on the command
+line rather than reached through `owl:imports`, two mappings disagreeing about
+what a prefix means, and the output moving where no move was intended. All 38
+are evidenced. Two generated documents record it:
 [COMPETENCY_COVERAGE.md](competency_tests/COMPETENCY_COVERAGE.md), how each test
 is checked and what the run found, and
 [COMPETENCY_CHECK_MATRIX.md](competency_tests/COMPETENCY_CHECK_MATRIX.md), every

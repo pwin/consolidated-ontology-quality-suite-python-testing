@@ -1,0 +1,49 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sh:  <http://www.w3.org/ns/shacl#>
+PREFIX oq:  <https://semantechs.co.uk/ontology-quality/>
+PREFIX tq:  <https://semantechs.co.uk/ontology-quality/tarql/>
+
+# CMP-037 (CT-37): one prefix bound to two namespaces across the mapping set.
+#
+# Was Python until the suite began publishing tq:PrefixBinding (0.16.0). It
+# is a GROUP BY once the prefix table is a fact, which is the whole argument
+# for publishing facts rather than findings: this check now reads the way the
+# question is asked.
+#
+# Each file is internally consistent, so nothing per-file fires. Downstream
+# the term-level checks do report the consequence -- as an undeclared term,
+# in whichever file is wrong, never mentioning that another file holds the
+# other half of the disagreement.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?binding ;
+    sh:resultPath tq:namespace ;
+    sh:value ?namespaces ;
+    sh:sourceConstraintComponent oq:CMP-037 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  {
+    SELECT ?prefix (COUNT(DISTINCT ?namespace) AS ?count)
+           (GROUP_CONCAT(DISTINCT ?namespace; separator=", ") AS ?namespaces)
+           (GROUP_CONCAT(DISTINCT ?source; separator=", ") AS ?files)
+    WHERE {
+      ?b a tq:PrefixBinding ;
+        tq:prefix ?prefix ;
+        tq:namespace ?namespace ;
+        tq:source ?source .
+    }
+    GROUP BY ?prefix
+    HAVING (COUNT(DISTINCT ?namespace) > 1)
+  }
+  # One finding per disagreeing prefix. Joining back to the binding nodes
+  # would report the same disagreement once per file that declares the
+  # prefix, which reads as four problems where there is one.
+  BIND(IRI(CONCAT("https://semantechs.co.uk/ontology-quality/tarql/prefix/",
+                  ENCODE_FOR_URI(?prefix))) AS ?binding)
+  BIND(CONCAT("The mapping set binds ", ?prefix, ": to ", STR(?count),
+              " different namespaces -- ", ?namespaces, " -- across ", ?files,
+              ". Every term either file builds with it lands somewhere the other ",
+              "does not expect.") AS ?msg)
+}

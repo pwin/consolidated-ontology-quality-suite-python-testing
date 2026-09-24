@@ -1,0 +1,23 @@
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# The project's integration ontology -- the one file a gate points at, which
+# pulls the rest in through owl:imports. This is the shape COMMANDS.md §5
+# recommends, and CT-36 is the failure it makes possible.
+#
+# SEEDS CT-36: this imports the model and nothing else, while the mappings
+# also build terms from the taxonomy and the unit vocabulary. Those two files
+# carry no owl:Ontology header at all, so there is no IRI to import them by
+# even if someone wanted to -- they are reachable only by being named on a
+# command line. Every check passes today because every check is invoked with
+# all three files; a consumer who loads this ontology the way it says to load
+# it gets neither. The defect is in what this file does *not* say.
+
+<https://example.org/water/integration>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/integration/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Acme Water integration ontology"@en ;
+    dcterms:title   "Acme Water integration ontology" ;
+    owl:imports     <https://example.org/water/model> .

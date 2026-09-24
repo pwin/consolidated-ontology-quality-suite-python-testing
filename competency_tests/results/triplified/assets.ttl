@@ -5,6 +5,10 @@
 <https://example.org/water/data/asset-A3> a :PumpStation ;
 	gist:isCategorizedBy vocab:TreatmentWorks .
 vocab:Reservoir skos:prefLabel "Reservoir"@en .
+<https://example.org/water/data/asset-A4> a :PumpStation ;
+	:atSite <https://example.org/water/data/site-S3> ;
+	gist:isCategorizedBy vocab:Culvert .
+vocab:Reservoir skos:prefLabel "Reservoir"@en .
 <https://example.org/water/data/asset-A2> a :PumpStation ;
 	:atSite <https://example.org/water/data/site-S2> ;
 	gist:isCategorizedBy vocab:Borehole .
@@ -12,8 +16,4 @@ vocab:Reservoir skos:prefLabel "Reservoir"@en .
 <https://example.org/water/data/asset-A1> a :PumpStation ;
 	:atSite <https://example.org/water/data/site-S1> ;
 	gist:isCategorizedBy vocab:Reservoir .
-vocab:Reservoir skos:prefLabel "Reservoir"@en .
-<https://example.org/water/data/asset-A4> a :PumpStation ;
-	:atSite <https://example.org/water/data/site-S3> ;
-	gist:isCategorizedBy vocab:Culvert .
 vocab:Reservoir skos:prefLabel "Reservoir"@en .

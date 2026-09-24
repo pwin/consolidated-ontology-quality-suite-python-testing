@@ -123,6 +123,57 @@ LOCAL_DEFINITIONS: Dict[int, Definition] = {
         "present; this asks whether there is exactly one. The registry's LOG-002 answers it only "
         "for a property the ontology declares owl:FunctionalProperty, which the cardinalities "
         "agreed in a mapping specification usually are not."),
+    32: Definition(
+        32, LOCAL_CATEGORY,
+        "Template asserts a property the class does not have",
+        "Detect a CONSTRUCT template hanging a property off an entity outside that property's "
+        "declared domain. The suite reports the condition as CNF-003, but of real output -- after "
+        "the CSVs are read and the mappings have run. The query text says which class it builds "
+        "and what it hangs off it, so the answer exists before any data does, and for a mapping "
+        "not yet wired to a CSV it is the only way the answer exists at all."),
+    33: Definition(
+        33, LOCAL_CATEGORY,
+        "Mapping still builds a term the model deprecates",
+        "Detect a transformation constructing a class or property marked owl:deprecated. QUA-003 "
+        "asks this of an ontology and of data; neither reaches the mappings, which are where the "
+        "use originates -- the data is only deprecated because the transformation that made it "
+        "is. The difference is between fixing one query and reprocessing a graph."),
+    34: Definition(
+        34, LOCAL_CATEGORY,
+        "One class built with different shapes by different mappings",
+        "Detect a class whose instances carry different properties depending on which mapping "
+        "built them. No single file is wrong: each builds a reasonable entity, and only the union "
+        "is lopsided. It surfaces as a consumer finding that half the instances of a class lack "
+        "the property they were promised."),
+    35: Definition(
+        35, LOCAL_CATEGORY,
+        "One predicate filled with different datatypes across mappings",
+        "Detect a predicate typed in one mapping and left untyped, or typed differently, in "
+        "another. The values will not compare, sort or aggregate against each other, and range "
+        "checks report only the file that disagrees with the ontology rather than the fact that "
+        "the mapping set disagrees with itself."),
+    36: Definition(
+        36, LOCAL_CATEGORY,
+        "Mapping builds a term outside the ontology's import closure",
+        "Detect terms that resolve only because every file was named on the command line. An "
+        "integration ontology says what it imports; anything the mappings build beyond that "
+        "closure passes every check as invoked and is missing for the first consumer who loads "
+        "the ontology as published."),
+    37: Definition(
+        37, LOCAL_CATEGORY,
+        "Two mappings disagree about what a prefix means",
+        "Detect one prefix bound to two namespaces across the mapping set. Each file is "
+        "internally consistent, so no per-file check fires; the term-level checks downstream "
+        "report an undeclared term, which names the symptom in one file and never mentions that "
+        "another file holds the other half of the disagreement."),
+    38: Definition(
+        38, LOCAL_CATEGORY,
+        "Output changed where no change was intended",
+        "Detect triples the mapping set no longer produces, or now produces, against a stored "
+        "golden copy. The review aids compare two outputs; nothing pointed them at before and "
+        "after a model change, which is the comparison a reviewer actually wants at a version "
+        "bump -- it turns a passing test suite after a model move into a list of what moved "
+        "with it."),
 }
 
 
@@ -403,6 +454,79 @@ COVERAGE: List[Coverage] = [
         notes="Two mappings contribute :atSite for asset-A1 and disagree -- the asset register "
               "says S1, the legacy register says S2. Neither mapping is wrong on its own, which "
               "is what makes this a question about the merged output rather than about a query.",
+    ),
+    Coverage(
+        number=32, kind="project-check",
+        how="run_competency_checks.py -- CMP-032 over the template sketch merged with the model's "
+            "declarations (template_with_declarations)",
+        evidence=(("template-shape", "CMP-032"),),
+        fixtures=("queries/assets/legacy_assets.rq", "queries/readings/draft_alarms.rq"),
+        notes="draft_alarms.rq is the case that settles why this is worth having statically: it "
+              "is wired to no CSV, so it is never triplified and CNF-003 can never see it. The "
+              "check honours subsumption -- a subclass of the domain is correct -- which is why "
+              "it walks rdfs:subClassOf* rather than comparing two IRIs.",
+    ),
+    Coverage(
+        number=33, kind="project-check",
+        how="run_competency_checks.py -- CMP-033 over the same graph, which carries core-v1.ttl's "
+            "deprecations",
+        evidence=(("template-shape", "CMP-033"),),
+        fixtures=("ontology/core-v1.ttl", "queries/assets/sites.rq"),
+        notes="Shares CT-29's seed and asks a different question of it: CT-29 is about the "
+              "instance IRIs the mapping mints, this is about the deprecated class it types them "
+              "with. One model change, two independent ways of being left behind.",
+    ),
+    Coverage(
+        number=34, kind="harness",
+        how="mapping_drift.compare_class_shapes(one sketch per query file)",
+        evidence=(("mapping-drift", "CMP-034"),),
+        fixtures=("queries/assets/sites.rq", "queries/readings/readings.rq"),
+        notes="sites.rq builds :Site with a name and readings.rq builds it with nothing. Needs "
+              "per-file sketches: the suite's sketch merges every query into one graph, where "
+              "two shapes are indistinguishable from one.",
+    ),
+    Coverage(
+        number=35, kind="harness",
+        how="mapping_drift.compare_predicate_datatypes(per-file sketch + BIND facts)",
+        evidence=(("mapping-drift", "CMP-035"),),
+        fixtures=("queries/assets/legacy_assets.rq", "queries/readings/readings.rq"),
+        notes="Reads both artefacts because neither is enough: the template says which predicate "
+              "a variable feeds, and only the BIND says what datatype fills it. legacy_assets.rq "
+              "wraps its number in STRDT, readings.rq CONCATs it into a string.",
+    ),
+    Coverage(
+        number=36, kind="harness",
+        how="mapping_drift.check_import_closure(integration.ttl vs the files passed)",
+        evidence=(("mapping-drift", "CMP-036"),),
+        fixtures=("ontology/integration.ttl", "queries/readings/readings.rq"),
+        notes="asset-types.ttl and units.ttl carry no owl:Ontology header at all, so there is no "
+              "IRI to import them by even if someone wanted to -- they are reachable only by "
+              "being named on a command line, which is how every check here invokes them. The "
+              "check also reports that two files claim the same ontology IRI, so which one wins "
+              "decides what the closure contains.",
+    ),
+    Coverage(
+        number=37, kind="project-check",
+        how="run_competency_checks.py -- CMP-037 over the query-source facts, which carry each "
+            "file's PREFIX table since suite 0.16.0",
+        evidence=(("iri-pattern", "CMP-037"),),
+        fixtures=("queries/readings/draft_alarms.rq", "queries/readings/readings.rq"),
+        notes="draft_alarms.rq ends the gist namespace with a hash where every other mapping uses "
+              "a slash. The term-level checks do report the consequence downstream, as an "
+              "undeclared term -- naming the file that is wrong, never the disagreement, and "
+              "never the other file holding the other half of it. Written in Python first, and "
+              "moved to a .rq once the suite published the prefix table: a GROUP BY over a fact "
+              "rather than a dictionary built by hand.",
+    ),
+    Coverage(
+        number=38, kind="harness",
+        how="mapping_drift.compare_against_golden(golden-legacy-assets.ttl vs this run's output)",
+        evidence=(("mapping-drift", "CMP-038"),),
+        fixtures=("outputs/golden-legacy-assets.ttl", "queries/assets/legacy_assets.rq"),
+        notes="The golden records the output before CT-29 to CT-35 were seeded, so the run "
+              "reports exactly what those changes did to the graph: a new :atSite link, and a "
+              "number that used to be a plain string. Regenerated deliberately -- a golden that "
+              "updates itself answers \"did this change?\" with \"no\" every time.",
     ),
 ]
 

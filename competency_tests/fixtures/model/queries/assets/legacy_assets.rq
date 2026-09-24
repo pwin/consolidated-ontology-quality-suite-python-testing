@@ -3,6 +3,7 @@
 prefix :      <https://example.org/water/model#>
 prefix gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
 prefix vocab: <https://example.org/water/vocab#>
+prefix xsd:   <http://www.w3.org/2001/XMLSchema#>
 
 CONSTRUCT {
   # SEEDS CT-2: this is the IRI template assets.rq uses for :PumpStation.
@@ -17,7 +18,10 @@ CONSTRUCT {
     # SEEDS CT-18: the agreed pattern puts the number on a :FlowRate
     # magnitude node reached by :hasFlowRate. This flattens it onto the
     # reading, so the value has no unit and no quantity kind.
-    gist:numericValue ?flow ;
+    # SEEDS CT-35: readings.rq emits gist:numericValue as a plain string.
+    # This one types it xsd:decimal, so the same predicate carries two
+    # datatypes across the mapping set and no single file looks wrong.
+    gist:numericValue ?flow_DT ;
     # SEEDS CT-4 (static): the taxonomy declares vocab:Reservoir. This is a
     # hard-coded reference to a term that does not exist.
     gist:isCategorizedBy vocab:Resevoir .
@@ -25,4 +29,5 @@ CONSTRUCT {
 WHERE {
   BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?legacy_IRI)
   BIND(IRI(CONCAT("https://example.org/water/data/site-", ?siteid)) AS ?legacy_site_IRI)
+  BIND(STRDT(?flow, xsd:decimal) AS ?flow_DT)
 }

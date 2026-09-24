@@ -1,0 +1,41 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+
+# CMP-032 (CT-32): a CONSTRUCT template asserting a property on a subject
+# whose class is not the property's declared rdfs:domain.
+#
+# Run against the template sketch merged with the ontology's declarations.
+# The suite already reports this as CNF-003 -- but only of real triplified
+# output, which means after the CSVs are read, the mappings are run, and
+# whatever the defect costs has already been paid. Everything needed to know
+# it earlier is in the query text: the template says what class it builds and
+# what properties it hangs off it, and the ontology says where each property
+# belongs. draft_alarms.rq is the case that makes the point -- it is wired to
+# no CSV, so no amount of running the pipeline will ever report it.
+#
+# Subsumption is honoured: a subclass of the domain is correct, which is why
+# this walks rdfs:subClassOf* rather than comparing the two class IRIs.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?subject ;
+    sh:resultPath ?property ;
+    sh:value ?domain ;
+    sh:sourceConstraintComponent oq:CMP-032 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?subject a ?class ;
+    ?property ?object .
+  ?property rdfs:domain ?domain .
+  ?class a owl:Class .
+  FILTER NOT EXISTS { ?class rdfs:subClassOf* ?domain }
+  FILTER(?property != rdf:type)
+  BIND(CONCAT("The transformation builds ", STR(?subject), " as a ", STR(?class),
+              " and hangs ", STR(?property), " off it, but that property's domain is ",
+              STR(?domain), ". Either the mapping is using the wrong property or the ",
+              "entity is being typed wrongly; the output will not conform either way.") AS ?msg)
+}

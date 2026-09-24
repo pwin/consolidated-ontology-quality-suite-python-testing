@@ -1,12 +1,18 @@
 # Draft alarm mapping -- not yet wired to a CSV, so it is never triplified.
 # It is still read by every static check, which is the point: these two
 # defects are catchable before the mapping has ever run.
-prefix : <https://example.org/water/model#>
+prefix :     <https://example.org/water/model#>
+# SEEDS CT-37: every other mapping binds gist: to the slash form. This one
+# ends it with a hash. Each file is internally consistent, and a check that
+# reads one query at a time can only say the term is undeclared -- not that
+# the mapping set disagrees with itself about what gist: means.
+prefix gist: <https://w3id.org/semanticarts/ns/ontology/gist#>
 
 CONSTRUCT {
   ?alarm_IRI a :Reading ;
     # SEEDS TQL-002: ?site_IRI is used here but bound nowhere below.
-    :atSite ?site_IRI .
+    :atSite ?site_IRI ;
+    gist:numericValue ?level .
 }
 WHERE {
   # SEEDS TQL-004: CONCAT returns a string. Without IRI() around it the
