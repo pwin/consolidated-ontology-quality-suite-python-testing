@@ -29,9 +29,15 @@ class RunSpec:
     registry -- the same stage, pointed at ``checks/sparql/`` and the merged
     registry -- and is what a CMP-* row in the matrix quotes. A run with
     neither has no single-command form, and ``note`` says why.
+
+    ``title`` says what the run is asked of and ``runner`` what produces it --
+    a suite subcommand or a script in this folder. Both generated documents
+    render their "Run" legend from those two, so a reader meeting a run key in
+    a table can tell what it is without decoding the command.
     """
     key: str
     title: str
+    runner: str = ""
     command: str = ""
     project_command: str = ""
     note: str = ""
@@ -41,6 +47,7 @@ RUNS: Dict[str, RunSpec] = {
     "sketch": RunSpec(
         key="sketch",
         title="Query source and shape vs ontology 1.0.0",
+        runner="`ontology-quality-suite sketch`",
         command=f'''uv run ontology-quality-suite sketch \\
   --queries {MODEL}/queries --file-pattern "**/*.rq" \\
   --ontology {MODEL}/ontology/water-v1.ttl \\
@@ -49,6 +56,7 @@ RUNS: Dict[str, RunSpec] = {
     "sketch-v2": RunSpec(
         key="sketch-v2",
         title="Query shape vs ontology 2.0.0, which the mappings were never updated for",
+        runner="`ontology-quality-suite sketch`, against the newer ontology",
         command=f'''uv run ontology-quality-suite sketch \\
   --queries {MODEL}/queries --file-pattern "**/*.rq" \\
   --ontology {MODEL}/ontology/water-v2.ttl \\
@@ -57,6 +65,7 @@ RUNS: Dict[str, RunSpec] = {
     "data": RunSpec(
         key="data",
         title="Triplified output vs ontology 1.0.0",
+        runner="`ontology-quality-suite data`",
         command=f'''uv run ontology-quality-suite data \\
   {OUTPUT} \\
   {MODEL}/ontology/asset-types.ttl {MODEL}/ontology/units.ttl \\
@@ -66,6 +75,7 @@ RUNS: Dict[str, RunSpec] = {
     "completeness": RunSpec(
         key="completeness",
         title="Documentation completeness of an authored ontology",
+        runner="`ontology-quality-suite checks`",
         command='''uv run ontology-quality-suite checks \\
   --ontology competency_tests/fixtures/completeness/incomplete-model.ttl \\
   --out-dir out/ct/completeness''',
@@ -78,6 +88,7 @@ RUNS: Dict[str, RunSpec] = {
     "project-output": RunSpec(
         key="project-output",
         title="Project-local checks over output + model",
+        runner="`ontology-quality-suite data` with `--registry` + `--sparql`",
         project_command=f'''uv run ontology-quality-suite data \\
   {OUTPUT} \\
   {MODEL}/ontology/asset-types.ttl {MODEL}/ontology/units.ttl \\
@@ -89,6 +100,7 @@ RUNS: Dict[str, RunSpec] = {
     "project-sketch": RunSpec(
         key="project-sketch",
         title="Project-local checks over the CONSTRUCT-template sketch",
+        runner="`run_competency_checks.py` (no single-command form -- see the note)",
         note="No single-command form. CMP-012 needs the sketch graph merged with the model's "
              "rdf:type and rdfs:subClassOf triples *only*, and the CLI's --ontology takes whole "
              "files: merging the model entire makes every term the ontology correctly labels "
@@ -97,6 +109,7 @@ RUNS: Dict[str, RunSpec] = {
     "pattern-consistency": RunSpec(
         key="pattern-consistency",
         title="Taxonomy boundaries, in query text and in real output",
+        runner="`ontology-quality-suite pattern-consistency`",
         command=f'''uv run ontology-quality-suite pattern-consistency \\
   --queries {MODEL}/queries \\
   --ontology {MODEL}/ontology/water-v1.ttl \\
@@ -108,6 +121,7 @@ RUNS: Dict[str, RunSpec] = {
     "consistency": RunSpec(
         key="consistency",
         title="Ontology 1.0.0 -> 2.0.0 vs the mappings",
+        runner="`ontology-quality-suite consistency`",
         command=f'''uv run ontology-quality-suite consistency \\
   --old {MODEL}/ontology/water-v1.ttl \\
   --new {MODEL}/ontology/water-v2.ttl \\
@@ -117,6 +131,7 @@ RUNS: Dict[str, RunSpec] = {
     "version-diff": RunSpec(
         key="version-diff",
         title="Semver bump implied by the ontology change",
+        runner="`ontology-quality-suite version-diff`",
         command=f'''uv run ontology-quality-suite version-diff \\
   {MODEL}/ontology/water-v1.ttl \\
   {MODEL}/ontology/water-v2.ttl \\
@@ -125,6 +140,7 @@ RUNS: Dict[str, RunSpec] = {
     "mapping-integrity": RunSpec(
         key="mapping-integrity",
         title="Source records and defined mappings vs real output",
+        runner="`mapping_integrity.py` in this folder",
         command=f'''uv run python competency_tests/mapping_integrity.py \\
   --queries {MODEL}/queries/assets \\
   --queries {MODEL}/queries/readings/readings.rq \\
@@ -136,6 +152,7 @@ RUNS: Dict[str, RunSpec] = {
     "review-aids": RunSpec(
         key="review-aids",
         title="Baseline output vs candidate output",
+        runner="`review_aids.py` in this folder",
         command=f'''uv run python competency_tests/review_aids.py \\
   {MODEL}/outputs/baseline.ttl \\
   {MODEL}/outputs/candidate.ttl''',

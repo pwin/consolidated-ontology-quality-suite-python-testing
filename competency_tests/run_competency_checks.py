@@ -390,6 +390,20 @@ def render_document(runs: List[Run], results) -> str:
     add("")
     add("## Coverage at a glance")
     add("")
+    add("*How it is checked* says where the answer comes from -- the suite alone answers most of "
+        "these tests, but not all of them. A test needing two sources shows both, joined with "
+        "`+`. The `Source` column in COMPETENCY_CHECK_MATRIX.md uses the same words. "
+        "`extension-only` is listed for completeness: it is the one kind no run can produce, "
+        "so it labels no test below.")
+    add("")
+    add("| How it is checked | Meaning |")
+    add("|---|---|")
+    used_kinds = {token for _d, cover, _o, _m in results
+                  for token in competency.kind_tokens(cover.kind)}
+    for kind, meaning in competency.KINDS.items():
+        if kind in used_kinds or kind == "extension-only":
+            add("| `{}` | {} |".format(kind, meaning))
+    add("")
     add("| CT | Issue | How it is checked | Evidence |")
     add("|---|---|---|---|")
     for definition, cover, observed, missing in results:
@@ -400,6 +414,22 @@ def render_document(runs: List[Run], results) -> str:
     add("")
 
     add("## How each test is implemented")
+    add("")
+    add("Each test's *category* below is where its definition came from -- one of the five "
+        "supplied CSVs, or this repo for the tests added after the supplied set ended at 28. It "
+        "is not a property of the checks that answer it. *Data used in test* names the fixture "
+        "files the defect was planted in -- a run usually reads more of the worked example than "
+        "those, and the commands under Runs say exactly what it reads.")
+    add("")
+    add("| Category | Defined in | Tests |")
+    add("|---|---|---|")
+    by_category = defaultdict(list)
+    for definition, _cover, _observed, _missing in results:
+        by_category[definition.category].append(definition.number)
+    for category in sorted(by_category, key=lambda c: min(by_category[c])):
+        numbers = sorted(by_category[category])
+        source = competency.DEFINITION_FILES.get(category, "competency.py")
+        add("| {} | `{}` | {} |".format(category, source, _ct_range(numbers)))
     add("")
     for definition, cover, observed, missing in results:
         add("### CT-{} -- {}".format(definition.number, definition.issue))
@@ -416,8 +446,9 @@ def render_document(runs: List[Run], results) -> str:
         add("```")
         add("")
         if cover.fixtures:
-            add("**Seeded in:** " + ", ".join("`fixtures/model/{}`".format(f) if "/" in f and
-                not f.startswith(("completeness/", "outputs/", "vsix/")) else "`fixtures/{}`".format(f)
+            add("**Data used in test:** " + ", ".join("`fixtures/model/{}`".format(f)
+                if "/" in f and not f.startswith(("completeness/", "vsix/"))
+                else "`fixtures/{}`".format(f)
                 for f in cover.fixtures))
             add("")
         if cover.notes:
@@ -436,11 +467,15 @@ def render_document(runs: List[Run], results) -> str:
 
     add("## Runs")
     add("")
-    add("| Run | What it covers | Findings | Command |")
-    add("|---|---|---|---|")
+    add("A run is one pass over the fixtures. Its key is what the tables above and "
+        "`results/findings.csv` name it by.")
+    add("")
+    add("| Run | What it covers | Produced by | Findings | Command |")
+    add("|---|---|---|---|---|")
     for run in runs:
-        add("| `{}` | {} | {} | `{}` |".format(
-            run.key, run.title, len(run.rows), run.command.replace("\n", " ")))
+        add("| `{}` | {} | {} | {} | `{}` |".format(
+            run.key, run.title, runspecs.RUNS[run.key].runner or "--", len(run.rows),
+            run.command.replace("\n", " ")))
     add("")
     for run in runs:
         add("### Run `{}`".format(run.key))
@@ -577,6 +612,13 @@ def _observations(by_key: Dict[str, Run]) -> List[str]:
         "one of the two inputs describes the system being assessed.")
 
     return notes
+
+
+def _ct_range(numbers: List[int]) -> str:
+    """CT-1 to CT-7 for a contiguous block, CT-2, CT-9 otherwise."""
+    if len(numbers) > 2 and numbers == list(range(numbers[0], numbers[-1] + 1)):
+        return "CT-{} to CT-{}".format(numbers[0], numbers[-1])
+    return ", ".join("CT-{}".format(number) for number in numbers)
 
 
 def _shorten(message: str, limit: int = 150) -> str:

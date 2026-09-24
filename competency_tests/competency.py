@@ -5,16 +5,10 @@ stays owned by them rather than being copied here. ``COVERAGE`` adds, per
 test, how it is checked and what evidence proves it: the check ids that must
 appear, and which run they must appear in.
 
-Coverage kinds:
-
-    registry        a check shipped in the suite's own registry
-    project-check   a project-local SPARQL check in checks/sparql/competency/
-    suite-module    a suite module with no registry id (pattern-consistency,
-                    version-diff, rename detection)
-    harness         Python in this folder -- review_aids.py / mapping_integrity.py,
-                    for questions that span two graphs or two artefacts
-    extension-only  declared in registry.json, implemented only in the VS Code
-                    extension; the CLI cannot report it
+``KINDS`` below defines the coverage vocabulary -- what a ``Coverage.kind``
+such as ``harness`` or ``registry + suite-module`` means. Both generated
+documents render their legend from it, so the words are defined once and
+cannot drift from the rows that use them.
 """
 from __future__ import annotations
 
@@ -24,6 +18,35 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence
 
 HERE = Path(__file__).resolve().parent
+
+# Where the answer to a competency test comes from. A ``Coverage.kind`` is one
+# of these, or two joined with " + " when one test needs both -- CT-6 is
+# answered by a suite module and a registry check together.
+#
+# COMPETENCY_COVERAGE.md renders this as the legend for its "How it is checked"
+# column and COMPETENCY_CHECK_MATRIX.md for its "Source" column, which is why
+# the text below is written to read as a table cell and uses Markdown.
+KINDS: Dict[str, str] = {
+    "registry": "a check shipped in the suite's own registry, reported by a stock CLI run",
+    "project-check":
+        "a project-local `CMP-*` SPARQL check in `checks/sparql/`, loaded through the suite's "
+        "documented `--registry` + `--sparql` extension points rather than by forking it",
+    "suite-module":
+        "structured output of a suite module that carries no registry id -- `consistency` rename "
+        "detection, `pattern-consistency` taxonomy findings, the `version-diff` semver verdict",
+    "harness":
+        "Python in this folder -- `review_aids.py`, `mapping_integrity.py` -- for the questions "
+        "that compare two artefacts, which no check over a single graph can express",
+    "extension-only":
+        "declared in the registry but implemented only in the VS Code extension, so no CLI run "
+        "can report it -- `REA-005`, `REA-006`, `VOC-001`",
+}
+
+
+def kind_tokens(kind: str) -> List[str]:
+    """The individual kinds in a ``Coverage.kind`` -- ``registry + harness``
+    is two of them, and a legend should explain both."""
+    return [token.strip() for token in kind.split("+") if token.strip()]
 
 DEFINITION_FILES = {
     "cross-artifact consistency": "cross-artifact_consistency.csv",
@@ -50,7 +73,8 @@ class Coverage:
     how: str
     """(run key, check id) pairs that must be present for the test to pass."""
     evidence: Sequence[tuple] = field(default_factory=tuple)
-    """Fixture files the seeded defect lives in."""
+    """Fixture files the seeded defect lives in -- the data the test is asked
+    of, printed as "Data used in test" in COMPETENCY_COVERAGE.md."""
     fixtures: Sequence[str] = field(default_factory=tuple)
     notes: Optional[str] = None
 

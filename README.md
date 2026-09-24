@@ -263,7 +263,10 @@ they read and two comparable outputs. All 28 are evidenced. Two generated docume
 [COMPETENCY_COVERAGE.md](competency_tests/COMPETENCY_COVERAGE.md), how each test
 is checked and what the run found, and
 [COMPETENCY_CHECK_MATRIX.md](competency_tests/COMPETENCY_CHECK_MATRIX.md), every
-(test, check) pair joined to its registry entry with the command to run it.
+(test, check) pair joined to its registry entry with the command to run it. Both
+open with a legend for the words their tables use -- where an answer comes from
+(`registry`, `project-check`, `suite-module`, `harness`) and which run produced
+it -- rendered from `competency.py` and `runspecs.py` so it cannot drift.
 
 ```bash
 uv run python competency_tests/run_competency_checks.py
