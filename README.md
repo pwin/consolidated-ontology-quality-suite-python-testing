@@ -75,6 +75,17 @@ the seeded errors, not to background noise. It needed one edit to stay that way
 across the 0.6.0 → 0.14.2 upgrade: `skos:definition` on each term, for the
 `QUA-010` check added in between.
 
+Every fixture also pins what must **not** fire. Each carries a `forbidden`
+list of ids it could plausibly trip but shouldn't — `07-naming-style` forbids
+`STR-002`, which really did fire on its `skos:prefLabel` until 0.6.0, and
+`03b` forbids `REA-001` and `CNF-001`/`CNF-002`, which need an individual and
+a data graph that fixture does not have. Seven fixtures add a severity
+ceiling: `09-profile-violations` may report nothing above Info, because
+exceeding a profile is not an error, and `07-naming-style` nothing above
+Warning, which is precisely the defect pyshacl had before 0.6.0. Without
+these, a fixture asserted only that its seeded errors were found and nothing
+at all about six spurious Violations appearing beside them.
+
 ## Issues found
 
 Building these fixtures surfaced six defects in the suite, **all now fixed** —

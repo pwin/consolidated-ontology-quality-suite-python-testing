@@ -81,10 +81,10 @@ FIXTURES: List[Fixture] = [
         ontology="01-clean/ontology.ttl",
         data="01-clean/data.ttl",
         seeded_errors="none -- control fixture",
-        # Nothing is logically or structurally wrong, so no Violation may be
-        # reported. Warnings/Info (e.g. CNF-005 "class never populated") are
-        # legitimate advisory output and are allowed.
-        max_severity="Warning",
+        # Severity ceiling: tightened from Warning. The control's whole job is that a
+        # correct ontology produces nothing but Info, and a Warning ceiling let one through
+        # unnoticed.
+        max_severity="Info",
         forbidden=("STR-001", "STR-002", "STR-007", "LOG-001", "LOG-002",
                    "REA-001", "REA-002", "REA-003", "DAT-001",
                    "CNF-003", "CNF-004", "QUA-005"),
@@ -96,6 +96,9 @@ FIXTURES: List[Fixture] = [
         data="02-undeclared-terms/data.ttl",
         seeded_errors="misspelled class IRI (:Persson) and property IRI (:hasNmae) in the data",
         expected=("STR-001", "STR-002", "STR-007", "CNF-001", "CNF-002"),
+        # False-positive guard: its header is complete, its literals are well formed and it
+        # declares no disjointness -- only the two misspelled IRIs are wrong.
+        forbidden=("QUA-005", "DAT-001", "LOG-001"),
     ),
     Fixture(
         name="03-disjoint-classes",
@@ -105,6 +108,9 @@ FIXTURES: List[Fixture] = [
         seeded_errors="class disjoint with its own superclass; individual typed with two disjoint classes",
         expected=("LOG-001", "REA-001"),
         dl_only=("REA-020",),
+        # False-positive guard: the contradiction is logical; nothing here is misspelled,
+        # badly named or missing metadata.
+        forbidden=("DAT-001", "STY-001", "QUA-005"),
     ),
     Fixture(
         name="03b-unsatisfiable-class",
@@ -115,6 +121,10 @@ FIXTURES: List[Fixture] = [
         # No individual is asserted into the contradiction here, so only a
         # full DL reasoner can report the class-level unsatisfiability.
         dl_only=("REA-021",),
+        # False-positive guard: the same ontology with no data at all. REA-001 needs an
+        # individual and the CNF-* layer needs a data graph, so either firing would mean
+        # data came from somewhere.
+        forbidden=("REA-001", "CNF-001", "CNF-002"),
     ),
     Fixture(
         name="04-property-axioms",
@@ -123,6 +133,9 @@ FIXTURES: List[Fixture] = [
         data="04-property-axioms/data.ttl",
         seeded_errors="functional property with two values; two inverses; self-inverse; symmetric and transitive properties with domain != range",
         expected=("LOG-002", "LOG-004", "LOG-005", "LOG-006", "LOG-007"),
+        # False-positive guard: odd axioms, but consistent ones. An external reasoner
+        # calling this ontology inconsistent, or a class unsatisfiable, would be wrong.
+        forbidden=("REA-020", "REA-021", "DAT-001"),
     ),
     Fixture(
         name="05-reasoning-violations",
@@ -133,6 +146,9 @@ FIXTURES: List[Fixture] = [
         expected=("REA-002", "REA-003"),
         # Both violations also make the graph inconsistent in full OWL2 DL.
         dl_only=("REA-020",),
+        # False-positive guard: no functional property, nothing unsatisfiable and no
+        # ill-formed literal -- the seeded errors are asymmetry and irreflexivity.
+        forbidden=("LOG-002", "REA-004", "DAT-001"),
     ),
     Fixture(
         name="06-datatype-conformance",
@@ -141,6 +157,9 @@ FIXTURES: List[Fixture] = [
         data="06-datatype-conformance/data.ttl",
         seeded_errors="ill-formed xsd:date/integer/boolean literals; rdfs:domain and rdfs:range violations",
         expected=("DAT-001", "CNF-003", "CNF-004", "REA-022"),
+        # False-positive guard: every term it uses is declared; the defects are in the
+        # literals.
+        forbidden=("STR-001", "STR-002", "LOG-001"),
     ),
     Fixture(
         name="07-naming-style",
@@ -148,6 +167,16 @@ FIXTURES: List[Fixture] = [
         ontology="07-naming-style/ontology.ttl",
         seeded_errors="snake_case class, hyphenated class, Upper_Snake property, untagged label, prefLabel drifted from local name, deprecated term still used",
         expected=("STY-001", "STY-002", "STY-003", "STY-004", "STY-005", "QUA-001", "QUA-003"),
+        # False-positive guard: every term it uses, including skos:prefLabel, is declared
+        # locally. STR-002 is here by history: it fired on this fixture's prefLabel until
+        # 0.6.0 (README, 'Issues found' #2), which is what a guard is for.
+        forbidden=("STR-001", "STR-002", "CNF-001"),
+        # Severity ceiling: the sharpest one in the table, because this is the fixture the
+        # pre-0.6.0 severity defect actually fired on -- pyshacl reported STY-001 and
+        # STY-003 as Violations, so a class named person_record failed a CI gate as hard
+        # as a logical contradiction (README, 'Issues found' #1). Naming and documentation
+        # are advice.
+        max_severity="Warning",
     ),
     Fixture(
         name="08a-no-version-metadata",
@@ -155,7 +184,12 @@ FIXTURES: List[Fixture] = [
         ontology="08-metadata/no-version-metadata.ttl",
         seeded_errors="ontology header with no version/title metadata, no owl:versionIRI, http:// IRI",
         expected=("QUA-002", "QUA-007", "QUA-008"),
-        forbidden=("QUA-005",),
+        # False-positive guard: it has an ontology IRI and does not reuse it as the concept
+        # namespace. Missing metadata is advice, never a gate.
+        forbidden=("QUA-005", "QUA-006"),
+        # Severity ceiling: it has an ontology IRI and does not reuse it as the concept
+        # namespace. Missing metadata is advice, never a gate.
+        max_severity="Warning",
     ),
     Fixture(
         name="08b-no-ontology-header",
@@ -163,7 +197,14 @@ FIXTURES: List[Fixture] = [
         ontology="08-metadata/no-ontology-header.ttl",
         seeded_errors="no owl:Ontology declaration at all",
         expected=("QUA-005",),
-        forbidden=("QUA-002", "QUA-007"),
+        # False-positive guard: with no owl:Ontology node there is no version, versionIRI or
+        # IRI scheme to have an opinion about, so reporting one would mean the check had
+        # invented its subject.
+        forbidden=("QUA-002", "QUA-007", "QUA-008"),
+        # Severity ceiling: with no owl:Ontology node there is no version, versionIRI or IRI
+        # scheme to have an opinion about, so reporting one would mean the check had
+        # invented its subject.
+        max_severity="Warning",
     ),
     Fixture(
         name="08c-ontology-iri-reused",
@@ -171,6 +212,12 @@ FIXTURES: List[Fixture] = [
         ontology="08-metadata/ontology-iri-reused.ttl",
         seeded_errors="ontology IRI reused verbatim as the concept namespace IRI",
         expected=("QUA-006",),
+        # False-positive guard: its header is complete apart from the one defect, the reused
+        # namespace.
+        forbidden=("QUA-002", "QUA-005", "QUA-007"),
+        # Severity ceiling: its header is complete apart from the one defect, the reused
+        # namespace.
+        max_severity="Warning",
     ),
     Fixture(
         name="09-profile-violations",
@@ -179,6 +226,12 @@ FIXTURES: List[Fixture] = [
         seeded_errors="unionOf, complementOf, allValuesFrom, minCardinality 4, transitive and functional properties",
         expected=("REA-010", "REA-011", "REA-012"),
         profiles=("EL", "QL", "RL"),
+        # False-positive guard: exceeding a profile is not an inconsistency. If this ever
+        # fails a build, the suite has started treating OWL2 DL as an error.
+        forbidden=("REA-020", "REA-021", "LOG-001"),
+        # Severity ceiling: exceeding a profile is not an inconsistency. If this ever fails
+        # a build, the suite has started treating OWL2 DL as an error.
+        max_severity="Info",
     ),
     Fixture(
         name="11-schema-gaps",
@@ -190,6 +243,8 @@ FIXTURES: List[Fixture] = [
                       "untyped, never-declared object",
         expected=("LOG-003", "STR-003", "STR-005", "STR-006", "STR-008", "STR-009",
                   "DAT-002"),
+        # False-positive guard: gaps in the schema, not contradictions in it.
+        forbidden=("REA-004", "LOG-001", "DAT-001"),
     ),
     Fixture(
         # Back on the `data` stage since suite 0.14.3 fixed the crash this
@@ -203,6 +258,9 @@ FIXTURES: List[Fixture] = [
         seeded_errors="60 values on one subject-predicate pair; the same lexical form twice under "
                       "two language tags",
         expected=("EFF-003", "DAT-003", "CNF-004"),
+        # False-positive guard: its names follow the conventions; the defects are volume and
+        # duplication.
+        forbidden=("STY-001", "STY-002", "LOG-001"),
     ),
     Fixture(
         name="13-unsatisfiable-class",
@@ -212,6 +270,10 @@ FIXTURES: List[Fixture] = [
         seeded_errors="an individual typed with a class declared rdfs:subClassOf owl:Nothing",
         expected=("REA-004",),
         dl_only=("REA-020",),
+        # False-positive guard: the class is subClassOf owl:Nothing, not disjoint with an
+        # ancestor, and no individual is in two disjoint classes. Telling those three apart
+        # is what the fixture is for.
+        forbidden=("LOG-001", "REA-001"),
     ),
     Fixture(
         name="10-efficiency",
@@ -219,6 +281,12 @@ FIXTURES: List[Fixture] = [
         ontology="10-efficiency/ontology.ttl",
         seeded_errors="6-hop subClassOf chain; blank nodes over 20% of all graph nodes",
         expected=("EFF-001", "EFF-002"),
+        # False-positive guard: shape advice about an ontology with no data attached.
+        # Efficiency findings must not gate a build, which is what the ceiling pins.
+        forbidden=("LOG-001", "DAT-001", "CNF-001"),
+        # Severity ceiling: shape advice about an ontology with no data attached. Efficiency
+        # findings must not gate a build, which is what the ceiling pins.
+        max_severity="Warning",
     ),
 ]
 
