@@ -13,7 +13,12 @@ dependencies = [
     # parity test in tests/test_detection.py has something to compare
     # against; suite 0.14.4 pinned it to <0.4 after 0.3.0 changed what
     # sh:conforms means.
-    "ontology-quality-suite[native-shacl]",
+    # >=0.18.0 for the repeatable --sparql that ontology-suite.yml's `@builtin`
+    # entry depends on. Against 0.17.0 the gate resolves it as a directory
+    # name, finds nothing there, and runs this project's eight checks alone.
+    # The uv source below makes this a local editable install, so the bound
+    # documents the requirement rather than enforcing it here.
+    "ontology-quality-suite[native-shacl]>=0.18.0",
     "pyyaml>=6.0.3",
 ]
 
