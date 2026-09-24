@@ -1,0 +1,51 @@
+@prefix core:    <https://example.org/core/model#> .
+@prefix water:   <https://example.org/water/model#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# Acme shared core model, version 1.0.0 -- the model change behind CT-29.
+#
+# :Site is used by more than one domain, so it was moved out of the water
+# model and into this shared namespace, and the agreed IRI pattern for its
+# instances moved with it. Nothing about that move is visible in the water
+# model's own files, which is the point: the mappings still mint the old
+# pattern and still pass every check that looks at one artefact at a time.
+#
+# Kept as its own file rather than as a water-v3.ttl, because that is what
+# actually happens when a concept becomes shared: a second ontology appears
+# and the domain model defers to it.
+
+<https://example.org/core/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/core/model/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Acme shared core model"@en ;
+    dcterms:title   "Acme shared core model" .
+
+# The agreed pattern has to be written down somewhere a check can read it.
+# An annotation on the class is the least ceremonious place: it travels with
+# the term, and a mapping author reading the class sees the rule.
+core:iriPattern
+    a               owl:AnnotationProperty ;
+    rdfs:label      "IRI pattern"@en ;
+    skos:prefLabel  "iriPattern"@en ;
+    skos:definition "The base IRI that instances of this class must be minted under. A mapping that builds an instance IRI outside it has drifted from the agreed pattern."@en .
+
+core:Site
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Site"@en ;
+    skos:prefLabel  "Site"@en ;
+    skos:definition "A place at which the operator owns or monitors assets."@en ;
+    core:iriPattern "https://example.org/core/data/site-" .
+
+# SEEDS CT-29: water:Site is superseded by core:Site, and with it the agreed
+# instance pattern -- https://example.org/water/data/site- became
+# https://example.org/core/data/site-. queries/assets/sites.rq was never
+# updated and still CONCATs the old base, so every site IRI the mappings
+# build now names something the shared model does not recognise.
+water:Site
+    owl:deprecated       true ;
+    dcterms:isReplacedBy core:Site .

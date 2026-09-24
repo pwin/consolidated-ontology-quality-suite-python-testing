@@ -759,6 +759,39 @@
       "remediation": "Correct the unit in the mapping. If the unit is right and the quantity kind is wrong, the magnitude's class is what needs changing.",
       "cucumber_feature": "Magnitudes, Values and Units",
       "cucumber_scenario": "Every magnitude's unit can express its quantity"
+    },
+    {
+      "id": "CMP-029",
+      "category": "competency",
+      "metric": "IRI construction pattern currency",
+      "default_severity": "Violation",
+      "title": "Instance IRI built under a superseded base",
+      "description": "A BIND still CONCATs instance IRIs under the base agreed for a class that has since been replaced -- typically because the concept moved into a shared or core namespace and took its agreed IRI pattern with it. Distinct from CNF-001/CNF-002, which ask whether the class and property IRIs a mapping names are declared: those terms can all be correct while every instance the mapping mints still lands under the old base.",
+      "remediation": "Update the mapping's BIND to the pattern the superseding class declares, and decide what happens to the identifiers already issued -- re-minting them changes the identity of every entity downstream, so a migration usually needs owl:sameAs or a rewrite of the existing graph.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Instance IRIs follow the pattern the current model agrees on"
+    },
+    {
+      "id": "CMP-030",
+      "category": "competency",
+      "metric": "business key uniqueness within an output",
+      "default_severity": "Warning",
+      "title": "Two entities share a business key",
+      "description": "Two instances of one class carry the same value for the property the project treats as that class's business key, so one real-world thing has been created twice under two identifiers. The mirror of CMP-002 (one IRI for two things) and not DAT-003, which is one subject repeating a value rather than two subjects sharing one.",
+      "remediation": "Decide which identifier survives, merge the two entities, and give the source a uniqueness constraint on that key -- or, if the key is legitimately non-unique, stop treating it as an identifier.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "A business key identifies at most one entity"
+    },
+    {
+      "id": "CMP-031",
+      "category": "competency",
+      "metric": "single-valued relationship cardinality",
+      "default_severity": "Violation",
+      "title": "Single-valued relationship carries two values",
+      "description": "An entity carries two values for a relationship the agreed graph pattern allows one of, typically because two mappings each contribute a link and disagree. Reported by a project check rather than by LOG-002 because the ontology does not declare the property owl:FunctionalProperty -- the cardinality is agreed in the mapping specification and never written into the TBox.",
+      "remediation": "Establish which source is authoritative for the link and drop the other mapping's triple; if both are legitimate, the property is not single-valued and the agreed pattern needs changing. Declaring it owl:FunctionalProperty afterwards moves the check to LOG-002.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "A single-valued relationship has one value"
     }
   ]
 }

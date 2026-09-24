@@ -33,10 +33,17 @@ def test_competency_test_is_evidenced(evaluated, number):
 
 
 def test_every_definition_has_coverage():
-    """No competency test is silently left out of the coverage table."""
+    """No competency test is silently left out of the coverage table.
+
+    The 28 supplied definitions must all be there, and the numbering must stay
+    gapless once the locally authored ones (29 and up, LOCAL_DEFINITIONS) are
+    added -- a gap means a test was removed rather than renumbered.
+    """
     definitions = competency.load_definitions()
     assert set(definitions) == set(competency.COVERAGE_BY_NUMBER)
-    assert sorted(definitions) == list(range(1, 29))
+    assert set(range(1, 29)) <= set(definitions), "a supplied definition went missing"
+    assert sorted(definitions) == list(range(1, len(definitions) + 1))
+    assert set(competency.LOCAL_DEFINITIONS) == set(definitions) - set(range(1, 29))
 
 
 def test_project_checks_all_execute(evaluated):

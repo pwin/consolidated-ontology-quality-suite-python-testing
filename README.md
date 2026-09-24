@@ -269,7 +269,11 @@ holds whichever binding won.
 [competency_tests/](competency_tests/) is a second, larger exercise over the
 same suite: 28 numbered competency tests supplied as CSVs, each one seeded into
 a worked example spanning an ontology, a taxonomy, four TARQL mappings, the CSVs
-they read and two comparable outputs. All 28 are evidenced. Two generated documents record it:
+they read and two comparable outputs — plus three more written here where the
+supplied set left a gap (CT-29 to CT-31: an instance IRI pattern left behind by
+a concept moving into a shared namespace, one entity generated twice under two
+identifiers, and a single-valued link carrying two values). All 31 are
+evidenced. Two generated documents record it:
 [COMPETENCY_COVERAGE.md](competency_tests/COMPETENCY_COVERAGE.md), how each test
 is checked and what the run found, and
 [COMPETENCY_CHECK_MATRIX.md](competency_tests/COMPETENCY_CHECK_MATRIX.md), every

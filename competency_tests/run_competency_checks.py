@@ -34,7 +34,7 @@ from ontology_suite import config, consistency as consistency_api, pattern_consi
 from ontology_suite.checks.merge import ResultRow, build_unified_results
 from ontology_suite.checks.registry import Registry
 from ontology_suite.checks.sparql_runner import run_sparql_checks
-from ontology_suite.sketch import prefix_alignment as pa
+from ontology_suite.sketch import bind_analysis, prefix_alignment as pa
 from ontology_suite.versioning import diff as version_diff
 
 HERE = Path(__file__).resolve().parent
@@ -45,6 +45,7 @@ WORK = HERE.parent / "out" / "competency"
 
 ONTOLOGY_V1 = MODEL / "ontology" / "water-v1.ttl"
 ONTOLOGY_V2 = MODEL / "ontology" / "water-v2.ttl"
+ONTOLOGY_CORE = MODEL / "ontology" / "core-v1.ttl"
 TAXONOMY = MODEL / "ontology" / "asset-types.ttl"
 UNITS = MODEL / "ontology" / "units.ttl"
 QUERIES = MODEL / "queries"
@@ -158,6 +159,25 @@ def sketch_with_declarations() -> Graph:
     return graph
 
 
+def query_source_with_agreed_patterns() -> Graph:
+    """The BIND facts, the CONSTRUCT-template sketch, and the shared core
+    ontology, in one graph.
+
+    CMP-029 asks whether a mapping still mints instance IRIs under a base the
+    model has moved away from, and no single artefact holds that: the base
+    lives in the query text (published as tq:Bind facts by the suite's
+    bind_analysis), the class each built variable carries lives in the
+    template sketch, and the replacement and its agreed pattern live in the
+    core ontology. The water model is deliberately left out -- it still
+    declares :Site as its own, which is exactly the state CT-29 is about.
+    """
+    report = bind_analysis.analyse(sorted(str(q) for q in QUERIES.rglob("*.rq")))
+    graph = bind_analysis.bind_report_to_graph(report)
+    graph += pa.build_sketch_graph([QUERIES], RECURSIVE_QUERIES)
+    graph += load_graph(ONTOLOGY_CORE)
+    return graph
+
+
 def project_checks(graph: Graph, registry: Registry, subdir: str = "competency") -> List[ResultRow]:
     """Run the project-local .rq checks over one graph, through the suite's
     own runner and result merge -- the documented extension mechanism, with
@@ -219,6 +239,9 @@ def run_everything() -> List[Run]:
     # ---- project-local checks over the CONSTRUCT-template sketch --------
     sketch_graph = sketch_with_declarations()
     runs.append(_run("project-sketch", project_checks(sketch_graph, registry, "sketch")))
+
+    runs.append(_run("iri-pattern",
+                     project_checks(query_source_with_agreed_patterns(), registry, "tarql")))
 
     # ---- pattern-consistency: the taxonomy boundaries -------------------
     four_layer = pattern_consistency.check_four_layer_consistency(
@@ -515,7 +538,7 @@ def render_document(runs: List[Run], results) -> str:
             check_id, title,
             "reasoningRunner.ts" if check_id.startswith("REA") else "vocabularyChecks.ts"))
     add("")
-    add("None of the 28 competency tests *depends* on these three: every one is evidenced by a "
+    add("No competency test *depends* on these three: every one is evidenced by a "
         "check the CLI runs, as the table above records. They matter as a limit on what a clean "
         "CLI result means -- `VOC-001` in particular is the one referential-integrity question "
         "SHACL's open-world semantics cannot ask, so an axiom pointing at a misspelled class is "
@@ -675,7 +698,8 @@ def main() -> int:
     print("Wrote {}".format(document))
     print("Wrote {} ({} findings)".format(findings_path, sum(len(r.rows) for r in runs)))
     print("RESULT: {}".format(
-        "all 28 competency tests evidenced" if not failures else "{} test(s) without evidence".format(failures)))
+        "all {} competency tests evidenced".format(len(results)) if not failures
+        else "{} test(s) without evidence".format(failures)))
     return 1 if failures else 0
 
 

@@ -90,12 +90,12 @@ Which subcommand does what here:
 
 ## 4. Competency tests
 
-The 28 numbered competency tests in [competency_tests/](competency_tests/) are a
+The 31 numbered competency tests in [competency_tests/](competency_tests/) are a
 separate exercise with their own fixtures, project-local checks and generated
 report.
 
 ```powershell
-uv run python competency_tests/run_competency_checks.py   # runs all 28, regenerates both documents
+uv run python competency_tests/run_competency_checks.py   # runs all 31, regenerates both documents
 uv run python competency_tests/build_check_matrix.py      # regenerates the check matrix alone (runs nothing)
 uv run pytest competency_tests -q                          # the same expectations as pass/fail tests
 uv run pytest "competency_tests/test_competency.py::test_competency_test_is_evidenced[16]" -q   # one competency test

@@ -1,6 +1,7 @@
 """How each competency-test run is reproduced from a shell.
 
-``competency.py`` says *what* the 28 tests are and which check answers each.
+``competency.py`` says *what* the competency tests are and which check answers
+each.
 This says *how to run* the pass that produces it: one entry per run key, with
 a command that works as-is from the repo root.
 
@@ -148,6 +149,16 @@ RUNS: Dict[str, RunSpec] = {
   --population {MODEL}/csv/readings.csv \\
                {OUTPUT}/readings.ttl \\
                https://example.org/water/model#Reading''',
+    ),
+    "iri-pattern": RunSpec(
+        key="iri-pattern",
+        title="Instance IRI patterns in the mappings vs the shared core model",
+        runner="`run_competency_checks.py` (no single-command form -- see the note)",
+        note="No single-command form. CMP-029 is asked of three artefacts at once -- the BIND "
+             "facts the sketch stage publishes, the CONSTRUCT-template sketch, and core-v1.ttl -- "
+             "and no CLI stage merges that particular trio: --ontology would merge the core model "
+             "into the conformance layer instead, which answers a different question. Run the "
+             "harness.",
     ),
     "review-aids": RunSpec(
         key="review-aids",

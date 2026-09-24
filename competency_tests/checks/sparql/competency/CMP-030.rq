@@ -1,0 +1,42 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+
+# CMP-030 (CT-30): two entities of one class carrying the same business key,
+# so one real-world thing has been created twice under two identifiers.
+#
+# The VALUES table is the project rule: a row per (class, business key) pair
+# whose value a person would use to recognise the thing. Distinct from
+# CMP-002, which is the opposite failure -- one IRI standing for two things,
+# rather than two IRIs standing for one -- and from DAT-003, which is one
+# subject repeating a value rather than two subjects sharing one.
+#
+# Emitted once per unordered pair: the STR comparison keeps (A,B) and drops
+# (B,A), so a duplicate reads as one finding rather than two mirrored ones.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Warning ;
+    sh:focusNode ?entity ;
+    sh:resultPath ?key ;
+    sh:value ?value ;
+    sh:sourceConstraintComponent oq:CMP-030 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  VALUES (?class ?key) {
+    (water:Site water:siteName)
+  }
+  ?entity a ?class ; ?key ?value .
+  ?other  a ?class ; ?key ?value .
+  FILTER(STR(?entity) < STR(?other))
+  BIND(CONCAT("The business key ", STR(?key), " value '", STR(?value), "' identifies both ",
+              STR(?entity), " and ", STR(?other),
+              ". Either the source holds the same ", STR(?class),
+              " twice under two ids, or the key is not the identifier it is being used as.") AS ?msg)
+}

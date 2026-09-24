@@ -1,0 +1,41 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+
+# CMP-031 (CT-31): a relationship the agreed pattern treats as single-valued
+# carrying two values for one entity.
+#
+# The mirror of CMP-017, and the same VALUES table of project rules: CMP-017
+# asks whether the link is there at all, this asks whether there is exactly
+# one of it. Both exist because the ontology declares neither -- were
+# water:atSite an owl:FunctionalProperty, LOG-002 would report this and no
+# project check would be needed. That is the usual state of a working model:
+# the cardinality is agreed in the mapping specification long before anyone
+# writes it into the TBox, and until they do, two sources contributing one
+# link each produce a silently two-sited asset.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?entity ;
+    sh:resultPath ?single ;
+    sh:value ?first ;
+    sh:sourceConstraintComponent oq:CMP-031 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  VALUES (?class ?single) {
+    (water:PumpStation water:atSite)
+  }
+  ?entity a ?class ;
+    ?single ?first , ?second .
+  FILTER(STR(?first) < STR(?second))
+  BIND(CONCAT(STR(?entity), " has more than one ", STR(?single), " -- ", STR(?first), " and ",
+              STR(?second), ". The agreed pattern allows one per ", STR(?class),
+              ", so two sources are contributing a link and disagreeing about it.") AS ?msg)
+}

@@ -1,0 +1,61 @@
+PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:     <http://www.w3.org/2002/07/owl#>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX sh:      <http://www.w3.org/ns/shacl#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX oq:      <https://semantechs.co.uk/ontology-quality/>
+PREFIX tq:      <https://semantechs.co.uk/ontology-quality/tarql/>
+PREFIX core:    <https://example.org/core/model#>
+
+# CMP-029 (CT-29): a BIND still minting instance IRIs under a base the model
+# no longer agrees on, after the concept moved into the shared core namespace.
+#
+# Run against the query-source graph (tq:Bind facts -- see the suite's
+# sketch/bind_analysis.py) merged with the CONSTRUCT-template sketch and the
+# shared core ontology. Each of the three supplies one link of the join and
+# none of them can answer it alone:
+#
+#   tq:Bind          the base IRI the mapping actually CONCATs, per variable
+#   sketch template  which class that variable's entity is typed with
+#   core-v1.ttl      which class supersedes it, and the base agreed for it
+#
+# This is why the question needs a check rather than a reading of the query:
+# the query text is unchanged and correct against the model it was written
+# for. Only the pairing of "what this variable is" with "where its concept
+# moved to" makes the old base wrong, and that pairing spans three artefacts.
+#
+# The base is the expression's first string literal, which is what a
+# CONCAT-built IRI starts with. A BIND whose expression opens with something
+# else yields no http-prefixed base and is skipped rather than guessed at.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?bind ;
+    sh:resultPath tq:expression ;
+    sh:value ?base ;
+    sh:sourceConstraintComponent oq:CMP-029 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?bind a tq:Bind ;
+    tq:target ?var ;
+    tq:expression ?expr ;
+    tq:source ?file .
+  BIND(REPLACE(?expr, '^[^"]*"([^"]*)".*$', "$1") AS ?base)
+  FILTER(STRSTARTS(?base, "http"))
+
+  ?entity a ?superseded .
+  FILTER(isIRI(?entity))
+  FILTER(STRAFTER(STR(?entity), "#") = ?var)
+
+  ?superseded dcterms:isReplacedBy ?agreed .
+  ?agreed core:iriPattern ?pattern .
+  FILTER(!STRSTARTS(?base, ?pattern))
+
+  BIND(CONCAT("The BIND for ?", ?var, " in ", ?file, " mints IRIs under <", ?base,
+              ">, but ", STR(?superseded), " has been replaced by ", STR(?agreed),
+              ", whose agreed instance pattern is <", ?pattern,
+              ">. The mapping was not updated when the concept moved into the ",
+              "shared namespace, so every entity it builds is outside it.") AS ?msg)
+}

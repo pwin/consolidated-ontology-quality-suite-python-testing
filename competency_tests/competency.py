@@ -93,8 +93,42 @@ def _clean(text: str) -> str:
     return text.replace(chr(0xA0), " ").strip()
 
 
+# Tests 29 and up are authored in this repo rather than supplied in the CSVs,
+# which stop at 28. They are kept here, not appended to a CSV, so the supplied
+# files stay exactly as they arrived and "which of these did we write?" has an
+# answer -- the category says so, and the generated documents print it.
+LOCAL_CATEGORY = "cross-artefact consistency (added here)"
+
+LOCAL_DEFINITIONS: Dict[int, Definition] = {
+    29: Definition(
+        29, LOCAL_CATEGORY,
+        "IRI construction pattern not updated after a concept moved namespace",
+        "Detect where an agreed IRI pattern has changed but TARQL BIND expressions still build "
+        "the old one, particularly when a concept moves into a shared or core namespace. CT-3 "
+        "covers the class and property IRIs a mapping names; this covers the instance IRIs it "
+        "mints, which stay syntactically valid and referentially intact while quietly denoting "
+        "entities the shared model does not recognise."),
+    30: Definition(
+        30, LOCAL_CATEGORY,
+        "The same entity generated twice under two identifiers",
+        "Detect where two instances of one class carry the same business key, so a reviewer "
+        "reading the output sees one thing twice. CT-28 asks this of two comparable outputs; "
+        "nothing asked it of a single one, where the duplicate is just as invisible -- both IRIs "
+        "are well formed, both entities are complete, and only the key they share gives it away."),
+    31: Definition(
+        31, LOCAL_CATEGORY,
+        "A single-valued relationship carrying more than one value",
+        "Detect where an entity ends up with two values for a link the agreed pattern allows one "
+        "of, because two mappings each contribute one. CT-17 asks whether a required link is "
+        "present; this asks whether there is exactly one. The registry's LOG-002 answers it only "
+        "for a property the ontology declares owl:FunctionalProperty, which the cardinalities "
+        "agreed in a mapping specification usually are not."),
+}
+
+
 def load_definitions() -> Dict[int, Definition]:
-    """Read the issue/summary text from the five source CSVs."""
+    """Read the issue/summary text from the five source CSVs, then add the
+    locally authored tests in ``LOCAL_DEFINITIONS``."""
     out: Dict[int, Definition] = {}
     for category, filename in DEFINITION_FILES.items():
         with (HERE / filename).open(encoding="utf-8-sig", newline="") as handle:
@@ -105,6 +139,7 @@ def load_definitions() -> Dict[int, Definition]:
                 issue = _clean(record[1]) if len(record) > 1 else ""
                 summary = _clean(record[2]) if len(record) > 2 else ""
                 out[number] = Definition(number, category, issue, summary)
+    out.update(LOCAL_DEFINITIONS)
     return out
 
 
@@ -336,6 +371,38 @@ COVERAGE: List[Coverage] = [
         fixtures=("outputs/baseline.ttl", "outputs/candidate.ttl"),
         notes="Needs a business key to align on. Without one, a renamed subject is indistinguishable "
               "from a deletion plus an insertion.",
+    ),
+    Coverage(
+        number=29, kind="project-check",
+        how="run_competency_checks.py -- CMP-029 over the BIND facts, the template sketch and "
+            "core-v1.ttl merged (query_source_with_agreed_patterns)",
+        evidence=(("iri-pattern", "CMP-029"),),
+        fixtures=("ontology/core-v1.ttl", "queries/assets/sites.rq"),
+        notes="Nothing that reads one artefact can see this. sites.rq is valid SPARQL, builds a "
+              "well-formed IRI, and is correct against the water model, which still declares "
+              ":Site. Only core-v1.ttl knows the concept moved and took its agreed base with it, "
+              "and only the BIND facts know what the mapping actually CONCATs -- so the check is "
+              "the join of the two, which is why it is a check rather than a review note.",
+    ),
+    Coverage(
+        number=30, kind="project-check",
+        how="ontology-quality-suite data <output> --registry results/merged-registry.json "
+            "--sparql checks/sparql/competency (CMP-030)",
+        evidence=(("project-output", "CMP-030"),),
+        fixtures=("csv/sites.csv", "queries/assets/sites.rq"),
+        notes="sites.csv holds Northgate twice, as S1 and S4. The mapping is correct and the "
+              "output is well formed; the duplicate exists in the source and survives every check "
+              "that reads identifiers rather than the values people recognise things by.",
+    ),
+    Coverage(
+        number=31, kind="project-check",
+        how="ontology-quality-suite data <output> --registry results/merged-registry.json "
+            "--sparql checks/sparql/competency (CMP-031)",
+        evidence=(("project-output", "CMP-031"),),
+        fixtures=("csv/legacy_assets.csv", "queries/assets/legacy_assets.rq"),
+        notes="Two mappings contribute :atSite for asset-A1 and disagree -- the asset register "
+              "says S1, the legacy register says S2. Neither mapping is wrong on its own, which "
+              "is what makes this a question about the merged output rather than about a query.",
     ),
 ]
 

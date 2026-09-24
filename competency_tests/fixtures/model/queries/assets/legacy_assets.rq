@@ -8,6 +8,12 @@ CONSTRUCT {
   # SEEDS CT-2: this is the IRI template assets.rq uses for :PumpStation.
   # The same IRI therefore denotes both an asset and a reading.
   ?legacy_IRI a :Reading ;
+    # SEEDS CT-31: the legacy register states its own :atSite. assets.rq
+    # already states one for this IRI from a different source, and for A1 the
+    # two disagree -- so the asset ends up at two sites, which the agreed
+    # pattern treats as single-valued but the ontology never declares
+    # functional. No registry check fires: LOG-002 needs the declaration.
+    :atSite ?legacy_site_IRI ;
     # SEEDS CT-18: the agreed pattern puts the number on a :FlowRate
     # magnitude node reached by :hasFlowRate. This flattens it onto the
     # reading, so the value has no unit and no quantity kind.
@@ -18,4 +24,5 @@ CONSTRUCT {
 }
 WHERE {
   BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?legacy_IRI)
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", ?siteid)) AS ?legacy_site_IRI)
 }
