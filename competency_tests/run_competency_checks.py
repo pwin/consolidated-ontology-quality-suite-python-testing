@@ -9,6 +9,7 @@ then writes:
     COMPETENCY_COVERAGE.md   the coverage document -- generated, so it can
                              never drift from what the run actually found
     results/findings.csv     every finding, one row each
+    results/themes.json      check ids per competency issue, for --themes
     results/*.txt            each suite stage's own report, verbatim
 
 Exits 1 if any competency test's expected evidence is missing.
@@ -368,16 +369,62 @@ def evaluate(runs: List[Run]):
     return results
 
 
+def write_themes_json() -> Path:
+    """`results/themes.json` -- the check ids behind each competency issue, in
+    the form `ontology-quality-suite --themes` reads.
+
+    The suite groups findings by place and by check. Neither says what a
+    finding *means for this project*, which is what these 38 issues are: a
+    reader who sees "CNF-002 x9" learns less than one who sees them under
+    "IRI construction pattern not updated following a model change". Handing
+    the suite this file adds that grouping as a "by question" index at the top
+    of `findings.txt`.
+
+    It is generated here rather than kept in the suite for the same reason the
+    `CMP-*` checks are: the mapping is this project's, not the tool's. It is
+    many-to-many -- one check is evidence for several issues and one issue
+    takes several checks -- and several issues are answered by things carrying
+    no registry id at all (`rename-detected`, `taxonomy-membership`) or by the
+    harness comparing two artefacts. Those ids are written out too: they match
+    no finding today, and they will group correctly on the day one carries
+    them.
+    """
+    definitions = competency.load_definitions()
+    themes: Dict[str, set] = defaultdict(set)
+    for cover in competency.COVERAGE:
+        issue = definitions[cover.number].issue
+        for evidence in cover.evidence:
+            themes[issue].add(evidence[1])
+
+    path = RESULTS / "themes.json"
+    path.write_text(
+        json.dumps({issue: sorted(ids) for issue, ids in sorted(themes.items())},
+                   indent=2, ensure_ascii=False) + chr(10),
+        encoding="utf-8",
+    )
+    return path
+
+
 def write_findings_csv(runs: List[Run]) -> Path:
     import csv as csv_module
     path = RESULTS / "findings.csv"
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv_module.writer(handle)
-        writer.writerow(["run", "check_id", "severity", "category", "focus_node", "path", "value", "message"])
+        # source_file/line carry the position of the finding in a file, for the
+        # checks that know one. The TARQL checks used to CONCAT it into the
+        # message -- "...never converted to an IRI (draft_alarms.rq:20)" --
+        # which this file then captured by accident. Suite 0.17.0 moved it into
+        # fields, so without these two columns the position would be recorded
+        # nowhere. They are empty for every check that cannot know a position,
+        # which is most of them: a finding about a graph has no line.
+        writer.writerow(["run", "check_id", "severity", "category", "focus_node", "path", "value",
+                         "source_file", "line", "message"])
         for run in runs:
             for row in run.rows:
                 writer.writerow([run.key, row.check_id, row.severity, row.category or "",
-                                 row.focus_node, row.path or "", row.value or "", row.message])
+                                 row.focus_node, row.path or "", row.value or "",
+                                 getattr(row, "source_file", None) or "",
+                                 getattr(row, "line", None) or "", row.message])
     return path
 
 
@@ -439,6 +486,8 @@ def render_document(runs: List[Run], results) -> str:
     add("| [COMPETENCY_CHECK_MATRIX.md](COMPETENCY_CHECK_MATRIX.md) | the companion table -- every "
         "(test, check) pair joined to its registry entry, with the command as a footnote |")
     add("| `results/` | this run's findings and each stage's verbatim report |")
+    add("| `results/themes.json` | the check ids behind each issue above, for the suite's "
+        "`--themes` flag |")
     add("")
     add("Every seeded defect is marked in its fixture with an `# ERROR:` or `# SEEDS CT-n` comment "
         "naming the test it is there for.")
@@ -707,6 +756,7 @@ def main() -> int:
     results = evaluate(runs)
 
     write_stage_reports(runs)
+    themes_path = write_themes_json()
     findings_path = write_findings_csv(runs)
     document = HERE / "COMPETENCY_COVERAGE.md"
     document.write_text(render_document(runs, results), encoding="utf-8")

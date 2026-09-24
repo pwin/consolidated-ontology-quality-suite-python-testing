@@ -119,3 +119,49 @@ def test_every_fixture_file_exists():
         assert fx.ontology_path.is_file(), f"{fx.name}: missing {fx.ontology_path}"
         if fx.data:
             assert fx.data_path.is_file(), f"{fx.name}: missing {fx.data_path}"
+
+
+@pytest.mark.parametrize("reasoner", ["auto", "owlrl-only"])
+def test_datatype_errors_are_found_whatever_the_reasoner(reasoner):
+    """06's seeded errors are ill-formed literals and domain/range violations.
+    Not one of them needs a DL reasoner, so the same ids must be reported with
+    or without one.
+
+    This replaces an expectation of `REA-022` on that fixture. REA-022 means
+    "external DL reasoner unavailable", so expecting it asserted something
+    about the machine rather than about the ontology: it passed here only
+    because this checkout has no working HermiT, failed under the fast path
+    documented in COMMANDS.md, and would fail for anyone who installed Java.
+    """
+    rows = detect.run_fixture("06-datatype-conformance", engine="both", reasoner=reasoner)
+    missing = {"DAT-001", "CNF-003", "CNF-004"} - ids_of(rows)
+    assert not missing, f"reasoner={reasoner}: suite did not report {sorted(missing)}"
+
+
+def test_ill_formed_literals_defeat_the_external_reasoner():
+    """06's seeded literals stop the DL reasoner before HermiT is reached.
+
+    `int("twelve")` raises inside owlready2's RDF/XML parser, so the suite
+    reports REA-022 ("external DL reasoner could not be run") with the parse
+    error in its message. Reproducible on any machine with a working reasoner
+    -- fixture 13 gets REA-020 out of the same installation -- and it is why
+    REA-022 is not one of 06's `expected` ids: it is what the defect *does* to
+    the toolchain, not the suite detecting the defect.
+
+    Pinned because it is the kind of interaction that otherwise gets
+    rediscovered as a mystery: a check reporting its own unavailability looks
+    like a broken environment until you notice which fixture provokes it.
+    """
+    if detect.REASONER in ("owlrl-only", "none"):
+        pytest.skip("the external reasoner is not attempted, so it cannot report on itself")
+
+    rows = detect.run_fixture("06-datatype-conformance", engine="both", reasoner="auto")
+    unavailable = [r for r in rows if r.check_id == "REA-022"]
+    assert unavailable, "expected REA-022 -- the ill-formed literals should stop owlready2"
+    assert "could not be run" in unavailable[0].message
+
+    # The same installation reasons successfully over a fixture whose literals
+    # are well formed, which is what makes this the fixture's fault rather than
+    # the machine's.
+    healthy = detect.ids_of(detect.run_fixture("13-unsatisfiable-class", engine="both", reasoner="auto"))
+    assert "REA-020" in healthy, "the reasoner must work elsewhere for this test to mean anything"

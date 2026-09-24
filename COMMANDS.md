@@ -195,3 +195,38 @@ Clean regenerated output:
 ```powershell
 Remove-Item -Recurse -Force out
 ```
+
+## 6. Grouping a suite run by competency issue
+
+`run_competency_checks.py` writes `competency_tests/results/themes.json`: the
+check ids behind each of the 38 competency issues, in the form the suite's
+`--themes` flag reads. Passing it to any report-writing subcommand adds a **by
+question** index to the top of that run's `findings.txt`, grouping the checks
+that fired under the issue they are evidence for rather than under their ids.
+
+```powershell
+uv run ontology-quality-suite sketch `
+  --queries competency_tests/fixtures/model/queries --file-pattern "**/*.rq" `
+  --ontology competency_tests/fixtures/model/ontology/water-v2.ttl `
+  --themes competency_tests/results/themes.json `
+  --out-dir out/themed/sketch-v2
+```
+
+```
+-- by question -------------------------------------------------------------
+
+  Construct variable used but never defined  (7)
+      TQL-002 x2, TQL-003 x4, TQL-004 x1
+
+  Ontology changes not propagated to TARQL mappings  (3)
+      CNF-001 x1, CNF-002 x2
+
+  not mapped to a question  (5)
+      CNF-003
+```
+
+The map is regenerated with the rest of the results, so it cannot drift from
+`competency.py`'s `COVERAGE` table. Check ids that no finding carries -- the
+`suite-module` and `harness` evidence such as `rename-detected` or `RVW-024`,
+which have no registry id -- are written out anyway: they match nothing today
+and will group correctly on the day one of them does.

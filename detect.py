@@ -156,7 +156,22 @@ FIXTURES: List[Fixture] = [
         ontology="06-datatype-conformance/ontology.ttl",
         data="06-datatype-conformance/data.ttl",
         seeded_errors="ill-formed xsd:date/integer/boolean literals; rdfs:domain and rdfs:range violations",
-        expected=("DAT-001", "CNF-003", "CNF-004", "REA-022"),
+        # REA-022 is deliberately not here, and the reason is worth keeping.
+        # It does fire on this fixture, reproducibly and on any machine: the
+        # seeded ill-formed literals defeat owlready2's RDF/XML parser --
+        # int("twelve") -- before HermiT is ever reached, so the suite reports
+        # "external DL reasoner could not be run". That is a *consequence* of
+        # the seeded defect, not a detection of it, and `expected` means "these
+        # must trigger". Listing it there also broke the fast path documented in
+        # COMMANDS.md: under OWL2_TEST_REASONER=owlrl-only the reasoner is never
+        # attempted, so REA-022 cannot appear and the fixture failed.
+        #
+        # It cannot move to `dl_only` either, since `dl_reasoner_ran()` is
+        # defined as REA-022 being absent, so the assertion would skip itself.
+        # Both halves are pinned as their own tests instead:
+        # test_datatype_errors_are_found_whatever_the_reasoner, and
+        # test_ill_formed_literals_defeat_the_external_reasoner.
+        expected=("DAT-001", "CNF-003", "CNF-004"),
         # False-positive guard: every term it uses is declared; the defects are in the
         # literals.
         forbidden=("STR-001", "STR-002", "LOG-001"),

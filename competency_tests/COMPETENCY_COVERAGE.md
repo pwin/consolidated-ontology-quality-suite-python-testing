@@ -34,6 +34,7 @@ The run needs `oxi-gen` on the path or built in a sibling checkout: CT-2, CT-4, 
 | `runspecs.py` | one entry per run: its title and the shell command that reproduces it |
 | [COMPETENCY_CHECK_MATRIX.md](COMPETENCY_CHECK_MATRIX.md) | the companion table -- every (test, check) pair joined to its registry entry, with the command as a footnote |
 | `results/` | this run's findings and each stage's verbatim report |
+| `results/themes.json` | the check ids behind each issue above, for the suite's `--themes` flag |
 
 Every seeded defect is marked in its fixture with an `# ERROR:` or `# SEEDS CT-n` comment naming the test it is there for.
 
@@ -387,7 +388,7 @@ Split by naming convention rather than by severity guesswork: a ?x_IRI variable 
 
 - `TQL-002` x2 in run `sketch` -- ?site_IRI is used in the CONSTRUCT template of draft_alarms.rq but is never bound by a BIND or matched in the WHERE clause. Its naming convention say...
 - `TQL-003` x4 in run `sketch` -- ?sitename is used in the CONSTRUCT template of sites.rq but is not bound in the query. This is ordinarily correct -- TARQL binds each CSV header as a...
-- `TQL-004` x1 in run `sketch` -- ?alarm_IRI is built as a string and never converted to an IRI (draft_alarms.rq:20). Every triple using it is dropped. Wrap it in tarql:expandPrefixed...
+- `TQL-004` x1 in run `sketch` -- ?alarm_IRI is built as a string and never converted to an IRI. Every triple using it is dropped. Wrap it in tarql:expandPrefixedName() for a prefixed...
 
 ### CT-15 -- Defined mapping produces no values
 
@@ -541,8 +542,8 @@ TQL-005 catches it in the query, before the pipeline runs. CNF-004 catches the c
 
 **Observed**
 
-- `TQL-005` x1 in run `sketch` -- ?flowvalue_DT is named as a typed value but produces a String (readings.rq:44). The triple will load and carry an untyped string. Wrap the expression...
-- `CNF-004` x13 in run `data` -- Value 2026-01-05T08:00:00 of property https://example.org/water/model#takenAt doesn't match any of the property's declared range classes/datatypes --...
+- `TQL-005` x1 in run `sketch` -- ?flowvalue_DT is named as a typed value but produces a String. The triple will load and carry an untyped string. Wrap the expression in STRDT(..., xs...
+- `CNF-004` x13 in run `data` -- Value 1.8 of property https://w3id.org/semanticarts/ns/ontology/gist/numericValue doesn't match any of the property's declared range classes/datatype...
 
 ### CT-23 -- Prefix and namespace declarations differ between outputs
 
@@ -734,7 +735,7 @@ draft_alarms.rq is the case that settles why this is worth having statically: it
 
 **Observed**
 
-- `CMP-032` x4 in run `template-shape` -- The transformation builds https://example.org/water/model#alarm_IRI as a https://example.org/water/model#Reading and hangs https://example.org/water/...
+- `CMP-032` x4 in run `template-shape` -- The transformation builds https://example.org/water/model#alarm_IRI as a https://example.org/water/model#Reading and hangs https://w3id.org/semantica...
 
 ### CT-33 -- Mapping still builds a term the model deprecates
 
