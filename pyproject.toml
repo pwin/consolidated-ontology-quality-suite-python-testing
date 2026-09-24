@@ -8,7 +8,12 @@ license-files = ["LICENSE-MIT", "LICENSE-APACHE"]
 authors = [{ name = "Peter Winstanley" }]
 requires-python = ">=3.12"
 dependencies = [
-    "ontology-quality-suite",
+    # The native-shacl extra installs the `shacl` engine the suite can run
+    # instead of pyshacl (`--engine native`). Pulled in here so the engine
+    # parity test in tests/test_detection.py has something to compare
+    # against; suite 0.14.4 pinned it to <0.4 after 0.3.0 changed what
+    # sh:conforms means.
+    "ontology-quality-suite[native-shacl]",
 ]
 
 [tool.uv.sources]

@@ -40,6 +40,14 @@ holds a dataset for checking them by hand. So every check the CLI can produce
 is pinned, and `test_extension_only_checks_are_not_reported_by_the_cli` guards
 the other three from the opposite direction.
 
+Both SHACL engines are asserted to agree. `--engine native` runs the registry's
+shapes through the `shacl` package instead of pyshacl, and
+`test_native_shacl_engine_reports_what_pyshacl_does` compares the two over every
+fixture whose stage takes an engine — 14 of the 16. They report the same checks
+at the same severities today; suite 0.14.4 exists because that package's 0.3.0
+changed the default meaning of `sh:conforms`, which is the kind of change this
+test is here to catch.
+
 | Fixture | Seeded error | Detected |
 |---|---|---|
 | `01-clean` | *(none — control)* | 0 Violations, 0 Warnings; only `CNF-005` ×2 (Info, "class never populated") |

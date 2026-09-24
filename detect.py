@@ -42,6 +42,15 @@ REASONER = os.environ.get("OWL2_TEST_REASONER", "auto")
 
 SEVERITY_ORDER = {"Violation": 0, "Warning": 1, "Info": 2}
 
+# The suite can run its SHACL shapes through pyshacl (the default) or through
+# the `shacl` package installed by its optional native-shacl extra. Suite
+# 0.14.4 pinned that package to <0.4 because 0.3.0 changed the default meaning
+# of sh:conforms, which is exactly the kind of change a parity test should
+# notice, so tests/test_detection.py runs both formulations over every fixture
+# whose stage accepts an --engine and compares what they report.
+NATIVE_ENGINE = "native+sparql"
+ENGINE_STAGES = ("checks", "data")
+
 
 @dataclass(frozen=True)
 class Fixture:
@@ -222,29 +231,41 @@ def _registry() -> Registry:
 
 
 @lru_cache(maxsize=None)
-def run_fixture(name: str) -> tuple:
+def run_fixture(name: str, engine: str = "both", reasoner: Optional[str] = None) -> tuple:
     """Run one fixture through its stage and return its findings.
 
     Cached, so a pytest run that asserts several things about the same
     fixture only pays for one suite pass.
+
+    ``engine`` picks the formulation of the registry-driven suite: the default
+    ``both`` is pyshacl plus the portable SPARQL layer, and ``native+sparql``
+    swaps pyshacl for the `shacl` package the suite's ``native-shacl`` extra
+    installs. ``reasoner`` overrides the module default, which the engine
+    comparison uses to hold the reasoner fixed -- it is not the variable under
+    test, and HermiT is slow enough to matter when every fixture runs twice.
+    The ``ontology`` stage takes neither: it has no SHACL formulation to swap.
     """
     fx = FIXTURES_BY_NAME[name]
-    out_dir = OUT_DIR / name
+    reasoner = reasoner or REASONER
+    suffix = "" if (engine == "both" and reasoner == REASONER) else "-{}-{}".format(
+        engine.replace("+", "-"), reasoner)
+    out_dir = OUT_DIR / (name + suffix)
     registry = _registry()
 
     if fx.stage == "data":
         stage = pipeline.run_data_stage(
             [str(fx.data_path)], out_dir,
-            ontology_path=str(fx.ontology_path), registry=registry, reasoner=REASONER,
+            ontology_path=str(fx.ontology_path), registry=registry, reasoner=reasoner,
+            engine=engine,
         )
     elif fx.stage == "checks":
         stage = pipeline.run_checks_stage(
             registry, out_dir, ontology_path=str(fx.ontology_path),
-            data_path=str(fx.data_path) if fx.data else None)
+            data_path=str(fx.data_path) if fx.data else None, engine=engine)
     elif fx.stage == "ontology":
         stage = pipeline.run_ontology_stage(
             str(fx.ontology_path), out_dir,
-            registry=registry, reasoner=REASONER, profiles=tuple(fx.profiles),
+            registry=registry, reasoner=reasoner, profiles=tuple(fx.profiles),
         )
     else:  # pragma: no cover - guarded by the fixture table itself
         raise ValueError(f"unknown stage {fx.stage!r} for fixture {name}")

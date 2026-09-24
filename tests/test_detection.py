@@ -77,6 +77,43 @@ def test_reported_severity_matches_registry(name):
     )
 
 
+ENGINE_FIXTURE_NAMES = [f.name for f in FIXTURES if f.stage in detect.ENGINE_STAGES]
+
+
+@pytest.mark.parametrize("name", ENGINE_FIXTURE_NAMES)
+def test_native_shacl_engine_reports_what_pyshacl_does(name):
+    """The two SHACL implementations report the same checks at the same
+    severities.
+
+    `--engine native` runs the registry's shapes through the `shacl` package
+    instead of pyshacl. The shapes, the registry and the fixture are identical
+    across the two runs, so any difference is the implementation's -- which is
+    a live risk rather than a hypothetical one: suite 0.14.4 pinned that
+    package to <0.4 because 0.3.0 changed the default meaning of sh:conforms.
+
+    Skipped when the optional extra is absent. Both sides hold the reasoner at
+    owlrl-only: REA-* findings come from the reasoning layer, not from either
+    SHACL engine, and pinning it keeps the comparison to the one variable (and
+    the run fast enough to double).
+    """
+    pytest.importorskip(
+        "shacl", reason="the suite's native-shacl extra is not installed")
+    baseline = run_fixture(name, engine="both", reasoner="owlrl-only")
+    native = run_fixture(name, engine=detect.NATIVE_ENGINE, reasoner="owlrl-only")
+
+    only_pyshacl = sorted(ids_of(baseline) - ids_of(native))
+    only_native = sorted(ids_of(native) - ids_of(baseline))
+    assert not only_pyshacl and not only_native, (
+        f"{name}: engines disagree -- pyshacl only: {only_pyshacl}, "
+        f"native only: {only_native}")
+
+    mismatches = detect.severity_mismatches(native)
+    assert not mismatches, (
+        f"{name}: native engine severity differs from the registry default: "
+        + "; ".join(f"{cid} registry={default} reported={got} via {src}"
+                    for cid, default, got, src in mismatches))
+
+
 def test_every_fixture_file_exists():
     for fx in FIXTURES:
         assert fx.ontology_path.is_file(), f"{fx.name}: missing {fx.ontology_path}"
