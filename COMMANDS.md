@@ -117,7 +117,56 @@ uv run ontology-quality-suite checks --ontology competency_tests/fixtures/vsix/e
 # then open the same file in VS Code and run "Ontology Suite: Run Local Checks"
 ```
 
-## 5. Experiments behind the observations in README.md
+## 5. Gate a project in CI
+
+[gate.py](gate.py) points the suite at a *project's* folders -- not at this
+repo's fixtures -- and exits non-zero if anything reaches a chosen severity.
+Settings live in [ontology-suite.yml](ontology-suite.yml), so the run in CI,
+the run in a hook and the run a person does by hand are the same run.
+
+```powershell
+uv run python gate.py                      # uses ./ontology-suite.yml
+uv run python gate.py --dry-run            # print the suite command, run nothing
+uv run python gate.py --config ../acme/ontology-suite.yml
+uv run python gate.py --fail-on never      # any flag overrides the file
+```
+
+Every key in the config is a flag of `ontology-quality-suite run`, spelled
+with underscores; paths are relative to the config file. The committed example
+gates the competency-test worked example, which seeds 3 Violations on purpose,
+so it exits 1 -- that is the gate working. About 4 seconds.
+
+One root ontology is enough: `owl:imports` pulls in the rest, so an
+integration file that imports each of the project's ontologies is the usual
+shape. `import_dir` points at local copies; `allow_network: true` fetches them
+over the wire, which is better kept for a scheduled job than a gate, since it
+makes the build depend on someone else's uptime.
+
+`own_namespace` is what keeps an imported vocabulary's own style and metadata
+findings from failing your build.
+
+As a GitHub Actions job:
+
+```yaml
+- uses: astral-sh/setup-uv@v3
+- run: uv sync
+- run: uv run python gate.py          # exit 1 fails the build
+- uses: actions/upload-artifact@v4
+  if: always()                        # the report is most wanted when it failed
+  with:
+    name: ontology-quality-report
+    path: out/gate/ci/
+```
+
+Stage by scope rather than by cost -- the whole run above is seconds. `sketch`
+alone answers "did a mapping change break anything" without touching data, and
+the external DL reasoner and OWL2 profile checks belong in a nightly job:
+
+```powershell
+uv run python gate.py --reasoner auto --profile EL --profile RL --out-dir out/gate/nightly
+```
+
+## 6. Experiments behind the observations in README.md
 
 ```powershell
 uv run python experiments/severity_probe.py         # pyshacl reports every finding as Violation
@@ -125,7 +174,7 @@ uv run python experiments/illtyped_boolean_probe.py # DAT-001 can't see an inval
 uv run python experiments/langstring_crash_probe.py # `data` crashed on a language-tagged literal (fixed in 0.14.3)
 ```
 
-## 6. Useful variations
+## 7. Useful variations
 
 ```powershell
 # faster: portable SPARQL engine only (skips pyshacl)

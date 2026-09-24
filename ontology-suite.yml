@@ -1,0 +1,38 @@
+# Gate configuration for `uv run python gate.py`.
+#
+# Every key is a flag of `ontology-quality-suite run`, spelled with
+# underscores; `gate.py --help` lists them and the suite's own `--help`
+# defines them. Paths are relative to this file.
+#
+# This copy points at the competency-test worked example, so the gate is
+# runnable straight from a clone. A real project's copy sits at its own root
+# and names its own folders.
+
+# One root ontology. owl:imports pulls in the rest -- an integration file
+# that imports each of the project's ontologies is the usual shape, and
+# import_dir says where the local copies live.
+ontology: competency_tests/fixtures/model/ontology/water-v1.ttl
+import_dir: competency_tests/fixtures/model/ontology
+
+# The TARQL/oxi-gen mappings, and the CSVs they read.
+queries: competency_tests/fixtures/model/queries
+query_pattern: "**/*.rq"
+csv_dir: competency_tests/fixtures/model/csv
+
+# Project-local checks, on top of the shipped registry. Drop these two lines
+# and the gate runs the suite's own 61 checks alone.
+registry: competency_tests/results/merged-registry.json
+sparql: competency_tests/checks/sparql/competency
+
+# Keep a gate fast and repeatable: the portable SPARQL formulation, and
+# owlrl closure rather than an external DL reasoner. Move the deep run to a
+# nightly job rather than paying for it on every push.
+engine: sparql
+reasoner: owlrl-only
+
+# Report only what this project is responsible for. Without it, an imported
+# vocabulary's own style and metadata findings fail your build.
+own_namespace: https://example.org/water/
+
+out_dir: out/gate/ci
+fail_on: Violation

@@ -23,6 +23,7 @@ uv run pytest -q            # same expectations, as pass/fail tests
 | [detect.py](detect.py) | The fixture table (stage, expected check ids, false-positive guards) and the suite invocations |
 | [tests/test_detection.py](tests/test_detection.py) | pytest assertions over that table |
 | [report.py](report.py) | Prints the detection matrix; writes `out/findings.csv` and `out/summary.md` |
+| [gate.py](gate.py) + [ontology-suite.yml](ontology-suite.yml) | A CI gate for *your* project's folders rather than these fixtures: config file in, suite exit code out. See [COMMANDS.md](COMMANDS.md) §5 |
 | [experiments/](experiments/) | Two standalone probes that isolate the suite issues found below |
 
 ## Results
