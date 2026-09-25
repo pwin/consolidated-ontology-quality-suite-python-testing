@@ -1,0 +1,29 @@
+@prefix water: <https://example.org/water/model#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+# The output as it was. Everything below is either something the candidate
+# changes -- and each change is one CT's question -- or a control that both
+# files agree about.
+
+# CONTROL (CT-28): same key, same IRI in both files.
+<https://example.org/water/data/site-S1>
+    a water:Site ;
+    skos:notation "S1" ;
+    water:siteName "Northgate" ;
+    water:hasReading <https://example.org/water/data/reading-R1> .
+
+# SEEDS CT-28: the candidate gives this business key a different subject IRI.
+<https://example.org/water/data/site-S2>
+    a water:Site ;
+    skos:notation "S2" ;
+    water:siteName "Eastbrook" .
+
+# SEEDS CT-25: two pump stations here, one in the candidate.
+<https://example.org/water/data/pump-P1> a water:PumpStation ; skos:notation "P1" .
+<https://example.org/water/data/pump-P2> a water:PumpStation ; skos:notation "P2" .
+
+# SEEDS CT-27: the same number, written differently in the candidate.
+<https://example.org/water/data/reading-R1>
+    a water:Reading ;
+    water:flowValue "1.50"^^xsd:decimal .

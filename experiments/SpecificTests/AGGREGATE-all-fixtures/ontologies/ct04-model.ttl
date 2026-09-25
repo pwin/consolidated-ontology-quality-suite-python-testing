@@ -1,0 +1,40 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix gist: <https://w3id.org/semanticarts/ns/ontology/gist/> .
+
+<https://example.org/water/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/model/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Minimal water model"@en .
+
+:AssetType
+    a               owl:Class ;
+    rdfs:subClassOf gist:Category ;
+    rdfs:label      "Asset type"@en ;
+    skos:prefLabel  "AssetType"@en ;
+    skos:definition "A kind of asset, drawn from the controlled vocabulary."@en .
+
+gist:Category
+    a               owl:Class ;
+    rdfs:label      "Category"@en ;
+    skos:prefLabel  "Category"@en ;
+    skos:definition "A member of a controlled vocabulary used to classify other things."@en .
+
+gist:isCategorizedBy
+    a               owl:ObjectProperty ;
+    rdfs:range      gist:Category ;
+    rdfs:label      "is categorized by"@en ;
+    skos:prefLabel  "isCategorizedBy"@en ;
+    skos:definition "Links a thing to the controlled-vocabulary term that classifies it."@en .
+
+:Asset
+    a               owl:Class ;
+    rdfs:label      "Asset"@en ;
+    skos:prefLabel  "Asset"@en ;
+    skos:definition "A piece of equipment the operator owns."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

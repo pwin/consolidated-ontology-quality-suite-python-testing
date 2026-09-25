@@ -1,0 +1,5 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://example.org/water/data/site-S1> a :Site ; rdfs:label "Northgate"@en .
+<https://example.org/water/data/site-S2> a :Site ; rdfs:label "Eastbrook"@en .

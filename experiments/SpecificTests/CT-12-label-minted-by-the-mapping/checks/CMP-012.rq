@@ -1,0 +1,45 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+# CMP-012 (CT-12): a label or definition the transformation states for a
+# term the model owns.
+#
+# A model-owned term is recognised by what it is *declared* as -- a class, a
+# property, or a member of a declared category class -- rather than by its
+# namespace. The sketch renders each per-row entity using the query's own ":"
+# prefix, so those land in the model's namespace too and a namespace test
+# cannot separate them. Their type is a domain class, never owl:Class or a
+# category, which is what makes this hold either way.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Warning ;
+    sh:focusNode ?term ;
+    sh:resultPath ?p ;
+    sh:value ?label ;
+    sh:sourceConstraintComponent oq:CMP-012 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?term ?p ?label .
+  FILTER(?p IN (skos:prefLabel, skos:definition, skos:altLabel))
+  FILTER(isIRI(?term))
+  {
+    # A term the model owns: declared as a class or property, or a member of
+    # a category class. Not "an instance of anything declared" -- that is
+    # every per-row entity the mapping builds, and flagging those would
+    # report the mapping for naming its own rows.
+    { ?term a owl:Class } UNION { ?term a owl:ObjectProperty }
+    UNION { ?term a owl:DatatypeProperty }
+    UNION { ?term rdf:type/rdfs:subClassOf* gist:Category }
+  }
+  BIND(CONCAT("The transformation states ", STR(?p), " for ", STR(?term),
+              ", a term the model declares. Its name belongs to the authoritative file, ",
+              "and two copies disagree the moment either changes.") AS ?msg)
+}

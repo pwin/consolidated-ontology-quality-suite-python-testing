@@ -1,0 +1,18 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://example.org/water/data/site-S1> a :Site ; rdfs:label "Northgate"@en .
+
+# CONTROL: built with its site link, as the agreed pattern requires.
+<https://example.org/water/data/asset-A1>
+    a :PumpStation ;
+    rdfs:label "Northgate pumps"@en ;
+    :atSite <https://example.org/water/data/site-S1> .
+
+# SEEDS CT-17: no :atSite. The source row had an empty site cell, so the
+# CONCAT that builds the site IRI produced nothing, the variable stayed
+# unbound, and this one triple was dropped for this row alone. The entity
+# itself is perfectly well formed.
+<https://example.org/water/data/asset-A2>
+    a :PumpStation ;
+    rdfs:label "Eastbrook pumps"@en .

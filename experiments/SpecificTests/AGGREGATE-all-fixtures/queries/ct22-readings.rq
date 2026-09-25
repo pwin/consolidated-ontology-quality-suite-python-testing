@@ -1,0 +1,21 @@
+# The _DT suffix is the project's convention for a variable that has been
+# given a datatype. One of these two keeps the promise.
+prefix :    <https://example.org/water/model#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+CONSTRUCT {
+  ?reading_IRI a :Reading ;
+    :flowValue ?flow_DT ;
+    :pressureValue ?pressure_DT .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/reading-", ?readingid)) AS ?reading_IRI)
+
+  # SEEDS CT-22: named as though it carries a datatype, and CONCAT returns a
+  # plain string. The number lands as text, the xsd:decimal range is missed,
+  # and every comparison and sum over it is string-shaped from then on.
+  BIND(CONCAT(?flow, "") AS ?flow_DT)
+
+  # CONTROL: the same convention, kept.
+  BIND(STRDT(?pressure, xsd:decimal) AS ?pressure_DT)
+}

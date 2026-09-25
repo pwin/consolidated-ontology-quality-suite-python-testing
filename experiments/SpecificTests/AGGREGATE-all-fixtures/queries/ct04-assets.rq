@@ -1,0 +1,22 @@
+# The mapping. Both references below are hard-coded taxonomy terms, written
+# by hand into the CONSTRUCT template -- which is where this kind of typo
+# lives and why reading the query is the way to find it.
+prefix :     <https://example.org/water/model#>
+prefix gist: <https://w3id.org/semanticarts/ns/ontology/gist/>
+prefix vocab: <https://example.org/water/vocab#>
+
+CONSTRUCT {
+  # SEEDS CT-4: "Resevoir". One letter, and the taxonomy has no such term.
+  # Every asset the mapping classifies this way is categorised by something
+  # that does not exist -- valid RDF pointing at nothing.
+  ?asset_IRI a :Asset ;
+    gist:isCategorizedBy vocab:Resevoir .
+
+  # CONTROL: spelled as the taxonomy spells it.
+  ?borehole_IRI a :Asset ;
+    gist:isCategorizedBy vocab:Borehole .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?asset_IRI)
+  BIND(IRI(CONCAT("https://example.org/water/data/borehole-", ?boreholeid)) AS ?borehole_IRI)
+}

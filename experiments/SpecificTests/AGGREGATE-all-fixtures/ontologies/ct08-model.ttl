@@ -1,0 +1,39 @@
+@prefix :        <https://example.org/water/model#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+
+# CT-8: a concept nobody wrote down the meaning of.
+#
+# Two classes, alike in every way the documentation checks look at except
+# the one under test. No dcterms:title in the header: it is an external
+# property, so using it undeclared is three findings of its own (STR-002,
+# STR-007, QUA-004) about the header rather than about the concepts. Both are named, labelled and given a preferred label;
+# one has a definition and one has not.
+
+<https://example.org/water/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/model/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Minimal water model"@en .
+
+# CONTROL: documented. A run that reports this is reporting a definition as
+# a missing definition.
+:Site
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Site"@en ;
+    skos:prefLabel  "Site"@en ;
+    skos:definition "A place at which the operator owns or monitors assets."@en .
+
+# SEEDS CT-8: no skos:definition. A reader knows what it is called and
+# nothing about what it means, so two people will use it two ways and the
+# data will be wrong in a manner no schema check can see.
+:Asset
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Asset"@en ;
+    skos:prefLabel  "Asset"@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

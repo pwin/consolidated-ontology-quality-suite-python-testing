@@ -1,0 +1,17 @@
+# The readings mapping. Two defects and a control, all in the templates.
+prefix : <https://example.org/water/model#>
+
+CONSTRUCT {
+  ?reading_IRI a :Reading ;
+    # CONTROL: defined and filled for every row.
+    :flowValue ?flow ;
+    # SEEDS CT-15: defined here and filled by nothing. The pair (Reading,
+    # pressureValue) is promised by the mapping and absent from the output,
+    # because no source column feeds it.
+    :pressureValue ?pressure .
+}
+WHERE {
+  # SEEDS CT-16: the key is the site, not the site and the timestamp, so the
+  # four source rows collapse onto two reading entities and nothing says so.
+  BIND(IRI(CONCAT("https://example.org/water/data/reading-", ?siteid)) AS ?reading_IRI)
+}

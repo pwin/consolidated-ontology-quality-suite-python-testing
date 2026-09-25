@@ -1,0 +1,34 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+
+# CMP-002 (CT-2): one IRI typed with two classes, neither a specialisation
+# of the other. A collision built from two differently-named columns shows up
+# here and nowhere in the query text, which is why this is asked of output.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?iri ;
+    sh:resultPath rdf:type ;
+    sh:value ?c1, ?c2 ;
+    sh:sourceConstraintComponent oq:CMP-002 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?iri a ?c1, ?c2 .
+  FILTER(isIRI(?iri) && isIRI(?c1) && isIRI(?c2))
+  FILTER(STR(?c1) < STR(?c2))
+  # Neither is a specialisation of the other, so no single thing can be both.
+  FILTER NOT EXISTS { ?c1 rdfs:subClassOf* ?c2 }
+  FILTER NOT EXISTS { ?c2 rdfs:subClassOf* ?c1 }
+  # Structural types say nothing about what the subject denotes.
+  FILTER(?c1 NOT IN (owl:NamedIndividual, owl:Thing, rdfs:Resource))
+  FILTER(?c2 NOT IN (owl:NamedIndividual, owl:Thing, rdfs:Resource))
+  BIND(CONCAT("IRI ", STR(?iri), " is typed both ", STR(?c1), " and ", STR(?c2),
+              ", which are unrelated classes -- two mappings are minting the same IRI for ",
+              "different concepts.") AS ?msg)
+}

@@ -1,0 +1,8 @@
+@prefix unit: <https://example.org/water/units#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# The unit vocabulary. It carries no owl:Ontology header at all, so there is
+# no IRI to import it by even if integration.ttl wanted to -- it is reachable
+# only by being named on a command line. That is CT-36's point.
+unit:LitrePerSecond a owl:NamedIndividual ; skos:prefLabel "litre per second"@en .

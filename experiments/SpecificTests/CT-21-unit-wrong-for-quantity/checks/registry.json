@@ -1,0 +1,16 @@
+{
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "CMP-021",
+      "category": "competency",
+      "metric": "unit compatibility with quantity kind",
+      "default_severity": "Violation",
+      "title": "Unit of measure incompatible with the quantity",
+      "description": "A magnitude carries a unit that does not measure its kind of quantity -- a pressure in litres, a length in seconds. The unit is a real unit and the link is the right link, so nothing structural can see it.",
+      "remediation": "Use a unit of the right kind, and check the mapping that chose it -- a wrong unit is usually a column read from the wrong place.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Every magnitude is measured in a unit of its own kind"
+    }
+  ]
+}

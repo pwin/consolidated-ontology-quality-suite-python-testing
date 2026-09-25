@@ -1,0 +1,15 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# SEEDS CT-30: one site, entered twice under two ids. Both nodes are well
+# formed, complete and correctly typed; only the name they share says that
+# the network has one Northgate and the data has two.
+<https://example.org/water/data/site-S1>
+    a :Site ; rdfs:label "Northgate"@en ; :siteName "Northgate" .
+
+<https://example.org/water/data/site-S4>
+    a :Site ; rdfs:label "Northgate"@en ; :siteName "Northgate" .
+
+# CONTROL: its own name, its own identifier.
+<https://example.org/water/data/site-S2>
+    a :Site ; rdfs:label "Eastbrook"@en ; :siteName "Eastbrook" .

@@ -1,0 +1,18 @@
+prefix :      <https://example.org/water/model#>
+prefix vocab: <https://example.org/water/vocab#>
+prefix skos:  <http://www.w3.org/2004/02/skos/core#>
+
+CONSTRUCT {
+  # SEEDS CT-12: the mapping states the preferred label of a taxonomy term.
+  # The taxonomy is the authority for that, and now two files disagree about
+  # it the moment either changes -- with the mapping's copy winning in the
+  # output and nobody looking there for vocabulary.
+  vocab:Reservoir skos:prefLabel "Reservoir"@en .
+
+  # CONTROL: the same kind of term, referenced and not relabelled.
+  ?asset_IRI a :Asset ;
+    skos:prefLabel ?assetname .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?asset_IRI)
+}

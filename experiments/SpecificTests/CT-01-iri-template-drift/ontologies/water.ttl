@@ -1,0 +1,45 @@
+@prefix :        <https://example.org/water/model#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# The smallest ontology that makes CT-1's finding attributable.
+#
+# Two classes and nothing else, because the fixture needs exactly two
+# concepts: one the mappings agree about and one they do not. Both are
+# declared completely -- label, prefLabel, definition -- so the documentation
+# checks stay silent and every finding in the run belongs to CT-1 or is a
+# known artefact.
+#
+# No rdfs:subClassOf owl:Thing: declaring it makes owl:Thing a class of this
+# ontology, which is then reported as declared-but-never-populated (CNF-005).
+# No properties either -- a property the queries do not fill is one more
+# thing to explain, and CT-1 is about IRI templates, not about properties.
+
+<https://example.org/water/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/model/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Minimal water model"@en ;
+    dcterms:title   "Minimal water model" .
+
+# The concept the two mappings DISAGREE about -- the error case.
+:Site
+    a               owl:Class ;
+    rdfs:label      "Site"@en ;
+    skos:prefLabel  "Site"@en ;
+    skos:definition "A place at which the operator owns or monitors assets."@en .
+
+# The concept the two mappings AGREE about -- the control. Identical in
+# kind to :Site in every respect that matters, so the only thing that can
+# explain a finding on one and not the other is the templates themselves.
+:Asset
+    a               owl:Class ;
+    rdfs:label      "Asset"@en ;
+    skos:prefLabel  "Asset"@en ;
+    skos:definition "A piece of equipment the operator owns."@en .
+
+# Declared locally because both this file and the queries use it, and an
+# undeclared external property is a finding in its own right (STR-002).
+skos:prefLabel a owl:AnnotationProperty .

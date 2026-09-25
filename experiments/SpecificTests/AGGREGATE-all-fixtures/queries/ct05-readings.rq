@@ -1,0 +1,17 @@
+# The readings domain, written by the other team.
+prefix : <https://example.org/water/model#>
+
+CONSTRUCT {
+  ?site_IRI a :Site .
+  ?asset_IRI a :Asset .
+}
+WHERE {
+  # SEEDS CT-5: the shared concept, minted a second way. The assets domain
+  # uses the raw column; this one upper-cases it first. Both domains believe
+  # they are talking about the same sites and their data does not join.
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", UCASE(?siteid))) AS ?site_IRI)
+
+  # CONTROL: the same template as the assets domain, character for
+  # character.
+  BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?asset_IRI)
+}

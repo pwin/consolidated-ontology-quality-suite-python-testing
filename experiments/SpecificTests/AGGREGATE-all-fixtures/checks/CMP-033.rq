@@ -1,0 +1,32 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+# CMP-033 (CT-33): a mapping still building a term the model deprecates.
+#
+# Reports the replacement when the ontology names one, because "deprecated"
+# without "use this instead" is the half of the message that does not help.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Warning ;
+    sh:focusNode ?term ;
+    sh:resultPath rdf:type ;
+    sh:value ?replacement ;
+    sh:sourceConstraintComponent oq:CMP-033 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?subject a ?term .
+  ?term owl:deprecated true .
+  OPTIONAL { ?term dcterms:isReplacedBy ?named }
+  BIND(COALESCE(STR(?named), "none stated") AS ?replacement)
+  BIND(CONCAT("The transformation still builds ", STR(?term), ", which the model marks ",
+              "owl:deprecated. Replacement: ", ?replacement, ". Every run adds more data that ",
+              "will have to be migrated.") AS ?msg)
+}

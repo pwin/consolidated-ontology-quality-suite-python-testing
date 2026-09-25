@@ -1,0 +1,15 @@
+prefix : <https://example.org/water/model#>
+
+CONSTRUCT {
+  # SEEDS CT-33: still building the deprecated class. Every run adds more
+  # data that will have to be migrated, and the deprecation notice sits in
+  # the ontology where the mapping author does not look.
+  ?asset_IRI a :PumpStation .
+
+  # CONTROL: a current term.
+  ?site_IRI a :Site .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?asset_IRI)
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", ?siteid)) AS ?site_IRI)
+}

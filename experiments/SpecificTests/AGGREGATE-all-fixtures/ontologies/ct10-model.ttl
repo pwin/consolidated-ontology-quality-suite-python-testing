@@ -1,0 +1,32 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<https://example.org/water/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/model/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Minimal water model"@en .
+
+# CONTROL: labelled both ways. The check wants a skos:prefLabel specifically,
+# and this has one.
+:Site
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Site"@en ;
+    skos:prefLabel  "Site"@en ;
+    skos:definition "A place at which the operator owns or monitors assets."@en .
+
+# SEEDS CT-10: rdfs:label and no skos:prefLabel. It looks labelled in every
+# tool that reads rdfs:label, and is absent from every list built from the
+# preferred term -- which is the one a glossary, a picklist or a search index
+# is built from.
+:Asset
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Asset"@en ;
+    skos:definition "A piece of equipment the operator owns."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

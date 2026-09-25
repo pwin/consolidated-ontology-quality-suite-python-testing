@@ -1,0 +1,16 @@
+{
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "CMP-012",
+      "category": "competency",
+      "metric": "label ownership",
+      "default_severity": "Warning",
+      "title": "Label or definition minted by the transformation",
+      "description": "A mapping states a skos:prefLabel, altLabel or definition for a term the model or taxonomy owns. Two files now disagree about the term's name the moment either changes, and the mapping's copy is the one that reaches the output.",
+      "remediation": "Delete the label from the mapping and let the taxonomy supply it.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Vocabulary terms are named by the vocabulary"
+    }
+  ]
+}

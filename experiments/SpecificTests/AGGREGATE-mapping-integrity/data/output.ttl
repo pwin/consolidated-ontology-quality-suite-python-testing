@@ -1,0 +1,5 @@
+# The graph the mapping actually produced from the four CSV rows above.
+@prefix : <https://example.org/water/model#> .
+
+<https://example.org/water/data/reading-S1> a :Reading ; :flowValue "118.0" .
+<https://example.org/water/data/reading-S2> a :Reading ; :flowValue "91.5" .

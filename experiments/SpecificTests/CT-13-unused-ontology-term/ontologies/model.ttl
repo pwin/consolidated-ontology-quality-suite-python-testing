@@ -1,0 +1,33 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix gist: <https://w3id.org/semanticarts/ns/ontology/gist/> .
+
+<https://example.org/water/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/model/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Minimal water model"@en .
+
+# CONTROL: declared and populated by the data below.
+:Site
+    a               owl:Class ;
+    rdfs:label      "Site"@en ;
+    skos:prefLabel  "Site"@en ;
+    skos:definition "A place at which the operator owns or monitors assets."@en .
+
+# SEEDS CT-13: declared, documented, and populated by nothing. Either the
+# mapping that was meant to build it was never written, or the concept was
+# retired and the declaration left behind. Both are worth knowing; neither
+# is visible from the ontology alone.
+:DecommissionedSite
+    a               owl:Class ;
+    rdfs:subClassOf :Site ;
+    rdfs:label      "Decommissioned site"@en ;
+    skos:prefLabel  "DecommissionedSite"@en ;
+    skos:definition "A site that is no longer in operational use."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

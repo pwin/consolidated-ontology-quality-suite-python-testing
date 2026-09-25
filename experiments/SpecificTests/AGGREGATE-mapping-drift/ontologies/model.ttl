@@ -1,0 +1,21 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<https://example.org/water/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/model/1.0.0> ;
+    rdfs:label      "Acme Water model"@en .
+
+:Site a owl:Class ; rdfs:label "Site"@en ; skos:prefLabel "Site"@en ;
+    skos:definition "A place at which the operator owns or monitors assets."@en .
+:Reading a owl:Class ; rdfs:label "Reading"@en ; skos:prefLabel "Reading"@en ;
+    skos:definition "A measurement taken at a site."@en .
+:siteName a owl:DatatypeProperty ; rdfs:label "site name"@en ; skos:prefLabel "siteName"@en ;
+    skos:definition "The name operational staff use for a site."@en .
+:flowValue a owl:DatatypeProperty ; rdfs:label "flow value"@en ; skos:prefLabel "flowValue"@en ;
+    skos:definition "A flow reading, in litres per second."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

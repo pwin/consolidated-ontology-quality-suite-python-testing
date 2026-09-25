@@ -1,0 +1,29 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# Version 2.0.0 -- :PumpStation is now :PumpingStation. Nothing else moved.
+
+<https://example.org/water/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/model/2.0.0> ;
+    owl:versionInfo "2.0.0" ;
+    rdfs:label      "Minimal water model"@en .
+
+# SEEDS CT-3: the renamed class. The mapping was never updated to match.
+:PumpingStation
+    a               owl:Class ;
+    rdfs:label      "Pumping station"@en ;
+    skos:prefLabel  "PumpingStation"@en ;
+    skos:definition "A station that pumps water through the network."@en .
+
+# CONTROL: unchanged across both versions.
+:Site
+    a               owl:Class ;
+    rdfs:label      "Site"@en ;
+    skos:prefLabel  "Site"@en ;
+    skos:definition "A place at which the operator owns or monitors assets."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

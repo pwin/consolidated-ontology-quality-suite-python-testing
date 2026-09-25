@@ -1,0 +1,21 @@
+# The mapping, written against model 1.0.0 and never updated.
+#
+# It builds two classes. One was renamed in 2.0.0 and one was not, so the
+# same file carries the fault and its control.
+prefix : <https://example.org/water/model#>
+
+CONSTRUCT {
+  # SEEDS CT-3: :PumpStation is 1.0.0's name. 2.0.0 calls it
+  # :PumpingStation. Every row this mapping writes builds a class the
+  # current model does not declare -- valid RDF that means nothing to
+  # anyone reading it against the model it claims to follow.
+  ?asset_IRI a :PumpStation .
+
+  # CONTROL: :Site is unchanged across both versions. A run that reports
+  # this is reporting a term that did not move.
+  ?site_IRI a :Site .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?asset_IRI)
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", ?siteid)) AS ?site_IRI)
+}

@@ -1,0 +1,34 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+
+# CMP-032 (CT-32): a template asserting a property on a subject whose class
+# is not the property's declared domain.
+#
+# Subsumption is honoured -- a subclass of the domain is correct -- which is
+# why this walks rdfs:subClassOf* rather than comparing two class IRIs.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?subject ;
+    sh:resultPath ?property ;
+    sh:value ?domain ;
+    sh:sourceConstraintComponent oq:CMP-032 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?subject a ?class ;
+    ?property ?object .
+  ?property rdfs:domain ?domain .
+  ?class a owl:Class .
+  FILTER(?property != rdf:type)
+  FILTER NOT EXISTS { ?class rdfs:subClassOf* ?domain }
+  BIND(CONCAT("The transformation builds ", STR(?subject), " as a ", STR(?class),
+              " and hangs ", STR(?property), " off it, but that property's domain is ",
+              STR(?domain), ". Either the mapping uses the wrong property or the entity is ",
+              "typed wrongly; the output will not conform either way.") AS ?msg)
+}

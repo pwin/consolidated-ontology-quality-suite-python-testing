@@ -1,0 +1,27 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix gist: <https://w3id.org/semanticarts/ns/ontology/gist/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+:LitrePerSecond a gist:UnitOfMeasure ; rdfs:label "litre per second"@en .
+
+# CONTROL: the agreed pattern. The number hangs off a magnitude node, which
+# can carry its unit and its quantity kind.
+<https://example.org/water/data/reading-R1>
+    a :Reading ;
+    rdfs:label "Northgate 08:00"@en ;
+    :hasFlowRate <https://example.org/water/data/flow-R1> .
+
+<https://example.org/water/data/flow-R1>
+    a gist:Magnitude ;
+    rdfs:label "Northgate flow"@en ;
+    gist:numericValue "120.5"^^xsd:decimal ;
+    gist:hasUnitOfMeasure :LitrePerSecond .
+
+# SEEDS CT-18: the older mapping flattens the number straight onto the
+# reading. Valid RDF, correct number, and there is nowhere left to put the
+# unit -- so this reading can never say what it measured in.
+<https://example.org/water/data/reading-R2>
+    a :Reading ;
+    rdfs:label "Eastbrook 08:00"@en ;
+    gist:numericValue "88.0"^^xsd:decimal .

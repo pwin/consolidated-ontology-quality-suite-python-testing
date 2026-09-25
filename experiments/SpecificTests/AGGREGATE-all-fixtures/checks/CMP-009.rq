@@ -1,0 +1,32 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+
+# CMP-009 (CT-9): a class of this model's own namespace with nothing above
+# it and nothing below.
+#
+# Scoped to the model's namespace deliberately. An imported vocabulary's top
+# class is someone else's business, and reporting it would bury the one term
+# this project can actually do something about.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Warning ;
+    sh:focusNode ?class ;
+    sh:resultPath rdfs:subClassOf ;
+    sh:sourceConstraintComponent oq:CMP-009 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?class a owl:Class .
+  FILTER(isIRI(?class))
+  FILTER(STRSTARTS(STR(?class), "https://example.org/water/model#"))
+  FILTER NOT EXISTS { ?class rdfs:subClassOf ?parent . FILTER(isIRI(?parent)) }
+  FILTER NOT EXISTS { ?child rdfs:subClassOf ?class . FILTER(isIRI(?child)) }
+  BIND(CONCAT(STR(?class), " has no superclass and no subclass, so it sits outside the ",
+              "hierarchy: it inherits nothing, appears in no tree view, and no reasoner can ",
+              "relate its instances to anything else.") AS ?msg)
+}

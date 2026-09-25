@@ -1,0 +1,16 @@
+prefix : <https://example.org/water/model#>
+
+CONSTRUCT {
+  # SEEDS CT-29: still minting site IRIs under the water base. The query is
+  # valid, the IRI is well formed, and it is correct against the water model
+  # -- which still declares :Site. Only the core model knows the concept
+  # moved and took its base with it.
+  ?site_IRI a :Site .
+
+  # CONTROL: a concept that never moved, minted under its own base.
+  ?asset_IRI a :Asset .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", ?siteid)) AS ?site_IRI)
+  BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?asset_IRI)
+}

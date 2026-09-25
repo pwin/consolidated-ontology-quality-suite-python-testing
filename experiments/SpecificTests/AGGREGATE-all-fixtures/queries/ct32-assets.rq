@@ -1,0 +1,21 @@
+# This mapping is wired to no CSV yet, which is the point: nothing about it
+# will ever be triplified, so a check that waits for output waits forever.
+prefix : <https://example.org/water/model#>
+
+CONSTRUCT {
+  # CONTROL: :atSite on a :PumpStation, which is its declared domain.
+  ?asset_IRI a :PumpStation ;
+    :atSite ?site_IRI .
+
+  # SEEDS CT-32: :atSite hung off a :Site. The property's domain is
+  # :PumpStation, so every row this writes asserts something the model says
+  # cannot be -- and the query is valid SPARQL that no one reading it alone
+  # would question.
+  ?other_site_IRI a :Site ;
+    :atSite ?site_IRI .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?asset_IRI)
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", ?siteid)) AS ?site_IRI)
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", ?othersiteid)) AS ?other_site_IRI)
+}

@@ -1,0 +1,16 @@
+{
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "CMP-009",
+      "category": "competency",
+      "metric": "hierarchy placement",
+      "default_severity": "Warning",
+      "title": "Locally defined class has no place in the class hierarchy",
+      "description": "A class the model itself declares has no superclass and no subclass, so it sits outside the hierarchy: it inherits nothing, appears in no tree view, and no reasoner can relate its instances to anything else.",
+      "remediation": "Give it a superclass, or accept it as a top-level concept and say so by making something a subclass of it.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Every locally defined class has a place in the hierarchy"
+    }
+  ]
+}

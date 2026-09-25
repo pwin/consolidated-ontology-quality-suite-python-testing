@@ -1,0 +1,39 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+
+# CMP-021 (CT-21): a magnitude measured in a unit of the wrong kind.
+#
+# The VALUES table is the project rule: which units are legitimate for which
+# quantity class. Anything a class is measured in that is not in its row is a
+# category error rather than a missing value.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?m ;
+    sh:resultPath gist:hasUnitOfMeasure ;
+    sh:value ?unit ;
+    sh:sourceConstraintComponent oq:CMP-021 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  VALUES (?class ?allowed) {
+    (water:FlowRate water:LitrePerSecond)
+    (water:Pressure water:Bar)
+  }
+  ?m a ?class ; gist:hasUnitOfMeasure ?unit .
+  FILTER NOT EXISTS {
+    VALUES (?class2 ?allowed2) {
+      (water:FlowRate water:LitrePerSecond)
+      (water:Pressure water:Bar)
+    }
+    ?m a ?class2 ; gist:hasUnitOfMeasure ?allowed2 .
+  }
+  BIND(CONCAT(STR(?m), " is a ", STR(?class), " measured in ", STR(?unit),
+              ", which does not measure that kind of quantity. The value is a number in the ",
+              "wrong dimension, and every conversion and comparison over it is wrong too.") AS ?msg)
+}

@@ -1,0 +1,16 @@
+{
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "CMP-019",
+      "category": "competency",
+      "metric": "magnitude completeness",
+      "default_severity": "Violation",
+      "title": "Magnitude missing a numeric value",
+      "description": "A magnitude node was built and typed but carries no number, usually because the source cell was empty and the mapping built the node anyway.",
+      "remediation": "Fill the source value, or make the mapping build the magnitude only when a value exists.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Every magnitude carries a number"
+    }
+  ]
+}

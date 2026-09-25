@@ -1,0 +1,16 @@
+{
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "CMP-030",
+      "category": "competency",
+      "metric": "business key uniqueness within an output",
+      "default_severity": "Warning",
+      "title": "Two entities share a business key",
+      "description": "Two instances of one class carry the same value for the property the project treats as that class's business key, so one real-world thing has been created twice under two identifiers.",
+      "remediation": "Decide which identifier survives, merge the two, and give the source a uniqueness constraint on that key.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "A business key identifies at most one entity"
+    }
+  ]
+}

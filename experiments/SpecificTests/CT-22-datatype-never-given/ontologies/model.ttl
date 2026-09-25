@@ -1,0 +1,35 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix gist: <https://w3id.org/semanticarts/ns/ontology/gist/> .
+
+<https://example.org/water/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/model/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Minimal water model"@en .
+
+:Reading
+    a               owl:Class ;
+    rdfs:label      "Reading"@en ;
+    skos:prefLabel  "Reading"@en ;
+    skos:definition "A measurement taken at a site at a point in time."@en .
+
+:flowValue
+    a               owl:DatatypeProperty ;
+    rdfs:range      xsd:decimal ;
+    rdfs:label      "flow value"@en ;
+    skos:prefLabel  "flowValue"@en ;
+    skos:definition "The flow rate reading, in litres per second."@en .
+
+:pressureValue
+    a               owl:DatatypeProperty ;
+    rdfs:range      xsd:decimal ;
+    rdfs:label      "pressure value"@en ;
+    skos:prefLabel  "pressureValue"@en ;
+    skos:definition "The pressure reading, in bar."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

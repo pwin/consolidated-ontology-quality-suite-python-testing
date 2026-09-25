@@ -1,0 +1,32 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+
+# CMP-031 (CT-31): a relationship the agreed pattern treats as single-valued
+# carrying two values. The mirror of CMP-017, from the same VALUES table of
+# project rules: that asks whether the link is there, this asks whether there
+# is exactly one.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?entity ;
+    sh:resultPath ?single ;
+    sh:value ?first ;
+    sh:sourceConstraintComponent oq:CMP-031 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  VALUES (?class ?single) {
+    (water:PumpStation water:atSite)
+  }
+  ?entity a ?class ;
+    ?single ?first , ?second .
+  FILTER(STR(?first) < STR(?second))
+  BIND(CONCAT(STR(?entity), " has more than one ", STR(?single), " -- ", STR(?first), " and ",
+              STR(?second), ". The agreed pattern allows one per ", STR(?class),
+              ", so two sources are contributing a link and disagreeing about it.") AS ?msg)
+}

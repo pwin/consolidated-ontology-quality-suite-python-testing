@@ -1,0 +1,57 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix gist: <https://w3id.org/semanticarts/ns/ontology/gist/> .
+
+<https://example.org/water/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/model/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Minimal water model"@en .
+
+gist:Magnitude
+    a               owl:Class ;
+    rdfs:label      "Magnitude"@en ;
+    skos:prefLabel  "Magnitude"@en ;
+    skos:definition "A quantity: a numeric value together with the unit it is measured in."@en .
+
+gist:UnitOfMeasure
+    a               owl:Class ;
+    rdfs:label      "Unit of measure"@en ;
+    skos:prefLabel  "UnitOfMeasure"@en ;
+    skos:definition "A standard quantity used to express the magnitude of a measurement."@en .
+
+gist:hasUnitOfMeasure
+    a               owl:ObjectProperty ;
+    rdfs:domain     gist:Magnitude ;
+    rdfs:range      gist:UnitOfMeasure ;
+    rdfs:label      "has unit of measure"@en ;
+    skos:prefLabel  "hasUnitOfMeasure"@en ;
+    skos:definition "Links a magnitude to the unit its value is expressed in."@en .
+
+gist:numericValue
+    a               owl:DatatypeProperty ;
+    rdfs:domain     gist:Magnitude ;
+    rdfs:range      xsd:decimal ;
+    rdfs:label      "numeric value"@en ;
+    skos:prefLabel  "numericValue"@en ;
+    skos:definition "The number of a magnitude, in its unit of measure."@en .
+
+:Reading
+    a               owl:Class ;
+    rdfs:label      "Reading"@en ;
+    skos:prefLabel  "Reading"@en ;
+    skos:definition "A measurement taken at a site at a point in time."@en .
+
+:hasFlowRate
+    a               owl:ObjectProperty ;
+    rdfs:domain     :Reading ;
+    rdfs:range      gist:Magnitude ;
+    rdfs:label      "has flow rate"@en ;
+    skos:prefLabel  "hasFlowRate"@en ;
+    skos:definition "Links a reading to the flow-rate magnitude it recorded."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

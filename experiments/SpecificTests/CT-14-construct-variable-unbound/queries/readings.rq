@@ -1,0 +1,15 @@
+# SEEDS CT-14: ?site_IRI is used in the CONSTRUCT template and bound
+# nowhere. The name says it is a constructed IRI -- the _IRI suffix is the
+# project's convention for one -- so it cannot be a CSV column arriving at
+# triplify time, and every triple using it is silently dropped for every row.
+#
+# ?reading_IRI is the control: same shape, same convention, and bound.
+prefix : <https://example.org/water/model#>
+
+CONSTRUCT {
+  ?reading_IRI a :Reading ;
+    :atSite ?site_IRI .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/reading-", ?readingid)) AS ?reading_IRI)
+}

@@ -1,0 +1,15 @@
+# Written against 1.0.0 and never updated.
+prefix : <https://example.org/water/model#>
+
+CONSTRUCT {
+  # SEEDS CT-6: 2.0.0 has no :PumpStation. Every row this builds is typed
+  # with a class the current model does not declare.
+  ?asset_IRI a :PumpStation .
+
+  # CONTROL: still declared in 2.0.0.
+  ?site_IRI a :Site .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?asset_IRI)
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", ?siteid)) AS ?site_IRI)
+}

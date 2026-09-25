@@ -1,0 +1,16 @@
+{
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "CMP-017",
+      "category": "competency",
+      "metric": "required relationship completeness",
+      "default_severity": "Violation",
+      "title": "Generated entity missing a required object property",
+      "description": "An entity of a class the project requires a link from does not have it. The rule is the project's, agreed in the mapping specification rather than declared in the ontology, which is why no registry check reports it.",
+      "remediation": "Fill the gap in the source, or change the mapping so an entity is not built at all when the link cannot be.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Every generated entity carries the links its class requires"
+    }
+  ]
+}

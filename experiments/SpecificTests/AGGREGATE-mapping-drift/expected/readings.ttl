@@ -1,0 +1,9 @@
+# What the readings mapping was agreed to produce, recorded deliberately.
+# Regenerating this automatically would answer "did anything change?" with
+# "no" every time.
+@prefix : <https://example.org/water/model#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/water/data/reading-R1>
+    a :Reading ;
+    :flowValue "1.5"^^xsd:decimal .

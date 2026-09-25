@@ -1,0 +1,20 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://example.org/water/data/site-S1> a :Site ; rdfs:label "Northgate"@en .
+<https://example.org/water/data/site-S2> a :Site ; rdfs:label "Eastbrook"@en .
+
+# SEEDS CT-31: two mappings each contributed one :atSite for this station
+# and they disagree. Neither mapping is wrong on its own, and the merged
+# graph says the station stands in two places at once.
+<https://example.org/water/data/asset-A1>
+    a :PumpStation ;
+    rdfs:label "Northgate pumps"@en ;
+    :atSite <https://example.org/water/data/site-S1> ,
+            <https://example.org/water/data/site-S2> .
+
+# CONTROL: one station, one site.
+<https://example.org/water/data/asset-A2>
+    a :PumpStation ;
+    rdfs:label "Eastbrook pumps"@en ;
+    :atSite <https://example.org/water/data/site-S2> .

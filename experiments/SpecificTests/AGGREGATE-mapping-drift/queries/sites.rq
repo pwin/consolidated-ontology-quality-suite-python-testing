@@ -1,0 +1,10 @@
+# The sites mapping. Builds :Site with its name.
+prefix : <https://example.org/water/model#>
+
+CONSTRUCT {
+  ?site_IRI a :Site ;
+    :siteName ?sitename .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", ?siteid)) AS ?site_IRI)
+}

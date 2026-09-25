@@ -1,0 +1,40 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix gist: <https://w3id.org/semanticarts/ns/ontology/gist/> .
+
+<https://example.org/water/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/model/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Minimal water model"@en .
+
+# The top of this model's hierarchy. Everything below hangs off it.
+:PhysicalThing
+    a               owl:Class ;
+    rdfs:label      "Physical thing"@en ;
+    skos:prefLabel  "PhysicalThing"@en ;
+    skos:definition "Anything in the network that occupies space."@en .
+
+# CONTROL: placed. A reader meeting it knows what kind of thing it is before
+# reading its definition.
+:Site
+    a               owl:Class ;
+    rdfs:subClassOf :PhysicalThing ;
+    rdfs:label      "Site"@en ;
+    skos:prefLabel  "Site"@en ;
+    skos:definition "A place at which the operator owns or monitors assets."@en .
+
+# SEEDS CT-9: declared, documented, and attached to nothing. Nothing is
+# above it and nothing below, so it appears in no hierarchy view, inherits
+# nothing, and no reasoner can place its instances among anything else.
+:Telemetry
+    a               owl:Class ;
+    rdfs:label      "Telemetry"@en ;
+    skos:prefLabel  "Telemetry"@en ;
+    skos:definition "A stream of readings sent from equipment in the field."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

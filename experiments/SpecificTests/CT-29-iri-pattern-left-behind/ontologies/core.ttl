@@ -1,0 +1,36 @@
+@prefix core:    <https://example.org/core/model#> .
+@prefix water:   <https://example.org/water/model#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# The shared core model. :Site is used by more than one domain, so it was
+# moved here and the agreed IRI pattern for its instances moved with it.
+# Nothing about that move is visible in the water model's own files.
+
+core:iriPattern
+    a               owl:AnnotationProperty ;
+    rdfs:label      "IRI pattern"@en ;
+    skos:prefLabel  "iriPattern"@en ;
+    skos:definition "The base IRI that instances of this class must be minted under."@en .
+
+core:Site
+    a               owl:Class ;
+    rdfs:label      "Site"@en ;
+    skos:prefLabel  "Site"@en ;
+    skos:definition "A place at which the operator owns or monitors assets."@en ;
+    core:iriPattern "https://example.org/core/data/site-" .
+
+# SEEDS CT-29: the water model's :Site is superseded, and its agreed base
+# went with it. The mapping was never updated.
+water:Site
+    owl:deprecated       true ;
+    dcterms:isReplacedBy core:Site .
+
+# CONTROL: never moved, so no pattern was ever agreed elsewhere for it.
+water:Asset
+    a               owl:Class ;
+    rdfs:label      "Asset"@en ;
+    skos:prefLabel  "Asset"@en ;
+    skos:definition "A piece of equipment the operator owns."@en .

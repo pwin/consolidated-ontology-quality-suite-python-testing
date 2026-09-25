@@ -1,0 +1,22 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix gist: <https://w3id.org/semanticarts/ns/ontology/gist/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+:LitrePerSecond a gist:UnitOfMeasure ; rdfs:label "litre per second"@en .
+:Bar            a gist:UnitOfMeasure ; rdfs:label "bar"@en .
+
+# CONTROL: a flow rate in litres per second.
+<https://example.org/water/data/flow-R1>
+    a :FlowRate ;
+    rdfs:label "Northgate flow"@en ;
+    gist:hasUnitOfMeasure :LitrePerSecond .
+
+# SEEDS CT-21: a pressure in litres per second. Present, well formed, and a
+# category error -- litres measure volume, not force per unit area. Nothing
+# structural can see it, because the unit is a real unit and the link is the
+# right link.
+<https://example.org/water/data/pressure-R1>
+    a :Pressure ;
+    rdfs:label "Eastbrook pressure"@en ;
+    gist:hasUnitOfMeasure :LitrePerSecond .

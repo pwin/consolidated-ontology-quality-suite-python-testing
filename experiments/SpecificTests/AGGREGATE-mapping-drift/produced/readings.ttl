@@ -1,0 +1,9 @@
+# What the run produces now: the unit link arrived with a model change and
+# the value lost its datatype somewhere in the mapping.
+@prefix :    <https://example.org/water/model#> .
+@prefix unit: <https://example.org/water/units#> .
+
+<https://example.org/water/data/reading-R1>
+    a :Reading ;
+    :flowValue "1.5" ;
+    :measuredIn unit:LitrePerSecond .

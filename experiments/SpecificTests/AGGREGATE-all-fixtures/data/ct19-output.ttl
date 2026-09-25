@@ -1,0 +1,21 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix gist: <https://w3id.org/semanticarts/ns/ontology/gist/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+:LitrePerSecond a gist:UnitOfMeasure ; rdfs:label "litre per second"@en .
+
+# CONTROL: a magnitude with its number.
+<https://example.org/water/data/flow-S1>
+    a gist:Magnitude ;
+    rdfs:label "Northgate flow"@en ;
+    gist:numericValue "120.5"^^xsd:decimal ;
+    gist:hasUnitOfMeasure :LitrePerSecond .
+
+# SEEDS CT-19: the node was built, typed and given its unit, and the source
+# cell was empty -- so it is a magnitude of nothing. Counting rows finds it
+# present; reading values finds nothing there.
+<https://example.org/water/data/flow-S2>
+    a gist:Magnitude ;
+    rdfs:label "Eastbrook flow"@en ;
+    gist:hasUnitOfMeasure :LitrePerSecond .

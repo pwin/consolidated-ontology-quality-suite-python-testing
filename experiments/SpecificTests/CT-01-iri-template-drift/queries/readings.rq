@@ -1,0 +1,20 @@
+# The second domain. One of its two IRI templates matches sites.rq and one
+# does not, which is the whole fixture.
+prefix : <https://example.org/water/model#>
+
+CONSTRUCT {
+  ?site_IRI a :Site .
+  ?asset_IRI a :Asset .
+}
+WHERE {
+  # CONTROL: character for character what sites.rq binds. A run that reports
+  # ?asset_IRI is reporting agreement as if it were drift, and the fixture
+  # fails.
+  BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?asset_IRI)
+
+  # SEEDS CT-1: the same concept, a different template. sites.rq uses the raw
+  # column; this wraps it in REPLACE first, so for any site id containing a
+  # space the two domains mint different IRIs for one site and their data
+  # never joins. Neither query is wrong on its own -- only the pair is.
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", REPLACE(?siteid, " ", "_"))) AS ?site_IRI)
+}

@@ -1,0 +1,23 @@
+# The readings mapping, written by the other team.
+prefix :    <https://example.org/water/model#>
+prefix unit: <https://example.org/water/units#>
+prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+CONSTRUCT {
+  # SEEDS CT-34: :Site built here too, and with nothing on it. One class,
+  # two shapes, depending on which mapping made the instance.
+  ?site_IRI a :Site .
+
+  # SEEDS CT-35: :flowValue typed here and left a plain string in
+  # legacy.rq. One property, two datatypes across the set.
+  ?reading_IRI a :Reading ;
+    :flowValue ?flow_DT ;
+    # SEEDS CT-36: a unit term. units.ttl declares it and the integration
+    # ontology cannot reach it.
+    :measuredIn unit:LitrePerSecond .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", ?siteid)) AS ?site_IRI)
+  BIND(IRI(CONCAT("https://example.org/water/data/reading-", ?readingid)) AS ?reading_IRI)
+  BIND(STRDT(?flow, xsd:decimal) AS ?flow_DT)
+}

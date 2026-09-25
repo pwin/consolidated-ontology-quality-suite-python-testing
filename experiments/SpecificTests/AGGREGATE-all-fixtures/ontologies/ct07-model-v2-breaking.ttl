@@ -1,0 +1,25 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# Version 1.0.0 -- the baseline both comparisons below start from.
+
+<https://example.org/water/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/model/2.0.0> ;
+    owl:versionInfo "2.0.0" ;
+    rdfs:label      "Minimal water model"@en .
+
+# SEEDS CT-7: :PumpStation is gone. Anything built against 1.0.0 that
+# names it is now wrong, which is what MAJOR means.
+
+# CONTROL: unchanged across both versions.
+:Site
+    a               owl:Class ;
+    rdfs:label      "Site"@en ;
+    skos:prefLabel  "Site"@en ;
+    skos:definition "A place at which the operator owns or monitors assets."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

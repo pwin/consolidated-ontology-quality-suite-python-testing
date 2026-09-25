@@ -1,0 +1,16 @@
+{
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "CMP-031",
+      "category": "competency",
+      "metric": "single-valued relationship cardinality",
+      "default_severity": "Violation",
+      "title": "Single-valued relationship carries two values",
+      "description": "An entity carries two values for a relationship the agreed pattern allows one of, typically because two mappings each contribute a link and disagree. Reported by a project check because the ontology does not declare the property functional.",
+      "remediation": "Establish which source is authoritative and drop the other mapping's triple. Declaring the property owl:FunctionalProperty afterwards moves the check to LOG-002.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "A single-valued relationship has one value"
+    }
+  ]
+}

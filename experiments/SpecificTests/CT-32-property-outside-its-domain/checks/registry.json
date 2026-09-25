@@ -1,0 +1,16 @@
+{
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "CMP-032",
+      "category": "competency",
+      "metric": "template conformance to declared domains",
+      "default_severity": "Violation",
+      "title": "Template asserts a property outside its declared domain",
+      "description": "A CONSTRUCT template hangs a property off an entity whose class is not the property's rdfs:domain, nor a subclass of it. The suite reports the same condition as CNF-003, but of real output -- after the CSVs are read and the mappings run.",
+      "remediation": "Use the property the class actually has, or type the entity as the class the property expects. If both are right, the ontology's domain is too narrow.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Every property a template asserts belongs to the class it is asserted on"
+    }
+  ]
+}

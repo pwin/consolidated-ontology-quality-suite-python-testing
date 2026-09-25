@@ -1,0 +1,16 @@
+{
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "CMP-037",
+      "category": "competency",
+      "metric": "prefix agreement across mappings",
+      "default_severity": "Violation",
+      "title": "One prefix bound to two namespaces across the mapping set",
+      "description": "Two mappings bind the same prefix to different namespaces. Each file is internally consistent, so no per-file check fires; downstream the term-level checks report an undeclared term, which names the symptom in one file rather than the disagreement between two.",
+      "remediation": "Agree one namespace per prefix across the mapping set, preferably in a shared header the queries include rather than repeat.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "A prefix means the same thing in every mapping"
+    }
+  ]
+}

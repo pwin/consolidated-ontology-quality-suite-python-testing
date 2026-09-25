@@ -1,0 +1,35 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+
+# CMP-030 (CT-30): two entities of one class sharing a business key. The
+# VALUES table is the project rule: a row per (class, key) pair whose value a
+# person would use to recognise the thing.
+#
+# Emitted once per unordered pair -- the STR comparison keeps (A,B) and drops
+# (B,A), so a duplicate reads as one finding rather than two mirrored ones.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Warning ;
+    sh:focusNode ?entity ;
+    sh:resultPath ?key ;
+    sh:value ?value ;
+    sh:sourceConstraintComponent oq:CMP-030 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  VALUES (?class ?key) {
+    (water:Site water:siteName)
+  }
+  ?entity a ?class ; ?key ?value .
+  ?other  a ?class ; ?key ?value .
+  FILTER(STR(?entity) < STR(?other))
+  BIND(CONCAT("The business key ", STR(?key), " value '", STR(?value), "' identifies both ",
+              STR(?entity), " and ", STR(?other), ". Either the source holds the same ",
+              STR(?class), " twice under two ids, or the key is not the identifier it is ",
+              "being used as.") AS ?msg)
+}

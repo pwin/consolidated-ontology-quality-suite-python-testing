@@ -1,0 +1,23 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix gist: <https://w3id.org/semanticarts/ns/ontology/gist/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# The unit lives in the data, so the class that declares it is populated.
+:LitrePerSecond a gist:UnitOfMeasure ; rdfs:label "litre per second"@en .
+
+# CONTROL: a number and the unit it is in. Comparable, convertible, safe to
+# aggregate.
+<https://example.org/water/data/flow-S1>
+    a gist:Magnitude ;
+    rdfs:label "Northgate flow"@en ;
+    gist:numericValue "120.5"^^xsd:decimal ;
+    gist:hasUnitOfMeasure :LitrePerSecond .
+
+# SEEDS CT-20: a number with no unit. 47 of what? It will be averaged with
+# the one above by anything that reads gist:numericValue, and the answer will
+# be arithmetically perfect and physically meaningless.
+<https://example.org/water/data/flow-S2>
+    a gist:Magnitude ;
+    rdfs:label "Eastbrook flow"@en ;
+    gist:numericValue "47.0"^^xsd:decimal .

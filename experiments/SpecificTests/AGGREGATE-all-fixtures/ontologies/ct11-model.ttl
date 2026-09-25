@@ -1,0 +1,34 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<https://example.org/water/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/model/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Minimal water model"@en .
+
+# CONTROL: one preferred label per language, which is what SKOS asks for.
+# Two languages is not two preferred labels.
+:Site
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Site"@en ;
+    skos:prefLabel  "Site"@en ;
+    skos:prefLabel  "Safle"@cy ;
+    skos:definition "A place at which the operator owns or monitors assets."@en .
+
+# SEEDS CT-11: two English preferred labels. Nothing can choose between
+# them, so every list built from the preferred term either shows the concept
+# twice or picks one arbitrarily and hides the disagreement.
+:Asset
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Asset"@en ;
+    skos:prefLabel  "Asset"@en ;
+    skos:prefLabel  "Equipment item"@en ;
+    skos:definition "A piece of equipment the operator owns."@en .
+
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

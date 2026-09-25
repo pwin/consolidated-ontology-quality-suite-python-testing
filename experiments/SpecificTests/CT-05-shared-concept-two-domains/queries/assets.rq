@@ -1,0 +1,12 @@
+# The assets domain. Owns neither concept: :Site is shared with the
+# readings domain, :Asset is shared with nothing here and is the control.
+prefix : <https://example.org/water/model#>
+
+CONSTRUCT {
+  ?site_IRI a :Site .
+  ?asset_IRI a :Asset .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", ?siteid)) AS ?site_IRI)
+  BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?asset_IRI)
+}

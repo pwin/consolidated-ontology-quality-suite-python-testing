@@ -1,0 +1,14 @@
+@prefix :     <https://example.org/water/model#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# SEEDS CT-2: one IRI, two unrelated classes. Two mappings each minted an
+# identifier from the same column and meant different things by it, so this
+# node is a site to one half of the pipeline and a reading to the other.
+<https://example.org/water/data/node-A1>
+    a :Site, :Reading ;
+    rdfs:label "Northgate"@en .
+
+# CONTROL: one IRI, one class, as every other node should be.
+<https://example.org/water/data/site-S2>
+    a :Site ;
+    rdfs:label "Eastbrook"@en .

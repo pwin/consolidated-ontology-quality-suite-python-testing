@@ -1,0 +1,47 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+
+PREFIX tq:      <https://semantechs.co.uk/ontology-quality/tarql/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX core:    <https://example.org/core/model#>
+
+# CMP-029 (CT-29): a BIND still minting instance IRIs under a base the model
+# has moved away from.
+#
+# Three artefacts, and none of them can answer it alone:
+#   bind facts    the base IRI the mapping actually CONCATs, per variable
+#   sketch        which class that variable's entity is typed with
+#   core.ttl      which class supersedes it, and the base agreed for it
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?bind ;
+    sh:resultPath tq:expression ;
+    sh:value ?base ;
+    sh:sourceConstraintComponent oq:CMP-029 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?bind a tq:Bind ;
+    tq:target ?var ;
+    tq:expression ?expr .
+  BIND(REPLACE(?expr, '^[^"]*"([^"]*)".*$', "$1") AS ?base)
+  FILTER(STRSTARTS(?base, "http"))
+
+  ?entity a ?superseded .
+  FILTER(isIRI(?entity))
+  FILTER(STRAFTER(STR(?entity), "#") = ?var)
+
+  ?superseded dcterms:isReplacedBy ?agreed .
+  ?agreed core:iriPattern ?pattern .
+  FILTER(!STRSTARTS(?base, ?pattern))
+
+  BIND(CONCAT("The BIND for ?", ?var, " mints IRIs under <", ?base, ">, but ",
+              STR(?superseded), " has been replaced by ", STR(?agreed),
+              ", whose agreed instance pattern is <", ?pattern, ">.") AS ?msg)
+}

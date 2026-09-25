@@ -1,0 +1,16 @@
+{
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "CMP-029",
+      "category": "competency",
+      "metric": "IRI construction pattern currency",
+      "default_severity": "Violation",
+      "title": "Instance IRI built under a superseded base",
+      "description": "A BIND still CONCATs instance IRIs under the base agreed for a class that has since been replaced, typically because the concept moved into a shared namespace and took its agreed IRI pattern with it.",
+      "remediation": "Update the mapping's BIND to the pattern the superseding class declares, and decide what happens to the identifiers already issued.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Instance IRIs follow the pattern the current model agrees on"
+    }
+  ]
+}

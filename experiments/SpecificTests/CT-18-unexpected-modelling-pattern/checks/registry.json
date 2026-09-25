@@ -1,0 +1,16 @@
+{
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "CMP-018",
+      "category": "competency",
+      "metric": "modelling pattern conformance",
+      "default_severity": "Violation",
+      "title": "Generated graph uses an unexpected modelling pattern",
+      "description": "A value is attached directly to an entity where the agreed pattern puts it on an intermediate node. The triple is valid and the number is right; what is lost is everywhere the unit and quantity kind would have gone.",
+      "remediation": "Build the intermediate node the pattern calls for, and move the value onto it.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Values are attached the way the agreed pattern attaches them"
+    }
+  ]
+}

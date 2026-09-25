@@ -1,0 +1,148 @@
+{
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "CMP-002",
+      "category": "competency",
+      "metric": "identifier uniqueness across mappings",
+      "default_severity": "Violation",
+      "title": "Same IRI used for two unrelated concepts",
+      "description": "One IRI is typed with two classes where neither is a specialisation of the other, so two mappings are minting the same identifier for different things.",
+      "remediation": "Decide which concept owns the IRI template and change the other mapping's BIND, or add the discriminator that keeps the two apart.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "No IRI denotes two unrelated concepts"
+    },
+    {
+      "id": "CMP-009",
+      "category": "competency",
+      "metric": "hierarchy placement",
+      "default_severity": "Warning",
+      "title": "Locally defined class has no place in the class hierarchy",
+      "description": "A class the model itself declares has no superclass and no subclass, so it sits outside the hierarchy: it inherits nothing, appears in no tree view, and no reasoner can relate its instances to anything else.",
+      "remediation": "Give it a superclass, or accept it as a top-level concept and say so by making something a subclass of it.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Every locally defined class has a place in the hierarchy"
+    },
+    {
+      "id": "CMP-012",
+      "category": "competency",
+      "metric": "label ownership",
+      "default_severity": "Warning",
+      "title": "Label or definition minted by the transformation",
+      "description": "A mapping states a skos:prefLabel, altLabel or definition for a term the model or taxonomy owns. Two files now disagree about the term's name the moment either changes, and the mapping's copy is the one that reaches the output.",
+      "remediation": "Delete the label from the mapping and let the taxonomy supply it.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Vocabulary terms are named by the vocabulary"
+    },
+    {
+      "id": "CMP-017",
+      "category": "competency",
+      "metric": "required relationship completeness",
+      "default_severity": "Violation",
+      "title": "Generated entity missing a required object property",
+      "description": "An entity of a class the project requires a link from does not have it. The rule is the project's, agreed in the mapping specification rather than declared in the ontology, which is why no registry check reports it.",
+      "remediation": "Fill the gap in the source, or change the mapping so an entity is not built at all when the link cannot be.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Every generated entity carries the links its class requires"
+    },
+    {
+      "id": "CMP-018",
+      "category": "competency",
+      "metric": "modelling pattern conformance",
+      "default_severity": "Violation",
+      "title": "Generated graph uses an unexpected modelling pattern",
+      "description": "A value is attached directly to an entity where the agreed pattern puts it on an intermediate node. The triple is valid and the number is right; what is lost is everywhere the unit and quantity kind would have gone.",
+      "remediation": "Build the intermediate node the pattern calls for, and move the value onto it.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Values are attached the way the agreed pattern attaches them"
+    },
+    {
+      "id": "CMP-019",
+      "category": "competency",
+      "metric": "magnitude completeness",
+      "default_severity": "Violation",
+      "title": "Magnitude missing a numeric value",
+      "description": "A magnitude node was built and typed but carries no number, usually because the source cell was empty and the mapping built the node anyway.",
+      "remediation": "Fill the source value, or make the mapping build the magnitude only when a value exists.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Every magnitude carries a number"
+    },
+    {
+      "id": "CMP-021",
+      "category": "competency",
+      "metric": "unit compatibility with quantity kind",
+      "default_severity": "Violation",
+      "title": "Unit of measure incompatible with the quantity",
+      "description": "A magnitude carries a unit that does not measure its kind of quantity -- a pressure in litres, a length in seconds. The unit is a real unit and the link is the right link, so nothing structural can see it.",
+      "remediation": "Use a unit of the right kind, and check the mapping that chose it -- a wrong unit is usually a column read from the wrong place.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Every magnitude is measured in a unit of its own kind"
+    },
+    {
+      "id": "CMP-029",
+      "category": "competency",
+      "metric": "IRI construction pattern currency",
+      "default_severity": "Violation",
+      "title": "Instance IRI built under a superseded base",
+      "description": "A BIND still CONCATs instance IRIs under the base agreed for a class that has since been replaced, typically because the concept moved into a shared namespace and took its agreed IRI pattern with it.",
+      "remediation": "Update the mapping's BIND to the pattern the superseding class declares, and decide what happens to the identifiers already issued.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Instance IRIs follow the pattern the current model agrees on"
+    },
+    {
+      "id": "CMP-030",
+      "category": "competency",
+      "metric": "business key uniqueness within an output",
+      "default_severity": "Warning",
+      "title": "Two entities share a business key",
+      "description": "Two instances of one class carry the same value for the property the project treats as that class's business key, so one real-world thing has been created twice under two identifiers.",
+      "remediation": "Decide which identifier survives, merge the two, and give the source a uniqueness constraint on that key.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "A business key identifies at most one entity"
+    },
+    {
+      "id": "CMP-031",
+      "category": "competency",
+      "metric": "single-valued relationship cardinality",
+      "default_severity": "Violation",
+      "title": "Single-valued relationship carries two values",
+      "description": "An entity carries two values for a relationship the agreed pattern allows one of, typically because two mappings each contribute a link and disagree. Reported by a project check because the ontology does not declare the property functional.",
+      "remediation": "Establish which source is authoritative and drop the other mapping's triple. Declaring the property owl:FunctionalProperty afterwards moves the check to LOG-002.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "A single-valued relationship has one value"
+    },
+    {
+      "id": "CMP-032",
+      "category": "competency",
+      "metric": "template conformance to declared domains",
+      "default_severity": "Violation",
+      "title": "Template asserts a property outside its declared domain",
+      "description": "A CONSTRUCT template hangs a property off an entity whose class is not the property's rdfs:domain, nor a subclass of it. The suite reports the same condition as CNF-003, but of real output -- after the CSVs are read and the mappings run.",
+      "remediation": "Use the property the class actually has, or type the entity as the class the property expects. If both are right, the ontology's domain is too narrow.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "Every property a template asserts belongs to the class it is asserted on"
+    },
+    {
+      "id": "CMP-033",
+      "category": "competency",
+      "metric": "deprecated term still built by a transformation",
+      "default_severity": "Warning",
+      "title": "Mapping still builds a deprecated term",
+      "description": "A mapping constructs a class or property the model marks owl:deprecated. QUA-003 asks this of an ontology and of data; neither reaches the mappings, which are where the use originates.",
+      "remediation": "Move the mapping to the replacement the ontology names, then decide what happens to the data already built with the old term.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "No mapping builds a term the model has deprecated"
+    },
+    {
+      "id": "CMP-037",
+      "category": "competency",
+      "metric": "prefix agreement across mappings",
+      "default_severity": "Violation",
+      "title": "One prefix bound to two namespaces across the mapping set",
+      "description": "Two mappings bind the same prefix to different namespaces. Each file is internally consistent, so no per-file check fires; downstream the term-level checks report an undeclared term, which names the symptom in one file rather than the disagreement between two.",
+      "remediation": "Agree one namespace per prefix across the mapping set, preferably in a shared header the queries include rather than repeat.",
+      "cucumber_feature": "Cross-artefact Consistency",
+      "cucumber_scenario": "A prefix means the same thing in every mapping"
+    }
+  ]
+}

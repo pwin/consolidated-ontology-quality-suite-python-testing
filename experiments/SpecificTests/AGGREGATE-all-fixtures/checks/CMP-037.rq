@@ -1,0 +1,45 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX gist:  <https://w3id.org/semanticarts/ns/ontology/gist/>
+PREFIX water: <https://example.org/water/model#>
+
+PREFIX tq: <https://semantechs.co.uk/ontology-quality/tarql/>
+
+# CMP-037 (CT-37): one prefix bound to two namespaces across the mapping set.
+#
+# A GROUP BY, because the suite publishes each query's PREFIX table as
+# tq:PrefixBinding facts (0.16.0). Before that this was Python: the question
+# is about the *set*, and no single file is wrong.
+#
+# One finding per disagreeing prefix -- joining back to the bindings would
+# report the same disagreement once per file that declares it.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?focus ;
+    sh:resultPath tq:namespace ;
+    sh:value ?namespaces ;
+    sh:sourceConstraintComponent oq:CMP-037 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  {
+    SELECT ?prefix (COUNT(DISTINCT ?namespace) AS ?count)
+           (GROUP_CONCAT(DISTINCT ?namespace; separator=", ") AS ?namespaces)
+           (GROUP_CONCAT(DISTINCT ?source; separator=", ") AS ?files)
+    WHERE {
+      ?b a tq:PrefixBinding ; tq:prefix ?prefix ; tq:namespace ?namespace ; tq:source ?source .
+    }
+    GROUP BY ?prefix
+    HAVING (COUNT(DISTINCT ?namespace) > 1)
+  }
+  BIND(IRI(CONCAT("https://semantechs.co.uk/ontology-quality/tarql/prefix/",
+                  ENCODE_FOR_URI(?prefix))) AS ?focus)
+  BIND(CONCAT("The mapping set binds ", ?prefix, ": to ", STR(?count), " namespaces -- ",
+              ?namespaces, " -- across ", ?files,
+              ". Every term either file builds with it lands somewhere the other does not ",
+              "expect.") AS ?msg)
+}

@@ -1,0 +1,21 @@
+@prefix :      <https://example.org/water/model#> .
+@prefix vocab: <https://example.org/water/vocab#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix gist:  <https://w3id.org/semanticarts/ns/ontology/gist/> .
+
+# Declarations only -- what each term *is*, and nothing about what it is
+# called. That is deliberate and is what makes the check answerable: merge
+# the model's own labels in as well and every term the ontology correctly
+# labels looks exactly like a term the mapping labelled.
+gist:Category a owl:Class .
+
+# A category class: its members are vocabulary, and the vocabulary names
+# them. That is what separates them from rows the mapping builds.
+:AssetType a owl:Class ; rdfs:subClassOf gist:Category .
+vocab:Reservoir a :AssetType .
+vocab:Borehole  a :AssetType .
+
+# A domain class. Its instances are per-row entities, and naming those is
+# the mapping's own business.
+:Asset a owl:Class .

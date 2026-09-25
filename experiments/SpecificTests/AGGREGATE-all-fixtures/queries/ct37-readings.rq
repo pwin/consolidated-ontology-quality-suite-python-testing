@@ -1,0 +1,16 @@
+# SEEDS CT-37: gist: ends with a hash here. The file is internally
+# consistent and reads perfectly well; every term it builds with that prefix
+# lands in a namespace the other mapping has never heard of.
+#
+# CONTROL: both files bind : to the same namespace, so a check that reported
+# every shared prefix would report that one too.
+prefix :     <https://example.org/water/model#>
+prefix gist: <https://w3id.org/semanticarts/ns/ontology/gist#>
+
+CONSTRUCT {
+  ?reading_IRI a :Reading ;
+    gist:numericValue ?value .
+}
+WHERE {
+  BIND(IRI(CONCAT("https://example.org/water/data/reading-", ?readingid)) AS ?reading_IRI)
+}

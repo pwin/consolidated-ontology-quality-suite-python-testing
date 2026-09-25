@@ -1,0 +1,15 @@
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+
+# The integration ontology: the one file a consumer is given, and the only
+# statement anywhere about what this project's model consists of.
+#
+# SEEDS CT-36: it imports the model and nothing else, while the mappings also
+# build terms from units.ttl. Pass every file on a command line and those
+# terms resolve; load this ontology the way it says to load it and they do
+# not exist.
+<https://example.org/water/integration>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/water/integration/1.0.0> ;
+    rdfs:label      "Acme Water integration ontology"@en ;
+    owl:imports     <https://example.org/water/model> .

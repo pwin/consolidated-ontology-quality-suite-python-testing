@@ -1,0 +1,19 @@
+# The reference mapping. Both variables below are built the way the project
+# agreed; readings.rq is compared against this file.
+#
+# ?asset_IRI is the control and ?site_IRI is the error case. They sit in one
+# file, built by one author, in the same style -- so a check that reports the
+# second and not the first is discriminating rather than merely firing.
+prefix : <https://example.org/water/model#>
+
+CONSTRUCT {
+  ?site_IRI a :Site .
+  ?asset_IRI a :Asset .
+}
+WHERE {
+  # CONTROL: readings.rq binds ?asset_IRI with this exact expression.
+  BIND(IRI(CONCAT("https://example.org/water/data/asset-", ?assetid)) AS ?asset_IRI)
+
+  # ERROR CASE, half one: the agreed template for a site IRI.
+  BIND(IRI(CONCAT("https://example.org/water/data/site-", ?siteid)) AS ?site_IRI)
+}

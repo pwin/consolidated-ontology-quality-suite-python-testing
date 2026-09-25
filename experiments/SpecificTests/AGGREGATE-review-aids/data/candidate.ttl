@@ -1,0 +1,34 @@
+# SEEDS CT-23: water: is bound as wt: here, and qudt: is declared and used
+# where nothing declared it before. The IRIs below are identical to the
+# baseline's -- only the serialisation differs, which is exactly what makes a
+# textual diff of these two files overstate the change.
+@prefix wt:   <https://example.org/water/model#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# CONTROL (CT-28): unchanged -- same key, same IRI.
+# SEEDS CT-24/CT-26: water:hasReading became water:reportedBy.
+<https://example.org/water/data/site-S1>
+    a wt:Site ;
+    skos:notation "S1" ;
+    wt:siteName "Northgate" ;
+    wt:reportedBy <https://example.org/water/data/reading-R1> .
+
+# SEEDS CT-28: the same business key as the baseline's site-S2, under a
+# different subject IRI. Anything joining on the key sees one site; anything
+# joining on the IRI sees two.
+<https://example.org/water/data/site-EASTBROOK>
+    a wt:Site ;
+    skos:notation "S2" ;
+    wt:siteName "Eastbrook" .
+
+# SEEDS CT-25: pump-P2 is gone.
+<https://example.org/water/data/pump-P1> a wt:PumpStation ; skos:notation "P1" ;
+    qudt:hasQuantityKind <http://qudt.org/vocab/quantitykind/VolumeFlowRate> .
+
+# SEEDS CT-27: 1.5 and 1.50 are the same number. A reviewer should not spend
+# attention on it, which is what normalisation before comparison is for.
+<https://example.org/water/data/reading-R1>
+    a wt:Reading ;
+    wt:flowValue "1.5"^^xsd:decimal .
