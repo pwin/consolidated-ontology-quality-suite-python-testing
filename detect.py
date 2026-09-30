@@ -303,6 +303,21 @@ FIXTURES: List[Fixture] = [
         # findings must not gate a build, which is what the ceiling pins.
         max_severity="Warning",
     ),
+    Fixture(
+        name="14-blank-node-focus",
+        stage="checks",
+        ontology="14-blank-node-focus/ontology.ttl",
+        seeded_errors="untagged rdfs:label on two anonymous restrictions, on an anonymous owl:Axiom, and on one IRI class",
+        expected=("STY-003",),
+        # False-positive guard: the header is complete, every term is declared
+        # locally, and every one carries a skos:definition and a formal
+        # definition -- so the fixture isolates the blank-node dimension and
+        # nothing else. QUA-010 and STR-004 both fired here before those were
+        # added, which is how the list below was arrived at rather than guessed.
+        forbidden=("STR-001", "STR-002", "STR-004", "QUA-001", "QUA-010"),
+        # An untagged label is advice, wherever its subject sits.
+        max_severity="Info",
+    ),
 ]
 
 FIXTURES_BY_NAME = {f.name: f for f in FIXTURES}

@@ -1,0 +1,116 @@
+@prefix :     <https://example.org/test/blanknode#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# A fixture whose findings hang off *blank nodes* rather than IRIs.
+#
+# Every other fixture here labels IRIs: measured across the other thirteen,
+# 101 rdfs:label subjects, none of them a blank node. A real ontology is the
+# other way round -- most labelled things are anonymous restrictions and
+# axioms -- and a check that misbehaves only on a blank-node focus node was
+# therefore undetectable here whatever the table asserted.
+#
+# It was not hypothetical. STY-003 built its sh:resultMessage with STR(?e),
+# and SPARQL 1.1 17.4.2.5 defines STR() for literals and IRIs only, so STR()
+# of a blank node is a type error: CONCAT errors, BIND leaves ?msg unbound,
+# and the CONSTRUCT template drops the message. The check still fired, at the
+# right count and the right severity, so test_expected_checks_fire,
+# test_severity_ceiling and both parity tests all passed while the message
+# silently went missing for 60 of 65 findings on the suite's own stress
+# fixture -- and in the VS Code extension, which runs the same query through
+# oxigraph, it went missing in the field. Fixed in suite 0.21.1 and extension
+# 0.13.9; this fixture plus the message assertions in tests/test_detection.py
+# are what would notice next time.
+#
+# The ontology header is deliberately complete, so metadata checks stay quiet
+# and what is left is the untagged labels on anonymous nodes.
+
+<https://example.org/test/blanknode>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/test/blanknode/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Blank-node focus fixture"@en ;
+    rdfs:comment    "Findings whose focus node is anonymous."@en .
+
+:Vehicle
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Vehicle"@en ;
+    skos:prefLabel  "Vehicle"@en ;
+    skos:definition "Something that conveys people or goods."@en ;
+    rdfs:comment    "A conveyance."@en .
+
+:Wheel
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Wheel"@en ;
+    skos:prefLabel  "Wheel"@en ;
+    skos:definition "A circular component that a vehicle rolls on."@en ;
+    rdfs:comment    "A round thing."@en .
+
+:hasPart
+    a               owl:ObjectProperty ;
+    rdfs:domain     :Vehicle ;
+    rdfs:range      :Wheel ;
+    rdfs:label      "has part"@en ;
+    skos:prefLabel  "hasPart"@en ;
+    skos:definition "Relates a vehicle to a part it is composed of."@en ;
+    rdfs:comment    "Relates a vehicle to a wheel."@en .
+
+# ERROR: the restriction carries an rdfs:label with no language tag, and the
+#        focus node of that finding is a blank node -> STY-003
+:Car
+    a               owl:Class ;
+    rdfs:label      "Car"@en ;
+    skos:prefLabel  "Car"@en ;
+    skos:definition "A road vehicle carrying a small number of people."@en ;
+    rdfs:comment    "A vehicle with wheels."@en ;
+    rdfs:subClassOf :Vehicle ;
+    rdfs:subClassOf [
+        a                  owl:Restriction ;
+        owl:onProperty     :hasPart ;
+        owl:someValuesFrom :Wheel ;
+        rdfs:label         "has at least one wheel"
+    ] .
+
+# ERROR: a second anonymous restriction with an untagged label, so the finding
+#        count is plural and a check that collapses distinct blank-node focus
+#        nodes into one shows up as a count -> STY-003
+:Motorcycle
+    a               owl:Class ;
+    rdfs:label      "Motorcycle"@en ;
+    skos:prefLabel  "Motorcycle"@en ;
+    skos:definition "A two-wheeled road vehicle."@en ;
+    rdfs:comment    "A two-wheeled vehicle."@en ;
+    rdfs:subClassOf :Vehicle ;
+    rdfs:subClassOf [
+        a                  owl:Restriction ;
+        owl:onProperty     :hasPart ;
+        owl:someValuesFrom :Wheel ;
+        rdfs:label         "has exactly two wheels"
+    ] .
+
+# ERROR: an anonymous axiom, not a restriction, also labelled without a tag --
+#        so the blank-node focus nodes are not all owl:Restriction and a check
+#        cannot pass by special-casing that one type -> STY-003
+[]  a            owl:Axiom ;
+    owl:annotatedSource   :Car ;
+    owl:annotatedProperty rdfs:subClassOf ;
+    owl:annotatedTarget   :Vehicle ;
+    rdfs:label            "a car is a vehicle" ;
+    rdfs:comment          "Reified for provenance."@en .
+
+# One IRI-subject untagged label as well, so the fixture exercises both sides
+# of the same check in one pass: whatever the message says for a blank node,
+# it must still be right for an IRI.
+# ERROR: untagged label on an IRI -> STY-003
+:Chassis
+    a               owl:Class ;
+    rdfs:label      "Chassis" ;
+    skos:prefLabel  "Chassis"@en ;
+    skos:definition "The load-bearing frame of a vehicle."@en ;
+    rdfs:comment    "The frame."@en ;
+    rdfs:subClassOf :Vehicle .

@@ -1,0 +1,69 @@
+@prefix :     <https://example.org/ct39#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# Two untagged labels, identical but for what carries them: one an anonymous
+# restriction, one a named class. STY-003 must report both, and each message
+# must name something the reader can go and find.
+#
+# The header is deliberately complete and every named term carries a
+# definition and a formal definition, so the only check left with anything to
+# say is the one under test.
+
+<https://example.org/ct39>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/ct39/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "CT-39 fixture"@en ;
+    rdfs:comment    "A finding must name something a reader can find."@en .
+
+:Wheel
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Wheel"@en ;
+    skos:prefLabel  "Wheel"@en ;
+    skos:definition "A circular component a vehicle rolls on."@en .
+
+:hasPart
+    a               owl:ObjectProperty ;
+    rdfs:domain     :Vehicle ;
+    rdfs:range      :Wheel ;
+    rdfs:label      "has part"@en ;
+    skos:prefLabel  "hasPart"@en ;
+    skos:definition "Relates a vehicle to a component of it."@en .
+
+:Vehicle
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Vehicle"@en ;
+    skos:prefLabel  "Vehicle"@en ;
+    skos:definition "Something that conveys people or goods."@en .
+
+# error case: the untagged label is on a blank node, so the focus node has no
+# IRI to put in the message. STR() of a blank node is a type error in SPARQL,
+# so a message built with it is either dropped entirely or -- under an engine
+# that does not raise -- filled with an internal identifier that means nothing
+# and differs on every run.
+:Car
+    a               owl:Class ;
+    rdfs:subClassOf :Vehicle ;
+    rdfs:label      "Car"@en ;
+    skos:prefLabel  "Car"@en ;
+    skos:definition "A road vehicle for a small number of people."@en ;
+    rdfs:subClassOf [
+        a                  owl:Restriction ;
+        owl:onProperty     :hasPart ;
+        owl:someValuesFrom :Wheel ;
+        rdfs:label         "has at least one wheel"
+    ] .
+
+# control: the same untagged label, on a class with an IRI. The message has
+# something to name, so this is the case that works however STR() behaves --
+# which is why the pair discriminates.
+:Chassis
+    a               owl:Class ;
+    rdfs:subClassOf :Vehicle ;
+    rdfs:label      "Chassis" ;
+    skos:prefLabel  "Chassis"@en ;
+    skos:definition "The load-bearing frame of a vehicle."@en .

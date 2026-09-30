@@ -53,6 +53,38 @@ only when no query declares an empty prefix — so the tool's own predicate
 landed in the project's namespace and was reported as a property nobody had
 declared. No project could have made that go away.
 
+## Why the numbering has gaps
+
+The folders run 1–39 with eleven numbers missing: 15, 16, 23–28, 34, 35, 36 and
+38. Those are not omissions, and the rule is exact — every competency whose
+`kind` in `competency_tests/competency.py` is `harness` is absent, and every
+competency the *suite* can answer is present:
+
+| `kind` | Competencies | On the board |
+|---|---|---|
+| `registry`, `suite-module`, `project-check`, or a mix | 26 of 38 | all of them |
+| `harness` | 15, 16, 23–28, 34–36, 38 | none |
+
+A `harness` competency is answered by this repo's own `mapping_drift.py` rather
+than by a check the suite ships: comparing two runs' outputs, comparing a run
+against a stored golden, comparing the shapes two query files build. The board
+asks *can the suite do this*, so a question the suite does not answer has no
+folder to put it in — those are covered in `competency_tests/` instead, and
+`REVIEW.md` groups all 38 by the inputs each needs.
+
+Worth knowing before adding one: a folder for a `harness` competency would have
+to invoke `mapping_drift` rather than the suite CLI, and `SUITE=` would stop
+meaning anything for it. That is a different board.
+
+## Numbers above 38
+
+38 is where the competency model ends. A folder numbered higher tests something
+the model does not name, and says so in its README.
+
+| | What it adds |
+|---|---|
+| [CT-39](CT-39-finding-names-something-findable/) | A finding must carry a message that names something a reader can find. The only folder whose assertion is about the *message* rather than about which check fired — written after `STY-003` lost its message for every blank-node focus node while firing at the right count and the right severity, so every other assertion here passed and the defect shipped in the VS Code extension. `EFF-001` had it too, found by the same assertion minutes after it existed. |
+
 ## How this differs from `competency_tests/`
 
 Both run the real suite over real artefacts. The difference is isolation.

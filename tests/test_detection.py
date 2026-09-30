@@ -1,6 +1,8 @@
 """Assert that the suite detects the errors seeded into each fixture."""
 from __future__ import annotations
 
+import re
+
 import pytest
 
 import detect
@@ -165,3 +167,68 @@ def test_ill_formed_literals_defeat_the_external_reasoner():
     # the machine's.
     healthy = detect.ids_of(detect.run_fixture("13-unsatisfiable-class", engine="both", reasoner="auto"))
     assert "REA-020" in healthy, "the reasoner must work elsewhere for this test to mean anything"
+
+#: rdflib and pyoxigraph both render a blank node as a long run of hex. Matching
+#: the run itself rather than a prefix keeps this independent of which engine
+#: produced it -- rdflib writes `n` then 32 hex digits, oxigraph writes its own.
+BNODE_LABEL = re.compile(r"[0-9a-f]{24,}")
+
+
+@pytest.mark.parametrize("name", FIXTURE_NAMES)
+def test_every_finding_carries_a_message(name):
+    """A finding a reader cannot act on is barely a finding.
+
+    Asserted under ``--engine sparql`` rather than the default ``both``, and
+    that is the whole point: with both formulations running, `checks/merge.py`
+    fills a missing message from whichever source has one, so a message the
+    portable layer has stopped producing is invisible. STY-003 lost its message
+    for every blank-node focus node -- 60 of 65 findings on the suite's own
+    stress fixture -- and the check still fired at the right count and the right
+    severity, so every other test in this file passed. The extension, which runs
+    the portable queries through oxigraph with no SHACL layer to fall back on,
+    shipped that gap to users.
+    """
+    rows = run_fixture(name, engine="sparql")
+    empty = sorted(
+        {f"{r.check_id} on {r.focus_node}" for r in rows if not (r.message or "").strip()}
+    )
+    assert not empty, (
+        f"{name}: {len(empty)} finding(s) carry no message under --engine sparql\n"
+        + "\n".join(f"    {e}" for e in empty[:10])
+        + "\n  A CONSTRUCT template drops a triple whose variable is unbound, so an"
+        "\n  expression that errors for some rows silently removes the message for"
+        "\n  exactly those rows. STR() of a blank node is the usual cause: it is a"
+        "\n  type error in SPARQL, so wrap it as IF(isBlank(?x), \"[a blank node]\","
+        "\n  STR(?x))."
+    )
+
+
+@pytest.mark.parametrize("name", FIXTURE_NAMES)
+def test_no_message_names_an_internal_blank_node_identifier(name):
+    """A message naming a blank node's internal label says nothing a reader can
+    use, and says something different on every run.
+
+    Scoped to ``--engine sparql`` because the SHACL twins cannot do better:
+    `sh:message "A label on {$this} has no language tag."` substitutes the focus
+    node, and SHACL has no conditional form of that substitution, so a
+    blank-node focus node always renders as its identifier there. The portable
+    SPARQL formulation *can* choose its own wording, so that is where the
+    property is worth holding.
+    """
+    rows = run_fixture(name, engine="sparql")
+    leaky = sorted(
+        {
+            f"{r.check_id}: {r.message[:70]}"
+            for r in rows
+            if r.message and BNODE_LABEL.search(r.message)
+        }
+    )
+    assert not leaky, (
+        f"{name}: {len(leaky)} message(s) name an internal blank node identifier\n"
+        + "\n".join(f"    {e}" for e in leaky[:10])
+        + "\n  Those identifiers differ between runs and between engines, so a report"
+        "\n  built from them is not reproducible. Use IF(isBlank(?x),"
+        "\n  \"[a blank node]\", STR(?x)) rather than STR(?x) or"
+        "\n  COALESCE(STR(?x), ...) -- COALESCE only helps where STR() errors, and"
+        "\n  rdflib returns the identifier instead of erroring."
+    )

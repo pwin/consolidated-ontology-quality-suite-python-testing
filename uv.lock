@@ -408,7 +408,7 @@ wheels = [
 
 [[package]]
 name = "ontology-quality-suite"
-version = "0.21.0"
+version = "0.21.1"
 source = { editable = "../consolidated_ontology_suite_python" }
 dependencies = [
     { name = "matplotlib" },
@@ -440,7 +440,10 @@ requires-dist = [
 provides-extras = ["reasoner", "native-shacl"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=8.0.0" }]
+dev = [
+    { name = "pyoxigraph", specifier = ">=0.5" },
+    { name = "pytest", specifier = ">=8.0.0" },
+]
 
 [[package]]
 name = "owl2-error-detection-tests"
