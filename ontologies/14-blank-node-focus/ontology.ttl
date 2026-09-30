@@ -21,9 +21,12 @@
 # test_severity_ceiling and both parity tests all passed while the message
 # silently went missing for 60 of 65 findings on the suite's own stress
 # fixture -- and in the VS Code extension, which runs the same query through
-# oxigraph, it went missing in the field. Fixed in suite 0.21.1 and extension
-# 0.13.9; this fixture plus the message assertions in tests/test_detection.py
-# are what would notice next time.
+# oxigraph, it went missing in the field. Suite 0.21.1 and extension 0.13.9
+# restored the message, with COALESCE; the IF(isBlank(?x), ...) form -- which
+# also stops rdflib putting the internal identifier in the prose -- and the
+# same defect in EFF-001's message are fixed but unreleased. This fixture plus
+# the message assertions in tests/test_detection.py are what would notice next
+# time.
 #
 # The ontology header is deliberately complete, so metadata checks stay quiet
 # and what is left is the untagged labels on anonymous nodes.
