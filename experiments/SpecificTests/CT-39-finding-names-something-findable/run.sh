@@ -20,7 +20,10 @@
 # message at all for 60 of 65 findings on the suite's own stress fixture. Every
 # other kind of assertion on this board would have passed, and did: the defect
 # reached users through the VS Code extension, which runs the same queries
-# through oxigraph and has no SHACL formulation to fall back on.
+# through oxigraph. The extension runs the shapes too, through shacl-wasm-node,
+# but its merge does not fill a missing message from the other arm -- so the
+# measured result there was three rows for two findings, the blank-node one
+# twice, with the surviving message naming an internal label. See the README.
 #
 # EFF-001 had it too, found by the same assertion once it existed.
 set -euo pipefail

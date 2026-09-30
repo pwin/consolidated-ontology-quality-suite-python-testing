@@ -31,9 +31,22 @@ error: `CONCAT` errors, `BIND` leaves the message variable unbound, and a
 The check went on firing. Right count, right severity, right focus node — and
 no message at all for **60 of 65 findings** on the suite's own stress fixture.
 Nothing on this board asserted anything about a message, so nothing failed. The
-defect reached users through the VS Code extension, which runs the portable
-queries through oxigraph and has no SHACL formulation to fall back on: measured
-on its own bundled engine, 1 message for 2 findings.
+defect reached users through the VS Code extension. What it does there was
+measured rather than assumed, and it is not what this file first claimed: the
+extension runs *both* tiers -- the portable queries through oxigraph, the shapes
+through `shacl-wasm-node` -- and merges them. Its merge does not fill a missing
+message from the other arm, so for one anonymous restriction with an untagged
+label it produced **three rows for two findings**: the blank-node one twice,
+because oxigraph labels that node `n3-0` where shacl-wasm labels it `_:1_b4` and
+the dedup key held the label. The surviving message read `A label on _:1_b4 has
+no language tag.`
+
+So the same pair of defects sat on both sides of the boundary, and the second
+outlived the first fix in both places for the same reason: the fix went into the
+query, while the *shape* interpolated the label independently. Fixed in the
+extension in `merge.anonymousKey` and `shaclRunner.fillMessageTemplate`, which
+mirror the suite's `merge._anonymous_key` and
+`merge.substitute_message_placeholders`.
 
 `EFF-001` had the same defect in its own message, interpolating the far end of a
 `subClassOf` chain that is often an anonymous class expression. It was found by
