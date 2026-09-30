@@ -152,12 +152,16 @@ wheels = [
 ]
 
 [[package]]
-name = "html5rdf"
-version = "1.2.1"
+name = "holosdb"
+version = "0.15.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/4c/55/1b839c43f5ed8207e17a9a02d8b395179520b8b4f00c00a41e113bc205ca/html5rdf-1.2.1.tar.gz", hash = "sha256:ace9b420ce52995bb4f05e7425eedf19e433c981dfe7a831ab391e2fa2e1a195", size = 287899, upload-time = "2024-10-30T05:06:56.384Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/89/5d/b2dc4e3e8e407e92e2d30f5784e8e8faa4daa198a0e20575a53a8a62b38c/holosdb-0.15.0.tar.gz", hash = "sha256:99e97d4677e1dc886d4daf6658d00c0069971351caa937e85d93e67012a5f3dc", size = 620017, upload-time = "2026-09-30T03:17:49.425Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7d/c9/f6e1e8567660bc5b0aba281f2b0017b2a7665fcad6bf3ed67286a0c72cd4/html5rdf-1.2.1-py2.py3-none-any.whl", hash = "sha256:1f519121bc366af3e485310dc8041d2e86e5173c1a320fac3dc9d2604069b83e", size = 109765, upload-time = "2024-10-30T05:06:52.507Z" },
+    { url = "https://files.pythonhosted.org/packages/47/fa/706b16ee22b3d00dce8ef9a2ff4f88a4d0c441d2d3b747f10e7f1af3fbb0/holosdb-0.15.0-cp39-abi3-macosx_10_13_x86_64.whl", hash = "sha256:11971c1931807dadac39e9d90d57b21639591d0b6d265542777c7ef6863cc97e", size = 5747791, upload-time = "2026-09-30T03:17:41.257Z" },
+    { url = "https://files.pythonhosted.org/packages/8c/a7/23024c8f91fbe1f3ffa301b0a90e7a4bd15282698eae9c535399838cf372/holosdb-0.15.0-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:e08212e10bb5c14e7a48ee290c15e543d899ce559f9d7261d8cf336b7463041b", size = 5215336, upload-time = "2026-09-30T03:17:43.025Z" },
+    { url = "https://files.pythonhosted.org/packages/b9/ce/7be4b839596eedef4c10379ef4fe0ec2c1793764defbaf1c30a34a494f14/holosdb-0.15.0-cp39-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:954fbc22cd45cbba515014f3c3004eb0db0f8e3ec8972bee5294c97470932458", size = 6138999, upload-time = "2026-09-30T03:17:44.724Z" },
+    { url = "https://files.pythonhosted.org/packages/0e/fb/6bb3116a0a77f11f5cfdda132af52ffd474457554d8153057ee2014e8a74/holosdb-0.15.0-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:8000fdb50c423ce14662a36a2953f706bcecb2b0f70a0636b09e3ca1b9967828", size = 6689246, upload-time = "2026-09-30T03:17:46.275Z" },
+    { url = "https://files.pythonhosted.org/packages/4c/a5/a33c9b9ab7639cf2e132fc602e0587aadc6ce3079710a4f132caf683cc15/holosdb-0.15.0-cp39-abi3-win_amd64.whl", hash = "sha256:ef7688875905a6a36bfa4fdaeeed63214cf954ada713da1451ae202dead5f005", size = 5419446, upload-time = "2026-09-30T03:17:47.747Z" },
 ]
 
 [[package]]
@@ -411,30 +415,26 @@ name = "ontology-quality-suite"
 version = "0.21.1"
 source = { editable = "../consolidated_ontology_suite_python" }
 dependencies = [
+    { name = "holosdb" },
     { name = "matplotlib" },
     { name = "owlready2" },
     { name = "owlrl" },
     { name = "pandas" },
-    { name = "pyshacl" },
     { name = "rdflib" },
-    { name = "tabulate" },
-]
-
-[package.optional-dependencies]
-native-shacl = [
     { name = "shacl" },
+    { name = "tabulate" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "holosdb", specifier = ">=0.15" },
     { name = "matplotlib", specifier = ">=3.7.0" },
     { name = "owlready2", specifier = ">=0.51" },
     { name = "owlready2", marker = "extra == 'reasoner'", specifier = ">=0.47" },
     { name = "owlrl", specifier = ">=6.0.2" },
     { name = "pandas", specifier = ">=2.0.0" },
-    { name = "pyshacl", specifier = ">=0.25.0" },
     { name = "rdflib", specifier = ">=7.6.0" },
-    { name = "shacl", marker = "extra == 'native-shacl'", specifier = ">=0.3.0,<0.4" },
+    { name = "shacl", specifier = ">=0.3.0,<0.4" },
     { name = "tabulate", specifier = ">=0.9.0" },
 ]
 provides-extras = ["reasoner", "native-shacl"]
@@ -442,6 +442,7 @@ provides-extras = ["reasoner", "native-shacl"]
 [package.metadata.requires-dev]
 dev = [
     { name = "pyoxigraph", specifier = ">=0.5" },
+    { name = "pyshacl", specifier = ">=0.25.0" },
     { name = "pytest", specifier = ">=8.0.0" },
 ]
 
@@ -450,7 +451,7 @@ name = "owl2-error-detection-tests"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "ontology-quality-suite", extra = ["native-shacl"] },
+    { name = "ontology-quality-suite" },
     { name = "pyyaml" },
 ]
 
@@ -622,18 +623,6 @@ wheels = [
 ]
 
 [[package]]
-name = "prettytable"
-version = "3.18.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "wcwidth" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/81/74/ba08d81e668ccfe8658d7520a307e63c19862c08eb4ccb26f356c5239a7a/prettytable-3.18.0.tar.gz", hash = "sha256:439217116152244369caf3d9f1caf2f9fe29b03bd79e88d2928c8e718c95d680", size = 76373, upload-time = "2026-06-22T16:07:50.174Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/fe/be/2e6798ace5cc036f5d05d36b7b2fd85346f1a708c87060890b070d0ec607/prettytable-3.18.0-py3-none-any.whl", hash = "sha256:b3346e0e6f79180833aebaac088ae926340586cf6d7d991b9eb125b65f72313a", size = 37357, upload-time = "2026-06-22T16:07:48.595Z" },
-]
-
-[[package]]
 name = "pygments"
 version = "2.21.0"
 source = { registry = "https://pypi.org/simple" }
@@ -649,21 +638,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f3/91/9c6ee907786a473bf81c5f53cf703ba0957b23ab84c264080fb5a450416f/pyparsing-3.3.2.tar.gz", hash = "sha256:c777f4d763f140633dcb6d8a3eda953bf7a214dc4eff598413c070bcdc117cbc", size = 6851574, upload-time = "2026-01-21T03:57:59.36Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/10/bd/c038d7cc38edc1aa5bf91ab8068b63d4308c66c4c8bb3cbba7dfbc049f9c/pyparsing-3.3.2-py3-none-any.whl", hash = "sha256:850ba148bd908d7e2411587e247a1e4f0327839c40e2e5e6d05a007ecc69911d", size = 122781, upload-time = "2026-01-21T03:57:55.912Z" },
-]
-
-[[package]]
-name = "pyshacl"
-version = "0.40.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "owlrl" },
-    { name = "packaging" },
-    { name = "prettytable" },
-    { name = "rdflib", extra = ["html"] },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/1f/b8/f92465fead905b7c5365631a3997107c896cf1e32f4f9a163bdaee54e4fb/pyshacl-0.40.1.tar.gz", hash = "sha256:011e3cf1a68b31747cb762ba3d755ae1bdcc464c8fad0dc212a9adc550719552", size = 1444205, upload-time = "2026-07-28T01:37:36.499Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/03/90/7f35a79db93032ef20db5b740062b54afba32a2c2475a6f0a43c141a69de/pyshacl-0.40.1-py3-none-any.whl", hash = "sha256:27dd58c8ddfa103303b4a8c40b2c666332ffc912dbcd3137f7adc7b7bc5e6bda", size = 1306209, upload-time = "2026-07-28T01:37:34.298Z" },
 ]
 
 [[package]]
@@ -752,11 +726,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/10/c2/6604a71269e0c1bd75656d5a001432d16f2cc5b8c057140ec797155c295e/rdflib-7.6.0-py3-none-any.whl", hash = "sha256:30c0a3ebf4c0e09215f066be7246794b6492e054e782d7ac2a34c9f70a15e0dd", size = 615416, upload-time = "2026-02-13T07:15:46.487Z" },
 ]
 
-[package.optional-dependencies]
-html = [
-    { name = "html5rdf" },
-]
-
 [[package]]
 name = "shacl"
 version = "0.3.2"
@@ -793,13 +762,4 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/92/ff/5a28bdfd8c3ebec42564ac7d0e54ca3db65044a9314a97f9564fa7a1e926/tzdata-2026.3.tar.gz", hash = "sha256:4a1518b8993086a7982523e071643f3c0e5f213e75b21318e78bcabfff9d1415", size = 198674, upload-time = "2026-07-10T08:50:37.887Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e5/6d/b53b99a9f2766d095985947a5782f1702cabb129a34f7a802d7197af832f/tzdata-2026.3-py2.py3-none-any.whl", hash = "sha256:dc096730c87af6cab1b171c9d532be840741ff5d459015e7f6947bd7d7e54931", size = 348168, upload-time = "2026-07-10T08:50:36.46Z" },
-]
-
-[[package]]
-name = "wcwidth"
-version = "0.8.3"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/36/57/ed58088fafdf4c55a0ad6bde846502567645424d7ebf325230b9237f4085/wcwidth-0.8.3.tar.gz", hash = "sha256:d128512515fbf4612e0ff21fd6380399210318b7b54a9af59dff8454cf9730eb", size = 1458450, upload-time = "2026-08-28T18:10:06.875Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/c4/0e/57f6bb3024a597b2e8ec4aee710ffe62ddc95af2e2bb1ee7a7abdc22c68c/wcwidth-0.8.3-py3-none-any.whl", hash = "sha256:d5b73dba6158a595ec9370350e7f2637bcac8d6c5e4fde34f30fcffb6103a5e4", size = 331669, upload-time = "2026-08-28T18:10:04.909Z" },
 ]
