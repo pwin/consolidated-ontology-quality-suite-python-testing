@@ -124,7 +124,21 @@ FIXTURES: List[Fixture] = [
         # False-positive guard: the same ontology with no data at all. REA-001 needs an
         # individual and the CNF-* layer needs a data graph, so either firing would mean
         # data came from somewhere.
-        forbidden=("REA-001", "CNF-001", "CNF-002"),
+        #
+        # REA-020 belongs here, and suite 0.23.0 is the first version that passes it.
+        # An unsatisfiable class is not an inconsistent ontology: this one has a model,
+        # because nothing is ever asserted to be a :Plant. REA-020 used to fire anyway,
+        # because owlready2 lists `owl:Nothing` among the unsatisfiable classes whenever
+        # anything at all is unsatisfiable -- it is unsatisfiable by definition -- and the
+        # suite tested for Thing *or* Nothing.
+        #
+        # The exit status never changed, since REA-021 is a Violation too. What changed is
+        # where the finding sends a reader: inconsistency means hunt for the individual
+        # asserting the contradiction, unsatisfiability means read one class's own axioms.
+        # Contrast 13-unsatisfiable-class, which *does* assert an individual into the
+        # impossible class and so is genuinely inconsistent -- it declares REA-020 in
+        # dl_only, and the two fixtures together are what pin the distinction.
+        forbidden=("REA-001", "CNF-001", "CNF-002", "REA-020"),
     ),
     Fixture(
         name="04-property-axioms",
