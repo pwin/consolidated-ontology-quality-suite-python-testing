@@ -28,9 +28,9 @@ uv run pytest -q            # same expectations, as pass/fail tests
 
 ## Results
 
-All 16 fixtures pass: **47 of the registry's 61 checks** are asserted, and
+All 17 fixtures pass: **47 of the registry's 61 checks** are asserted, and
 every seeded error is detected. Counts below are from `uv run python report.py`
-against suite 0.14.4 — 153 findings in total, identical across runs.
+against suite 0.24.3 — 148 findings in total, identical across runs.
 
 Taken together with [competency_tests/](competency_tests/), **58 of the 61
 checks are pinned by a test** — named as an expectation, so a suite regression
@@ -41,32 +41,64 @@ holds a dataset for checking them by hand. So every check the CLI can produce
 is pinned, and `test_extension_only_checks_are_not_reported_by_the_cli` guards
 the other three from the opposite direction.
 
-Both SHACL engines are asserted to agree. `--engine native` runs the registry's
-shapes through the `shacl` package instead of pyshacl, and
-`test_native_shacl_engine_reports_what_pyshacl_does` compares the two over every
-fixture whose stage takes an engine — 14 of the 16. They report the same checks
-at the same severities today; suite 0.14.4 exists because that package's 0.3.0
-changed the default meaning of `sh:conforms`, which is the kind of change this
-test is here to catch.
+Where a check has two formulations, both are asserted to find it. 21 of the
+61 checks are written twice — as a SHACL shape *and* as a portable `.rq`
+query — and the suite runs both arms and merges the rows, recording in each
+row's `sources` which arms produced it.
+`test_both_formulations_still_find_what_they_both_used_to` pins 20 of those
+21 over the 15 fixtures whose stage takes an `--engine`; the odd one out is
+`DAT-004`, which no fixture here seeds and which
+[competency_tests/](competency_tests/) pins instead.
+
+Losing one arm is otherwise invisible: the surviving arm still reports the
+check, the id still appears, the count is unchanged, and the only trace is a
+row that said `shacl+sparql` and now says `sparql`. A check joining that set
+is fine; one leaving it fails.
+
+This replaced an engine-parity test that had stopped meaning anything. It
+compared `--engine both` against `--engine native+sparql` — pyshacl against
+the `shacl` package — and suite 0.22.0 moved the checks onto `shacl` and
+holosdb outright, dropping pyshacl to a dev-only dependency. `pipeline.py` now
+says the two engine names "name the same two engines", so the test was
+comparing a configuration with itself, and passing for that reason.
 
 | Fixture | Seeded error | Detected |
 |---|---|---|
 | `01-clean` | *(none — control)* | 0 Violations, 0 Warnings; only `CNF-005` ×2 (Info, "class never populated") |
 | `02-undeclared-terms` | class IRI and property IRI misspelled in the data | `STR-001`, `STR-002`, `STR-007`, `CNF-001`, `CNF-002` |
-| `03-disjoint-classes` | class disjoint with its own superclass; individual in two disjoint classes | `LOG-001` ×2, `REA-001` ×2, `REA-020` (HermiT) |
+| `03-disjoint-classes` | class disjoint with its own superclass; individual in two disjoint classes | `LOG-001`, `REA-001`, `REA-020` (HermiT) |
 | `03b-unsatisfiable-class` | same ontology, no data — contradiction is class-level only | `LOG-001`, `REA-021` (HermiT) |
 | `04-property-axioms` | functional property with 2 values; 2 inverses; self-inverse; symmetric/transitive with domain ≠ range | `LOG-002`, `LOG-004`, `LOG-005`, `LOG-006`, `LOG-007` |
-| `05-reasoning-violations` | asymmetric property both ways; irreflexive self-loop | `REA-002` ×4, `REA-003` ×2, `REA-020` (HermiT) |
+| `05-reasoning-violations` | asymmetric property both ways; irreflexive self-loop | `REA-002` ×2, `REA-003`, `REA-020` (HermiT) |
 | `06-datatype-conformance` | ill-formed `xsd:date`/`integer`/`boolean`; domain and range violations | `DAT-001` ×3, `CNF-003`, `CNF-004`, `REA-022` (reasoner fell back) |
 | `07-naming-style` | `snake_case` class, hyphenated class, `Upper_Snake` property, untagged label, `skos:prefLabel` drifted from local name, deprecated term still used | `STY-001` ×2, `STY-002`, `STY-003`, `STY-004`, `STY-005`, `QUA-001`, `QUA-003` |
 | `08a-no-version-metadata` | header with no version/title metadata, no `owl:versionIRI`, `http://` IRI | `QUA-002`, `QUA-007`, `QUA-008` |
 | `08b-no-ontology-header` | no `owl:Ontology` declaration at all | `QUA-005` |
 | `08c-ontology-iri-reused` | ontology IRI reused verbatim as the concept namespace | `QUA-006` |
 | `09-profile-violations` | `unionOf`, `complementOf`, `allValuesFrom`, `minCardinality 4`, transitive + functional properties | `REA-010` ×6, `REA-011` ×5, `REA-012` ×3 |
-| `10-efficiency` | 6-hop `subClassOf` chain; blank nodes >20% of all nodes | `EFF-001` ×2, `EFF-002` |
+| `10-efficiency` | 6-hop `subClassOf` chain; blank nodes >20% of all nodes | `EFF-001` ×3, `EFF-002` |
 | `11-schema-gaps` | redundant `equivalentClass`+`subClassOf`; property with no domain or range; domain and range IRIs never declared; untyped subject; untyped, never-declared object | `LOG-003`, `STR-003`, `STR-005`, `STR-006`, `STR-008`, `STR-009`, `DAT-002` ×2 |
-| `12-literal-volume` | 60 values on one subject-predicate pair; one lexical form under two language tags | `EFF-003`, `DAT-003` |
+| `12-literal-volume` | 60 values on one subject-predicate pair; one lexical form under two language tags | `EFF-003`, `DAT-003`, `CNF-004` |
 | `13-unsatisfiable-class` | individual typed with a class declared `rdfs:subClassOf owl:Nothing` | `REA-004`, `REA-020` (HermiT) |
+| `14-blank-node-focus` | untagged `rdfs:label` on two anonymous restrictions, on an anonymous `owl:Axiom`, and on one IRI class | `STY-003` ×4 |
+
+Two sets of multiplicities in that last column moved since 0.14.4, and
+re-running the fixtures on each release in between says where:
+
+- `EFF-001` on `10` went ×2 → ×3 **at 0.22.0**, the release that took the
+  checks off rdflib and pyshacl and onto holosdb and `shacl`.
+- `LOG-001` and `REA-001` on `03` went ×2 → ×1, and `REA-002` on `05`
+  ×4 → ×2 with `REA-003` ×2 → ×1, **at 0.24.0**. Those are a fix, not a
+  loss: `data` deduplicated findings within each call but nothing
+  deduplicated across the join between calls, so one contradiction was
+  reported twice. 0.24.0's notes name this fixture — "on the
+  disjoint-classes fixture this merged two pairs, not the one reported".
+
+Not one check id was lost in either move, which is why neither cost the
+fixtures an edit — they pin ids, severities and what must not fire, never
+counts. (`12`'s `CNF-004` is older and unrelated: it arrived with the 0.14.3
+fix described under "Issues found" below, and this table had simply never
+been updated for it.)
 
 The clean control is the important negative case: it declares labels,
 definitions, domains, ranges and metadata properly, and produces **no Violation
@@ -94,6 +126,16 @@ credits three more found while fixing them), the last two in 0.14.3. Each
 section keeps the original evidence and records how the fixed suite behaves
 now. The fixtures themselves needed almost no changing across either round —
 they pin check ids, not finding counts, which is what let them survive.
+
+Four more were found later by the work in [competency_tests/](competency_tests/)
+and [experiments/SpecificTests/](experiments/SpecificTests/) rather than by
+these fixtures, and are recorded there rather than repeated here: the
+over-reported taxonomy references fixed in 0.14.3
+([COMPETENCY_COVERAGE.md](competency_tests/COMPETENCY_COVERAGE.md)), the
+namespace legend written into the project's namespace (0.20.0) and the
+`@prefix :` declarations the prefix loader skipped (0.21.0), both in
+[SpecificTests/REVIEW.md](experiments/SpecificTests/REVIEW.md), and the
+duplicate `LOG-001` rows merged in 0.24.0, described under "Results" above.
 
 ### 1. pyshacl reported every finding as a Violation, ignoring the declared severity — fixed
 

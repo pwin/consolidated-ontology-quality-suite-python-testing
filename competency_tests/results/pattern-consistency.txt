@@ -1,16 +1,11 @@
 == ontology <-> transformation ==
-9 prefix/namespace misalignment(s):
-  [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\assets\assets.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
+4 prefix/namespace misalignment(s):
   [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\assets\assets.rq: 'vocab:' (<https://example.org/water/vocab#>) does not appear, under any prefix, in the given ontology set
-  [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\assets\legacy_assets.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
   [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\assets\legacy_assets.rq: 'vocab:' (<https://example.org/water/vocab#>) does not appear, under any prefix, in the given ontology set
-  [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\assets\sites.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
-  [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\readings\draft_alarms.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
   [namespace_mismatch] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\readings\draft_alarms.rq: 'gist:' is <https://w3id.org/semanticarts/ns/ontology/gist#> here, but the ontology set binds 'gist:' to: <https://w3id.org/semanticarts/ns/ontology/gist/> (in C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\ontology\water-v1.ttl)
-  [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\readings\readings.rq: ':' (<https://example.org/water/model#>) does not appear, under any prefix, in the given ontology set
   [undeclared_namespace] C:\repos\consolidated-ontology-suite-python-testing\competency_tests\fixtures\model\queries\readings\readings.rq: 'unit:' (<https://example.org/water/units#>) does not appear, under any prefix, in the given ontology set
 1 propert(y/ies) used in TARQL but not declared in the ontology set:
-  [undeclared_property] https://example.org/water/model#isRepresentedBy
+  [undeclared_property] https://w3id.org/semanticarts/ns/ontology/gist#numericValue
 == taxonomy <-> transformation ==
   [undeclared_taxonomy_reference] https://example.org/water/vocab#Resevoir is used as the value of https://w3id.org/semanticarts/ns/ontology/gist/isCategorizedBy in the TARQL query sketch but is not declared as an individual anywhere in the given taxonomy set.
 == ontology+taxonomy <-> output data ==

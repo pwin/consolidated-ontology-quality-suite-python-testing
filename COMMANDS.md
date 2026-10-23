@@ -22,7 +22,7 @@ uv sync
 ## 2. Run everything
 
 ```powershell
-uv run python report.py        # detection matrix, all 16 fixtures  (~3 min with HermiT)
+uv run python report.py        # detection matrix, all 17 fixtures  (~3 min with HermiT)
 uv run pytest -q               # the same expectations as pass/fail tests
 ```
 
@@ -169,7 +169,7 @@ uv run python gate.py --reasoner auto --profile EL --profile RL --out-dir out/ga
 ## 6. Experiments behind the observations in README.md
 
 ```powershell
-uv run python experiments/severity_probe.py         # pyshacl reports every finding as Violation
+uv run python experiments/severity_probe.py         # the SHACL arm reported every finding as Violation (fixed in 0.6.0; now a regression check)
 uv run python experiments/illtyped_boolean_probe.py # DAT-001 can't see an invalid xsd:boolean
 uv run python experiments/langstring_crash_probe.py # `data` crashed on a language-tagged literal (fixed in 0.14.3)
 ```
@@ -177,7 +177,7 @@ uv run python experiments/langstring_crash_probe.py # `data` crashed on a langua
 ## 7. Useful variations
 
 ```powershell
-# faster: portable SPARQL engine only (skips pyshacl)
+# faster: portable SPARQL arm only (skips the SHACL shapes)
 uv run ontology-quality-suite checks --ontology ontologies/07-naming-style/ontology.ttl --engine sparql --out-dir out/cli/07-sparql-only
 
 # show what each input resolved to (imports, files matched, engine used)

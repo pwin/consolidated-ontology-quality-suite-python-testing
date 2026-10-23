@@ -92,7 +92,7 @@ A *Run* is one pass over the fixtures, named so a finding can be traced back to 
 | CT-29 | IRI construction pattern not updated after a concept moved namespace | `CMP-029` | Instance IRI built under a superseded base | Violation | project-check | x3 | `iri-pattern`[^13] |
 | CT-30 | The same entity generated twice under two identifiers | `CMP-030` | Two entities share a business key | Warning | project-check | x1 | `project-output`[^2] |
 | CT-31 | A single-valued relationship carrying more than one value | `CMP-031` | Single-valued relationship carries two values | Violation | project-check | x1 | `project-output`[^2] |
-| CT-32 | Template asserts a property the class does not have | `CMP-032` | Template asserts a property outside its declared domain | Violation | project-check | x4 | `template-shape`[^14] |
+| CT-32 | Template asserts a property the class does not have | `CMP-032` | Template asserts a property outside its declared domain | Violation | project-check | x3 | `template-shape`[^14] |
 | CT-33 | Mapping still builds a term the model deprecates | `CMP-033` | Mapping still builds a deprecated term | Warning | project-check | x1 | `template-shape`[^14] |
 | CT-34 | One class built with different shapes by different mappings | `CMP-034` | One class built with different shapes by different mappings | Warning | project-check | x2 | `mapping-drift`[^15] |
 | CT-35 | One predicate filled with different datatypes across mappings | `CMP-035` | One predicate filled with different datatypes by different mappings | Violation | project-check | x1 | `mapping-drift`[^15] |

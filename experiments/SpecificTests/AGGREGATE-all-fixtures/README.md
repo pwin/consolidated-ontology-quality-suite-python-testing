@@ -35,7 +35,9 @@ run time is more machinery than a demonstration needs.
 
 ## What it shows
 
-**142 findings: 19 Violation, 87 Warning, 36 Info.**
+**142 findings: 18 Violation, 88 Warning, 36 Info**, measured on suite
+0.24.3 with holosdb 0.25.0. Every row carries its registry default
+severity, which is what makes the split reproducible.
 
 Three checks account for 99 of them:
 

@@ -90,8 +90,8 @@ finding lets you do next.
 ## 4. What the aggregate says about reporting
 
 `AGGREGATE-all-fixtures` merges every fixture into one project: 29 ontology
-files, 15 mappings, 9 output graphs. **142 findings — 19 Violation, 87
-Warning, 36 Info.**
+files, 15 mappings, 9 output graphs. **142 findings — 18 Violation, 88
+Warning, 36 Info** (suite 0.24.3, holosdb 0.25.0).
 
 Three checks produce 99 of them:
 
@@ -110,7 +110,7 @@ The specific defects are single lines among hundreds. Reporting that groups
 by competency question rather than by check id would put one `TQL-001` beside
 one `CMP-030` instead of burying both under 56 of something else.
 
-**Severity does not separate them.** 87 Warnings is not a work queue. What
+**Severity does not separate them.** 88 Warnings is not a work queue. What
 separates the 99 from the rest is not severity but *kind*: three conditions
 that are true of the project as a whole against eleven that are true of one
 triple each.
