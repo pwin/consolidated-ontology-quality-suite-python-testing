@@ -17,7 +17,6 @@ Exits 1 if any competency test's expected evidence is missing.
 from __future__ import annotations
 
 import json
-import shutil
 import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -138,6 +137,32 @@ def triplify_all() -> Dict[str, Path]:
     return produced
 
 
+def write_canonical(src_path: Path, dest: Path) -> None:
+    """Copy a triplified file with its statements in a fixed order.
+
+    oxi-gen emits subjects in whatever order they came out of the store, which
+    differs between runs over identical input. These four files are tracked --
+    the comment at the call site says why -- so an unordered copy showed every
+    run as a change to all of them, and a real change to the output could not
+    be seen in the diff for the reshuffling around it.
+
+    Re-emitted here rather than fixed upstream because the order is not wrong,
+    only unstable, and only a tracked artefact cares. Same triples, same
+    prefixes, sorted by subject, then predicate, then object.
+    """
+    graph = Graph()
+    graph.parse(src_path)
+    manager = graph.namespace_manager
+    lines = ["@prefix {}: <{}> .".format(prefix, uri)
+             for prefix, uri in sorted(graph.namespaces())]
+    for subject in sorted(set(graph.subjects()), key=lambda term: term.n3(manager)):
+        statements = sorted((predicate.n3(manager), obj.n3(manager))
+                            for predicate, obj in graph.predicate_objects(subject))
+        body = ' ;\n\t'.join("{} {}".format(p, o) for p, o in statements)
+        lines.append("{} {} .".format(subject.n3(manager), body))
+    dest.write_text('\n'.join(lines) + '\n', encoding="utf-8")
+
+
 def load_graph(*paths) -> Graph:
     graph = Graph()
     for path in paths:
@@ -228,7 +253,7 @@ def run_everything() -> List[Run]:
     triplified = RESULTS / "triplified"
     triplified.mkdir(parents=True, exist_ok=True)
     for path in output_paths:
-        shutil.copy(path, triplified / path.name)
+        write_canonical(path, triplified / path.name)
 
     # ---- sketch: the query source, against v1 ---------------------------
     sketch_v1 = pipeline.run_sketch_stage(
