@@ -81,39 +81,91 @@ def test_reported_severity_matches_registry(name):
 
 ENGINE_FIXTURE_NAMES = [f.name for f in FIXTURES if f.stage in detect.ENGINE_STAGES]
 
+#: Checks that both formulations find on these fixtures: the registry's SHACL
+#: shape and its portable `.rq` twin each report them, and `checks/merge.py`
+#: merges the two rows into one carrying `shacl+sparql`.
+#:
+#: 21 of the registry's 61 checks are written both ways (the shapes under
+#: `resources/shapes/`, every one of which also has an `.rq`); the rest are
+#: SPARQL only, so there is nothing to cross-validate them against. This set
+#: is 20 of those 21 -- all but DAT-004, which no fixture here seeds and which
+#: competency_tests/ pins instead. So it is not an arbitrary snapshot: it is
+#: every doubly-written check these fixtures reach.
+#:
+#: Losing one arm is silent. If a shape stops firing, the `.rq` still reports
+#: the check, the id still appears, the count is unchanged, and every other
+#: assertion in this file passes -- the only trace is a row that used to say
+#: `shacl+sparql` and now says `sparql`.
+#:
+#: A check moving *into* this set is fine and the assertion below allows it.
+#: A check leaving it is the regression.
+CROSS_VALIDATED = {
+    "DAT-001", "DAT-002", "DAT-003",
+    "EFF-001", "EFF-002", "EFF-003",
+    "LOG-001", "LOG-002", "LOG-003",
+    "QUA-001", "QUA-002", "QUA-003", "QUA-009", "QUA-010",
+    "STR-001", "STR-002", "STR-003",
+    "STY-001", "STY-002", "STY-003",
+}
+
+REGISTRY_ARMS = {"shacl", "sparql"}
+
+
+def test_both_formulations_still_find_what_they_both_used_to():
+    """Every check in CROSS_VALIDATED is still reported by both arms.
+
+    What this replaces is worth recording. Until suite 0.22.0 the comparison
+    here was `--engine both` against `--engine native+sparql`: pyshacl against
+    the `shacl` package, two implementations of SHACL over identical inputs.
+    That test cannot exist any more and had stopped meaning anything before it
+    was noticed. pyshacl is no longer a runtime dependency of the suite -- it
+    is in the suite's own dev group, for its parity tests -- so it is absent
+    from an install like this one, and `pipeline.py` now says plainly that
+    `both` and `native+sparql` "name the same two engines". The old test
+    compared a configuration with itself and passed for that reason.
+
+    The parity worth asserting from here is between the two *formulations*
+    rather than two SHACL implementations: the shapes on the `shacl` engine,
+    the `.rq` queries on holosdb. The suite cross-validates them against each
+    other, which is the thing that quietly breaks.
+    """
+    found_by_both = set()
+    for name in ENGINE_FIXTURE_NAMES:
+        for row in run_fixture(name, engine="both", reasoner="owlrl-only"):
+            if REGISTRY_ARMS <= set(row.sources):
+                found_by_both.add(row.check_id)
+
+    lost = sorted(CROSS_VALIDATED - found_by_both)
+    assert not lost, (
+        "these checks are no longer reported by both formulations: "
+        + ", ".join(lost)
+        + ". One arm has stopped firing. The check id still appears in the "
+        "report, so nothing else here fails -- look at whether the shape or "
+        "the .rq twin is the one that went quiet.")
+
 
 @pytest.mark.parametrize("name", ENGINE_FIXTURE_NAMES)
-def test_native_shacl_engine_reports_what_pyshacl_does(name):
-    """The two SHACL implementations report the same checks at the same
-    severities.
+def test_each_formulation_agrees_about_severity(name):
+    """Neither arm reports a severity the registry does not declare.
 
-    `--engine native` runs the registry's shapes through the `shacl` package
-    instead of pyshacl. The shapes, the registry and the fixture are identical
-    across the two runs, so any difference is the implementation's -- which is
-    a live risk rather than a hypothetical one: suite 0.14.4 pinned that
-    package to <0.4 because 0.3.0 changed the default meaning of sh:conforms.
+    This is the defect these fixtures were built on, kept asserted because it
+    was real: until suite 0.6.0 every finding from the SHACL arm came back
+    `Violation` whatever the registry said, because the shapes declared
+    `sh:severity` on the nested `sh:SPARQLConstraint` rather than on the shape
+    node. README.md §1 records the evidence and
+    experiments/severity_probe.py is what proved it.
 
-    Skipped when the optional extra is absent. Both sides hold the reasoner at
-    owlrl-only: REA-* findings come from the reasoning layer, not from either
-    SHACL engine, and pinning it keeps the comparison to the one variable (and
-    the run fast enough to double).
+    Asserted per arm rather than on the merged rows: merging two rows for one
+    check has to settle on one severity, which would hide an arm that
+    disagreed -- exactly the shape of the original bug.
     """
-    pytest.importorskip(
-        "shacl", reason="the suite's native-shacl extra is not installed")
-    baseline = run_fixture(name, engine="both", reasoner="owlrl-only")
-    native = run_fixture(name, engine=detect.NATIVE_ENGINE, reasoner="owlrl-only")
-
-    only_pyshacl = sorted(ids_of(baseline) - ids_of(native))
-    only_native = sorted(ids_of(native) - ids_of(baseline))
-    assert not only_pyshacl and not only_native, (
-        f"{name}: engines disagree -- pyshacl only: {only_pyshacl}, "
-        f"native only: {only_native}")
-
-    mismatches = detect.severity_mismatches(native)
-    assert not mismatches, (
-        f"{name}: native engine severity differs from the registry default: "
-        + "; ".join(f"{cid} registry={default} reported={got} via {src}"
-                    for cid, default, got, src in mismatches))
+    for engine in ("shacl", "sparql"):
+        mismatches = detect.severity_mismatches(
+            run_fixture(name, engine=engine, reasoner="owlrl-only"))
+        assert not mismatches, (
+            f"{name}: --engine {engine} severity differs from the registry: "
+            + "; ".join(f"{cid} registry={default} reported={got} via {src}"
+                        for cid, default, got, src in mismatches))
 
 
 def test_every_fixture_file_exists():

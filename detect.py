@@ -42,13 +42,15 @@ REASONER = os.environ.get("OWL2_TEST_REASONER", "auto")
 
 SEVERITY_ORDER = {"Violation": 0, "Warning": 1, "Info": 2}
 
-# The suite can run its SHACL shapes through pyshacl (the default) or through
-# the `shacl` package installed by its optional native-shacl extra. Suite
-# 0.14.4 pinned that package to <0.4 because 0.3.0 changed the default meaning
-# of sh:conforms, which is exactly the kind of change a parity test should
-# notice, so tests/test_detection.py runs both formulations over every fixture
-# whose stage accepts an --engine and compares what they report.
-NATIVE_ENGINE = "native+sparql"
+# The stages that take an --engine, and so can be asked for one arm at a
+# time. Every registry check is written twice -- as a SHACL shape and as a
+# portable .rq query -- and the suite runs both and merges the rows, so these
+# are the stages where tests/test_detection.py can ask which arm found what.
+#
+# (There used to be a NATIVE_ENGINE here, for a run that swapped pyshacl for
+# the `shacl` package. Suite 0.22.0 moved the checks onto `shacl` and holosdb
+# outright and dropped pyshacl as a runtime dependency, so "native+sparql" is
+# now just the default engine under another name.)
 ENGINE_STAGES = ("checks", "data")
 
 
