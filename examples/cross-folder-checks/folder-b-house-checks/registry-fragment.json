@@ -1,0 +1,41 @@
+{
+  "_comment": "Folder B. The house rules, and nothing else. This file declares them; the .rq files under sparql/ implement them. It is deliberately NOT a copy of the suite's registry.json -- folder-a-fleet-project/merge_registry.py joins the two at run time, so the suite's own entries stay whatever the installed suite says they are. See ../README.md.",
+  "_owner": "Fleet Data Standards group -- raise changes as a PR here, not in a project that consumes it",
+  "_version": "2.1.0",
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "FLT-001",
+      "category": "structural",
+      "metric": "asset tag conformance",
+      "default_severity": "Violation",
+      "title": "Vehicle asset tag missing or not in the house format",
+      "description": "Every vehicle on the fleet register must carry an asset tag of the form FLT-NNNNNN. The tag is the key the maintenance system, the finance ledger and the telematics feed all join on, so a vehicle without one in the agreed format cannot be reconciled against any of them. No suite check can know this format: it is a local convention, which is why it lives here.",
+      "remediation": "Set :assetTag to the tag printed on the vehicle's chassis plate, formatted FLT- followed by six digits. If the vehicle genuinely has no plate yet, it is not yet on the register and should not be in this dataset.",
+      "cucumber_feature": "Fleet House Rules",
+      "cucumber_scenario": "Every vehicle carries a well-formed asset tag"
+    },
+    {
+      "id": "FLT-002",
+      "category": "quality",
+      "metric": "lifecycle consistency",
+      "default_severity": "Warning",
+      "title": "Retired vehicle still has an open work order",
+      "description": "A vehicle whose status is Retired has a work order against it that is still Open. One of the two is wrong: either the vehicle was retired with maintenance outstanding, or the work order was never closed when it was. Both cost money -- the first strands a part on order, the second keeps a bay allocated to a vehicle that has left the fleet.",
+      "remediation": "Close the work order if the work was done or cancelled, or put the vehicle back to InService if it was retired in error. If a retired vehicle really does need work before disposal, model that explicitly rather than leaving an operational work order open.",
+      "cucumber_feature": "Fleet House Rules",
+      "cucumber_scenario": "No retired vehicle has outstanding work"
+    },
+    {
+      "id": "FLT-003",
+      "category": "quality",
+      "metric": "depot assignment completeness",
+      "default_severity": "Info",
+      "title": "Vehicle is not assigned to a depot",
+      "description": "An in-service vehicle with no :operatesFrom depot appears in no depot's capacity figures and on no depot's rota. Info rather than Warning because the register is the system of record for ownership, not for day-to-day allocation, and a vehicle between depots legitimately has none for a short while.",
+      "remediation": "Set :operatesFrom to the depot the vehicle is allocated to. If it is genuinely unallocated, that is worth knowing and this finding is the record of it.",
+      "cucumber_feature": "Fleet House Rules",
+      "cucumber_scenario": "Every in-service vehicle has a home depot"
+    }
+  ]
+}

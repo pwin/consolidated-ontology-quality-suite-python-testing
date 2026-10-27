@@ -1,0 +1,31 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX fleet: <https://example.org/fleet/model#>
+
+# FLT-002: a retired vehicle with a work order still open.
+#
+# The finding is reported against the *work order*, not the vehicle. That is
+# deliberate: the work order is what someone has to go and close, and a
+# finding whose focus node is the thing you act on can be handed straight to
+# whoever owns that queue. Reported against the vehicle it would name a record
+# that is already correct.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Warning ;
+    sh:focusNode ?order ;
+    sh:resultPath fleet:concerns ;
+    sh:value ?vehicle ;
+    sh:sourceConstraintComponent oq:FLT-002 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?order a fleet:WorkOrder ;
+         fleet:hasState fleet:Open ;
+         fleet:concerns ?vehicle .
+  ?vehicle fleet:hasStatus fleet:Retired .
+  BIND(CONCAT("Work order ", STR(?order), " is Open against ", STR(?vehicle),
+              ", which is Retired. Either the work order was never closed or ",
+              "the vehicle was retired with work outstanding.") AS ?msg)
+}

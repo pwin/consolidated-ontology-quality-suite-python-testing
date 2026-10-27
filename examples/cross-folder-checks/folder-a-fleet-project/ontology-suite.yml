@@ -1,0 +1,61 @@
+# Folder A's validation config, read by ../../../gate.py.
+#
+# Every key is a flag of `ontology-quality-suite run` spelled with
+# underscores. Paths are relative to THIS FILE, not to the working directory,
+# which is what lets Folder A name Folder B by a relative path and still work
+# from any cwd and on any machine.
+
+# --- Folder A: the work under test -------------------------------------
+ontology: ontology/fleet-v1.ttl
+data:
+  - data/fleet.ttl
+
+# --- Folder B: the house rules, referenced across the folder boundary ---
+#
+# Two halves, and they have to agree:
+#
+#   `sparql` names the directory of .rq files. It is a list because the flag
+#   is repeatable, and `@builtin` must be in that list. Given at all, --sparql
+#   replaces the suite's own tree, so naming only Folder B here would run
+#   three checks instead of 46 -- the suite warns, and the warning is easy to
+#   scroll past in CI.
+#
+#   `registry` names the MERGED file, not Folder B's fragment. --registry does
+#   not repeat, so merge_registry.py writes the suite's entries plus Folder
+#   B's into out/ before this runs. Pointing it straight at Folder B's
+#   fragment is the quiet failure described in the README.
+#
+# `@builtin` is passed through unresolved on purpose: it means the suite's own
+# tree wherever this install put it, which differs between an editable install
+# and a wheel.
+sparql:
+  - ../folder-b-house-checks/sparql
+  - "@builtin"
+registry: out/merged-registry.json
+
+# --- Folder C: the house rules written as SHACL shapes -----------------
+#
+# `shapes` points at the ASSEMBLED directory under out/, not at Folder C.
+# --shapes is not repeatable, takes no @builtin, and replaces the suite's
+# shapes outright, so there is no way to say "the suite's and also Folder
+# C's" -- prepare_checks.py builds a directory holding both. Naming Folder C
+# here directly would run one shape where 22 should.
+#
+# The loader globs *.ttl at the top level and does not recurse, which is why
+# the assembled directory is flat.
+shapes: out/shapes
+
+# --- how to run it -----------------------------------------------------
+# `both` runs the SHACL arm and the SPARQL arm. It has to: Folder B's rules
+# are SPARQL CONSTRUCTs and Folder C's are SHACL shapes, and `engine: sparql`
+# would declare Folder C's and never evaluate them. owlrl closure rather than
+# an external DL reasoner keeps a gate fast and repeatable.
+engine: both
+reasoner: owlrl-only
+
+# Report what this project is responsible for. Without it, an imported
+# vocabulary's own style and metadata findings fail Folder A's build.
+own_namespace: https://example.org/fleet/
+
+out_dir: out/validation
+fail_on: Violation

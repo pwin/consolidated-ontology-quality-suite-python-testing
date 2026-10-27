@@ -1,0 +1,136 @@
+@prefix :     <https://example.org/fleet/model#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Folder A's model. This is the development work under test -- it is written
+# to be correct, so that what the validation run reports comes from the data
+# and from the house rules in Folder B rather than from the model itself.
+
+<https://example.org/fleet/model>
+    a               owl:Ontology ;
+    owl:versionIRI  <https://example.org/fleet/model/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    rdfs:label      "Fleet register"@en .
+
+:Vehicle
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Vehicle"@en ;
+    skos:prefLabel  "Vehicle"@en ;
+    skos:definition "A road vehicle on the fleet register."@en .
+
+:Van
+    a               owl:Class ;
+    rdfs:subClassOf :Vehicle ;
+    rdfs:label      "Van"@en ;
+    skos:prefLabel  "Van"@en ;
+    skos:definition "A light commercial vehicle."@en .
+
+:Truck
+    a               owl:Class ;
+    rdfs:subClassOf :Vehicle ;
+    rdfs:label      "Truck"@en ;
+    skos:prefLabel  "Truck"@en ;
+    skos:definition "A heavy goods vehicle."@en .
+
+:Depot
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Depot"@en ;
+    skos:prefLabel  "Depot"@en ;
+    skos:definition "A site from which vehicles are operated and maintained."@en .
+
+:WorkOrder
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Work order"@en ;
+    skos:prefLabel  "WorkOrder"@en ;
+    skos:definition "An instruction to carry out maintenance on one vehicle."@en .
+
+:OperatingStatus
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Operating status"@en ;
+    skos:prefLabel  "OperatingStatus"@en ;
+    skos:definition "Where a vehicle stands in its service life."@en .
+
+:WorkOrderState
+    a               owl:Class ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:label      "Work order state"@en ;
+    skos:prefLabel  "WorkOrderState"@en ;
+    skos:definition "Where a work order stands between raising and closure."@en .
+
+:assetTag
+    a               owl:DatatypeProperty ;
+    rdfs:domain     :Vehicle ;
+    rdfs:range      xsd:string ;
+    rdfs:label      "asset tag"@en ;
+    skos:prefLabel  "assetTag"@en ;
+    skos:definition "The tag printed on the vehicle's chassis plate, and the key every other system joins on."@en .
+
+:operatesFrom
+    a               owl:ObjectProperty ;
+    rdfs:domain     :Vehicle ;
+    rdfs:range      :Depot ;
+    rdfs:label      "operates from"@en ;
+    skos:prefLabel  "operatesFrom"@en ;
+    skos:definition "Links a vehicle to the depot it is allocated to."@en .
+
+:hasStatus
+    a               owl:ObjectProperty ;
+    rdfs:domain     :Vehicle ;
+    rdfs:range      :OperatingStatus ;
+    rdfs:label      "has status"@en ;
+    skos:prefLabel  "hasStatus"@en ;
+    skos:definition "Links a vehicle to where it stands in its service life."@en .
+
+:concerns
+    a               owl:ObjectProperty ;
+    rdfs:domain     :WorkOrder ;
+    rdfs:range      :Vehicle ;
+    rdfs:label      "concerns"@en ;
+    skos:prefLabel  "concerns"@en ;
+    skos:definition "Links a work order to the vehicle the work is on."@en .
+
+:hasState
+    a               owl:ObjectProperty ;
+    rdfs:domain     :WorkOrder ;
+    rdfs:range      :WorkOrderState ;
+    rdfs:label      "has state"@en ;
+    skos:prefLabel  "hasState"@en ;
+    skos:definition "Links a work order to where it stands between raising and closure."@en .
+
+# The two controlled vocabularies, declared here because they are small and
+# closed. The house rules in Folder B name these individuals directly.
+
+:InService
+    a               :OperatingStatus , owl:NamedIndividual ;
+    rdfs:label      "In service"@en ;
+    skos:prefLabel  "InService"@en ;
+    skos:definition "The vehicle is available for operational use."@en .
+
+:Retired
+    a               :OperatingStatus , owl:NamedIndividual ;
+    rdfs:label      "Retired"@en ;
+    skos:prefLabel  "Retired"@en ;
+    skos:definition "The vehicle has left the fleet and is awaiting or has completed disposal."@en .
+
+:Open
+    a               :WorkOrderState , owl:NamedIndividual ;
+    rdfs:label      "Open"@en ;
+    skos:prefLabel  "Open"@en ;
+    skos:definition "The work has been raised and not yet completed or cancelled."@en .
+
+:Closed
+    a               :WorkOrderState , owl:NamedIndividual ;
+    rdfs:label      "Closed"@en ;
+    skos:prefLabel  "Closed"@en ;
+    skos:definition "The work has been completed or cancelled."@en .
+
+# Declared locally so the referential-integrity check does not report them as
+# undefined properties -- it exempts rdf:/rdfs:/owl:, not all of w3.org.
+skos:prefLabel  a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .

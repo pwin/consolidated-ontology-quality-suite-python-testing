@@ -1,0 +1,19 @@
+{
+  "_comment": "Folder C. Same job as Folder B's fragment -- declare the checks so the report can title them -- and merged the same way. The checks it declares are implemented as SHACL shapes rather than SPARQL CONSTRUCTs, which changes how they are referenced but not how they are declared.",
+  "_owner": "Fleet Data Standards group -- the shapes half of the house rules",
+  "_version": "1.3.0",
+  "namespace": "https://semantechs.co.uk/ontology-quality/",
+  "checks": [
+    {
+      "id": "FLT-004",
+      "category": "structural",
+      "metric": "work order cardinality",
+      "default_severity": "Violation",
+      "title": "Work order does not concern exactly one vehicle",
+      "description": "A work order must name exactly one vehicle: none and the work cannot be scheduled, more than one and the labour and parts cannot be costed against anything. Written as a SHACL shape rather than a SPARQL CONSTRUCT because cardinality is what SHACL says natively -- sh:minCount and sh:maxCount on one property path, against a target class.",
+      "remediation": "Split the work order into one per vehicle, or set :concerns to the single vehicle the work is on. If the work genuinely spans vehicles it is a programme, not a work order, and needs its own class.",
+      "cucumber_feature": "Fleet House Rules",
+      "cucumber_scenario": "Every work order concerns exactly one vehicle"
+    }
+  ]
+}

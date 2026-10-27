@@ -1,0 +1,37 @@
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix oq:    <https://semantechs.co.uk/ontology-quality/> .
+@prefix fleet: <https://example.org/fleet/model#> .
+
+# Folder C: the house rules that are SHACL shapes.
+#
+# Two conventions here are not decoration, and getting either wrong produces
+# a report that looks fine:
+#
+#   The shape node's local name IS the check id. That is how a validation
+#   result gets tied back to the registry entry that holds its title and
+#   remediation -- the suite matches sh:sourceShape's local name against the
+#   registry, and falls back to an oq:checkId annotation when a shape cannot
+#   be named after its check. Rename this node and the finding still fires,
+#   as UNMAPPED.
+#
+#   sh:severity goes on the SHAPE node, and it must agree with the registry
+#   entry. The shape's severity wins: measured on this shape, moving it to
+#   the nested sh:property node and setting sh:Info reported the finding as
+#   Info even though the registry declares FLT-004 a Violation, and a gate at
+#   --fail-on Violation then passes. With no severity declared at all the
+#   finding came back Violation, the SHACL default. So the severity in the
+#   report is the shape's, the registry's entry is documentation of what it
+#   should be, and nothing checks that the two agree -- which is why this one
+#   is written where SHACL defines it and says the same thing the registry
+#   does.
+
+oq:FLT-004
+    a                sh:NodeShape ;
+    sh:targetClass   fleet:WorkOrder ;
+    sh:severity      sh:Violation ;
+    sh:property [
+        sh:path     fleet:concerns ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message  "A work order must concern exactly one vehicle: with none the work cannot be scheduled, with more than one the labour and parts cannot be costed." ;
+    ] .

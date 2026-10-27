@@ -1,0 +1,85 @@
+@prefix :     <https://example.org/fleet/model#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Eight records. Each house rule in Folders B and C fires on exactly one, and
+# every other record is written so that it does not -- so a finding names the
+# record it is about and nothing else, and a rule that stops working shows up
+# as a missing finding rather than as a smaller number.
+
+# Clean: well-formed tag, in service, has a depot.
+:van-1
+    a              :Van , owl:NamedIndividual ;
+    rdfs:label     "Van 1"@en ;
+    :assetTag      "FLT-000123" ;
+    :hasStatus     :InService ;
+    :operatesFrom  :depot-north .
+
+# FLT-001: the tag is the registration, not the asset tag.
+:van-2
+    a              :Van , owl:NamedIndividual ;
+    rdfs:label     "Van 2"@en ;
+    :assetTag      "YE24 KPX" ;
+    :hasStatus     :InService ;
+    :operatesFrom  :depot-north .
+
+# FLT-002: retired, and work order wo-7 below is still Open against it.
+# Everything else about it is correct, so only FLT-002 should name it.
+:truck-1
+    a              :Truck , owl:NamedIndividual ;
+    rdfs:label     "Truck 1"@en ;
+    :assetTag      "FLT-000987" ;
+    :hasStatus     :Retired ;
+    :operatesFrom  :depot-south .
+
+# FLT-003: in service, tag is fine, no depot.
+:truck-2
+    a              :Truck , owl:NamedIndividual ;
+    rdfs:label     "Truck 2"@en ;
+    :assetTag      "FLT-000555" ;
+    :hasStatus     :InService .
+
+# Nothing for the house rules to report -- well-formed tag, in service, has
+# a depot -- but :mileage is used here and declared nowhere in the model.
+# That is the standard checks' job, not Folder B's, and it is why both sets
+# have to run: no house rule would catch it and no suite check knows what an
+# asset tag should look like.
+:van-3
+    a              :Van , owl:NamedIndividual ;
+    rdfs:label     "Van 3"@en ;
+    :assetTag      "FLT-000311" ;
+    :hasStatus     :InService ;
+    :operatesFrom  :depot-north ;
+    :mileage       "120000" .
+
+:depot-north
+    a              :Depot , owl:NamedIndividual ;
+    rdfs:label     "Northgate depot"@en .
+
+:depot-south
+    a              :Depot , owl:NamedIndividual ;
+    rdfs:label     "Southfield depot"@en .
+
+# Open against a retired vehicle -- the one FLT-002 is looking for.
+:wo-7
+    a              :WorkOrder , owl:NamedIndividual ;
+    rdfs:label     "Work order 7"@en ;
+    :concerns      :truck-1 ;
+    :hasState      :Open .
+
+# Control: open, but against a vehicle that is in service. FLT-002 must not
+# report this one, which is what makes a pass meaningful.
+:wo-8
+    a              :WorkOrder , owl:NamedIndividual ;
+    rdfs:label     "Work order 8"@en ;
+    :concerns      :van-1 ;
+    :hasState      :Open .
+
+# FLT-004, Folder C's shape: one work order against two vehicles, so the
+# labour and parts cannot be costed against either. Closed and against
+# in-service vehicles, so none of Folder B's rules report it.
+:wo-9
+    a              :WorkOrder , owl:NamedIndividual ;
+    rdfs:label     "Work order 9"@en ;
+    :concerns      :van-1 , :truck-2 ;
+    :hasState      :Closed .

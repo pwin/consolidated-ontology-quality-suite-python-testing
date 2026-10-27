@@ -1,0 +1,27 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX fleet: <https://example.org/fleet/model#>
+
+# FLT-003: an in-service vehicle with no depot.
+#
+# Scoped to in-service vehicles on purpose. A retired vehicle has no depot by
+# definition, and reporting those would mean the finding fired on every
+# disposal -- noise that teaches people to filter the whole check out.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Info ;
+    sh:focusNode ?vehicle ;
+    sh:resultPath fleet:operatesFrom ;
+    sh:sourceConstraintComponent oq:FLT-003 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?vehicle a/rdfs:subClassOf* fleet:Vehicle ;
+           fleet:hasStatus fleet:InService .
+  FILTER(isIRI(?vehicle))
+  FILTER NOT EXISTS { ?vehicle fleet:operatesFrom ?depot }
+  BIND(CONCAT("Vehicle ", STR(?vehicle), " is InService and assigned to no ",
+              "depot, so it appears in no depot's capacity figures or rota.") AS ?msg)
+}

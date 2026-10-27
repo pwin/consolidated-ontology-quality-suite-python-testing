@@ -1,0 +1,35 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX sh:    <http://www.w3.org/ns/shacl#>
+PREFIX oq:    <https://semantechs.co.uk/ontology-quality/>
+PREFIX fleet: <https://example.org/fleet/model#>
+
+# FLT-001: a vehicle with no asset tag, or one not in the house format.
+#
+# Two failures, one finding, because to the person fixing it they are the same
+# job: go and read the chassis plate. ?tag is left unbound by the OPTIONAL when
+# there is no tag at all, and COALESCE turns that into text the message can use.
+#
+# The format is FLT- followed by exactly six digits. Anchored at both ends:
+# without the anchors "XFLT-000123Y" passes, which is the kind of near-miss a
+# bad import produces.
+CONSTRUCT {
+  _:r a sh:ValidationResult ;
+    sh:resultSeverity sh:Violation ;
+    sh:focusNode ?vehicle ;
+    sh:resultPath fleet:assetTag ;
+    sh:value ?reported ;
+    sh:sourceConstraintComponent oq:FLT-001 ;
+    sh:resultMessage ?msg .
+}
+WHERE {
+  ?vehicle a/rdfs:subClassOf* fleet:Vehicle .
+  FILTER(isIRI(?vehicle))
+  OPTIONAL { ?vehicle fleet:assetTag ?tag }
+  FILTER(!BOUND(?tag) || !REGEX(STR(?tag), "^FLT-[0-9]{6}$"))
+  BIND(COALESCE(STR(?tag), "(none)") AS ?reported)
+  BIND(CONCAT("Vehicle ", STR(?vehicle), " has asset tag ", ?reported,
+              ", which is not in the house format FLT-NNNNNN. Nothing can be ",
+              "joined to the maintenance or finance records without it.") AS ?msg)
+}
