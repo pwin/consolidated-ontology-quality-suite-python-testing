@@ -25,6 +25,7 @@ uv run pytest -q            # same expectations, as pass/fail tests
 | [report.py](report.py) | Prints the detection matrix; writes `out/findings.csv` and `out/summary.md` |
 | [gate.py](gate.py) + [ontology-suite.yml](ontology-suite.yml) | A CI gate for *your* project's folders rather than these fixtures: config file in, suite exit code out. See [COMMANDS.md](COMMANDS.md) §5 |
 | [experiments/](experiments/) | Two standalone probes that isolate the suite issues found below |
+| [demonstration/](demonstration/) | A plan for demonstrating the VS Code extension and the suite together across one day's work — tasks to build it, and a script to present from |
 | [examples/cross-folder-checks/](examples/cross-folder-checks/) | A worked example of referencing project-local checks that live in *other* folders — SPARQL in one, SHACL in another — and the five ways that reference goes wrong |
 
 ## Results
