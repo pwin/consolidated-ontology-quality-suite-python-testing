@@ -1,0 +1,18 @@
+{
+  "_comment": "The same idea once one reading is not enough. Stage names are this project's; the suite ships none and has no opinion about them.",
+  "stages": {
+    "sketch": {
+      "STR-002": "Info",
+      "STR-003": "Info"
+    },
+    "draft": {
+      "extends": "sketch",
+      "STR-002": "Warning"
+    },
+    "release": {
+      "extends": "draft",
+      "STR-002": "Violation",
+      "STR-003": "Violation"
+    }
+  }
+}

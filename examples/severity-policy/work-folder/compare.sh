@@ -11,7 +11,7 @@ set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../../.." && pwd)"
-POLICY="$HERE/../policy-repo/severities.json"
+POLICY="$HERE/../policy-repo/severities-by-stage.json"
 
 cd "$REPO"
 

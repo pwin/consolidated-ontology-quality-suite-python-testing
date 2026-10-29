@@ -8,7 +8,8 @@ comparable by construction because both ran the installed suite's own checks.
 ```
 severity-policy/
 ├── policy-repo/                     <- a separate repo, someone else's
-│   └── severities.json                  three stages, ids -> severity
+│   ├── severities.json                  ids -> severity, one reading
+│   └── severities-by-stage.json         the same, once one is not enough
 └── work-folder/                     <- the ontology under evaluation
     ├── myOntology.ttl
     ├── ontology-suite.yml               gate 1: the defaults
@@ -54,13 +55,44 @@ It blocks on `STR-002` (a property used and never declared) and `STR-007`.
 
 ## Reading 2: an alternative interpretation
 
-Three stages, named by this project. The suite ships none and has no opinion
-about them:
+[`policy-repo/severities.json`](policy-repo/severities.json) is the whole
+file — a list of check ids and the severity this project wants:
+
+```json
+[
+  { "STR-003": "Violation" },
+  { "STR-002": "Info" }
+]
+```
+
+One flag applies it, and no stage name is needed when the file has only one
+reading:
+
+```
+--severity-policy ../policy-repo/severities.json
+```
+
+```
+Severity policy 'default' from severities.json: 2 check(s) re-mapped
+  STR-002 Violation -> Info (1 finding(s))
+  STR-003 Warning -> Violation (1 finding(s))
+Findings: 13 total (2 Violation, 5 Warning, 6 Info)
+```
+
+**Thirteen findings and two Violations, both times — but a different pair.**
+The defaults block on `STR-002` and `STR-007`; this blocks on `STR-003` and
+`STR-007`. Nothing was hidden and nothing invented: the same thirteen facts,
+read against a different standard. Totals alone cannot show you that.
+
+### When one reading is not enough
+
+[`severities-by-stage.json`](policy-repo/severities-by-stage.json) is the same
+idea with named stages. The names are this project's — the suite ships none:
 
 ```json
 {
   "stages": {
-    "sketch":  { "STR-002": "Info", "STR-003": "Info", "QUA-004": "off" },
+    "sketch":  { "STR-002": "Info", "STR-003": "Info" },
     "draft":   { "extends": "sketch", "STR-002": "Warning" },
     "release": { "extends": "draft", "STR-002": "Violation",
                  "STR-003": "Violation" }
@@ -68,29 +100,29 @@ about them:
 }
 ```
 
-`extends` means three stages that differ in two checks need not restate the
-other forty. `off` is not a severity — the suite has exactly three — it says
-*do not ask this question at this stage*, which is different from `Info`,
-meaning *we looked and here it is*.
-
-The release gate is the default config plus **two lines**:
+`extends` means three stages differing in two checks need not restate the
+other forty. The release gate is then the default config plus **two lines**:
 
 ```yaml
 # ontology-suite-release.yml
-severity_policy: ../policy-repo/severities.json
+severity_policy: ../policy-repo/severities-by-stage.json
 stringency: release
 ```
 
 ```
-Severity policy 'release' from severities.json: 2 check(s) re-mapped
-  QUA-004 Warning -> off (1 finding(s) dropped)
+Severity policy 'release' from severities-by-stage.json: 1 check(s) re-mapped
   STR-003 Warning -> Violation (1 finding(s))
-Findings: 12 total (3 Violation, 4 Warning, 5 Info)
+Findings: 13 total (3 Violation, 5 Warning, 5 Info)
 gate: FAIL (suite exit 1, --fail-on Violation)
 ```
 
 Note what is *not* in that config: no registry, no shapes directory, no
 assembled copy of anything. The policy is applied to the findings.
+
+> There is a third value besides the three severities — `off`, which drops a
+> check's findings entirely, for a question that does not apply at a stage
+> yet. It is left out of this example to keep the contrast about severity;
+> `docs/SEVERITY_POLICY.md` in the suite covers it.
 
 ---
 
@@ -103,13 +135,12 @@ bash examples/severity-policy/work-folder/compare.sh
 ```
 Each run, as a whole
   defaults   13 finding(s) (2 V, 6 W, 5 I) across  9 check(s)
-  sketch     12 finding(s) (1 V, 4 W, 7 I) across  8 check(s)
-  draft      12 finding(s) (1 V, 5 W, 6 I) across  8 check(s)
-  release    12 finding(s) (3 V, 4 W, 5 I) across  8 check(s)
+  sketch     13 finding(s) (1 V, 5 W, 7 I) across  9 check(s)
+  draft      13 finding(s) (1 V, 6 W, 6 I) across  9 check(s)
+  release    13 finding(s) (3 V, 5 W, 5 I) across  9 check(s)
 
 Where the readings differ
   check     defaults    sketch      draft       release
-  QUA-004   Warning     -- off --   -- off --   -- off --
   STR-002   Violation   Info        Warning     Violation
   STR-003   Warning     Info        Info        Violation
 
@@ -122,9 +153,10 @@ What each run would block on, at --fail-on Violation
 
 Three things to read off it.
 
-**The totals barely move; the gate moves a lot.** Every stage reports twelve
-findings. What changes is which of them block: one check at sketch, three at
-release. A count is not a summary.
+**The totals do not move at all; the gate moves a lot.** Thirteen findings
+across nine checks, every single time. What changes is which of them block:
+one check at sketch, three at release. The report does not change — what it
+means here does. A count is not a summary.
 
 **`STR-002` travels the whole range** — `Info` at sketch, `Warning` at draft,
 `Violation` at release — without the check being touched between runs. That is
@@ -132,8 +164,8 @@ the thing a single `--fail-on` threshold cannot express: it can say *how
 strict*, not *about what*.
 
 **`release` restores `STR-002` to `Violation`, which is what it declares**, so
-that run re-maps only two checks rather than three. A stage asking for the
-shipped severity is not an override, and the run says so.
+that run re-maps one check rather than two. A stage asking for the shipped
+severity is not an override, and the run says so.
 
 ### Nothing is relabelled quietly
 

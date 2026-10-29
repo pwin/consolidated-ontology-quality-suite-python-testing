@@ -16,7 +16,8 @@ quoting it.
 
 **Say:**
 - Two tools, one day's work: write an ontology, write the transformations that
-  populate it, review those transformations, add the rules your project needs.
+  populate it, review those transformations, add the rules your project needs —
+  and then decide what any of it should block.
 - They are not alternatives. The registry has 61 checks; the editor runs 50 of
   them in-process as you type, and the 11 it does not are exactly the 11 the
   CLI alone can produce. 50 + 11 = 61, with nothing falling between.
@@ -502,19 +503,245 @@ still looks green.
 
 ---
 
+## Act 5 — The standard checks, read your way (12 min)
+
+> **This act stands alone.** It needs nothing from Acts 1–4 and can open the
+> session, or be the whole session. It answers the objection that otherwise
+> ends an adoption conversation: *we cannot switch this on, it would fail
+> everything on day one.*
+>
+> Requires suite **0.25.0** or later for `--severity-policy`/`--stringency`.
+
+### Beat 1 — The situation, in three folders (0:00)
+
+**Do:** Three windows, nothing running.
+
+```
+consolidated_ontology_suite_python/   the suite        (installed)
+policy-repo/                          severities.json  (someone else's repo)
+work-folder/myOntology.ttl            what we evaluate (ours)
+```
+
+**Say:**
+- This is the shape of the real question: the checks come from one place, the
+  severities your organisation wants come from another, and the thing being
+  evaluated is yours.
+- The policy repo is deliberately not ours. It is the standards group's, or
+  another team's, or a submodule. We reference it; we never copy it.
+- And the suite being a local checkout changes nothing here. We point at the
+  *installed* suite, however it got installed — editable checkout, wheel from
+  PyPI, does not matter. Nothing in this act edits it.
+
+**Land:** three owners, three folders, one run.
+
+### Beat 2 — What the checks say (1:30)
+
+**Do:**
+
+```
+uv run ontology-quality-suite checks --ontology myOntology.ttl \
+  --engine both --own-namespace https://example.org/mine --fail-on Violation
+```
+
+> Findings: 13 total (2 Violation, 6 Warning, 5 Info)
+> blocks on: STR-002, STR-007 — exit 1
+
+**Say:**
+- No policy yet. This is what the checks themselves declare, and it is the
+  baseline everything else is read against.
+- `STR-002` is "a property is used and never declared". The suite calls that a
+  Violation, and it is right to — in general.
+- Here, mid-modelling, we know about it and we are not going to stop for it.
+  That is not the suite being wrong. It is the same fact meaning something
+  different at this point in the work.
+
+**Land:** the default reading is a real reading, not a placeholder.
+
+### Beat 3 — The JSON file becomes the severity (3:00) ★ hinge
+
+**Do:** Show `policy-repo/severities.json` — all of it:
+
+```json
+[
+  { "STR-003": "Violation" },
+  { "STR-002": "Info" }
+]
+```
+
+Then add one flag:
+
+```
+  --severity-policy ../policy-repo/severities.json
+```
+
+> Severity policy 'default' from severities.json: 2 check(s) re-mapped
+>   STR-002 Violation -> Info (1 finding(s))
+>   STR-003 Warning -> Violation (1 finding(s))
+> Findings: 13 total (2 Violation, 5 Warning, 6 Info)
+
+**Say:**
+- That is the whole file. A list of check ids and the severity we want. No
+  SPARQL, no SHACL, no stage vocabulary to learn.
+- One flag. Nothing was copied, nothing was rewritten, and the suite's own
+  checks are the ones that ran.
+- Now look carefully, because this is the point of the act:
+
+```
+            findings   Violations   which ones
+defaults    13         2            STR-002, STR-007
+policy      13         2            STR-003, STR-007
+```
+
+- **Same count. Same number of Violations. A different pair.** Nothing was
+  hidden and nothing was invented — the same thirteen facts are being read
+  against a different standard.
+- If you only ever look at the totals, you cannot see that. It is the named
+  checks that tell you what a gate is actually enforcing.
+
+**Land:** the JSON file is now the severity, and it took one flag.
+
+### Beat 4 — Why this is not a fudge (5:00)
+
+**Do:** Open `full_results.csv`. Point at the `declared_severity` column.
+
+> `STR-002, Info, Violation, ...`
+
+**Say:**
+- The obvious worry about a feature like this is that it is a way to make red
+  things green and say nothing.
+- So it cannot be done quietly, by construction. Three things:
+- The run **prints every re-mapping**, naming the stage and the file it came
+  from. It is in the log of whoever ran it.
+- The CSV carries **`declared_severity`** — what the check itself said —
+  populated *only* where a policy moved it. A reviewer sees both readings side
+  by side without being told which policy ran.
+- And a policy that changes nothing **warns**, because a wrong stage name is
+  otherwise indistinguishable from a correct run.
+- The suite's own contributor guide says: set severity to what is true, and use
+  `--fail-on` to decide what blocks. This does not weaken that. The check still
+  says what is true; the policy records, in the open, what this project does
+  about it here.
+
+**Land:** a policy can change what blocks a build. It cannot do it quietly.
+
+### Beat 5 — The two ways this is usually got wrong (7:00) ★ hinge
+
+**Do:** Show the table. Do not run these live — they take a minute each and
+produce nothing to look at, which is the point.
+
+```
+Approach                                   Result
+Write the severities into the registry     the shipped result, exactly
+and pass --registry                        13 findings, both overrides ignored
+
+Copy the suite's checks and rewrite        looks like it worked
+the .rq files                              same total, same Violation count,
+                                           severities still the shipped ones
+```
+
+**Say:**
+- Both of these are what you reach for first. Neither produces a diagnostic of
+  any kind.
+- **The registry does not decide severity.** Its `default_severity` drives
+  report badges and Cucumber tags. Each check carries its own
+  `sh:resultSeverity` or `sh:severity`, and that is what is read and what
+  `--fail-on` gates on.
+- The second is worse, because it looks like it worked. Rewrite the query and
+  leave the shape, and **the shape wins** — in both directions. `STR-002` came
+  back Violation where we asked for Info; `STR-003` came back Warning where we
+  asked for Violation.
+- And `sources` still read `shacl+sparql`, so nothing reported a disagreement.
+  Twenty-one of the suite's checks are written both ways. This is not an edge
+  case.
+- Applying the policy to *findings* removes the failure entirely: by then a
+  check written both ways is one row, so there is no half of it to miss.
+
+**Land:** the reason this is a flag and not a recipe is that every recipe
+fails silently.
+
+### Beat 6 — One reading is rarely enough (9:00)
+
+**Do:** Show `severities-by-stage.json`, then:
+
+```
+bash examples/severity-policy/work-folder/compare.sh
+```
+
+> ```
+> check     defaults    sketch      draft       release
+> STR-002   Violation   Info        Warning     Violation
+> STR-003   Warning     Info        Info        Violation
+>
+> blocks on defaults  STR-002, STR-007
+>           sketch    STR-007
+>           draft     STR-007
+>           release   STR-002, STR-003, STR-007
+> ```
+
+**Say:**
+- The same file grows stages when one reading stops being enough. `extends`
+  means three stages that differ in two checks do not restate the other forty.
+- The stage names are **ours**. The suite ships none and has no opinion — call
+  them what your process calls them.
+- `STR-002` runs Info → Warning → Violation across the three, and the check is
+  untouched between runs. That is exactly what one `--fail-on` threshold cannot
+  say: it sets *how strict*, not *about what*.
+- And look at the totals: **thirteen findings, every single time.** The report
+  does not change. What it means here does.
+
+**Land:** stringency becomes a property of the stage, not of the check.
+
+### Beat 7 — Commit it, so nobody has to remember (11:00)
+
+**Do:** Show the two configs side by side. The second is the first plus two
+lines.
+
+```yaml
+severity_policy: ../policy-repo/severities-by-stage.json
+stringency: release
+```
+
+```
+uv run python gate.py --config ontology-suite-release.yml
+```
+
+**Say:**
+- Two committed configs: one for the defaults, one for release. The difference
+  is two lines, and `gate.py` resolves the policy path against the config, so
+  it works from any directory and from CI.
+- That is the real win. Which reading a branch is held to stops being a flag
+  someone remembers to pass.
+- One honest limit, and say it rather than let them find it: **this is the CLI.**
+  The editor has no stringency. Its blunt instrument is
+  `ontologySuite.disabledChecks`, which drops a check entirely — fine for
+  keeping the Problems panel usable while you iterate, not a substitute for a
+  policy.
+- So the shape is: the editor shows you everything as you type; the gate decides
+  what blocks, per stage, from a file you can read in a pull request.
+
+**Land:** the question is never "is this a Violation". It is "is it a Violation
+*here, now*" — and that answer belongs in a committed file.
+
+---
+
 ## Close (2 min)
 
 **Say:**
-- Four acts, one rule: the cheap check where you type, the expensive one in the
-  pipeline.
+- Five acts, one rule: the cheap check where you type, the expensive one in the
+  pipeline, and you decide what any of it blocks.
 - The editor does 50 of the registry's 61 in-process, plus three that no
   pipeline can do. The CLI does the 11 remaining, and asks the questions that
   need more than one file — the set-level ones from Act 3.
 - Both are extensible by you, in three tiers: JSON rules, SPARQL checks, SHACL
   shapes. Committed, versioned, running in the editor and in CI from the same
   source.
-- The one thing to take away: when you add your own checks, the mistake to fear
-  is not the one that errors. It is the one that still reports green.
+- And the check set is yours in a second sense: a JSON file of check ids and
+  severities decides what any of it *means here*, per stage, without editing a
+  single check. Printed on every run and recorded next to what the check
+  declared, so it is a decision in the open rather than a fudge.
+- The one thing to take away: when you add your own checks, or change what they
+  mean, the mistake to fear is not the one that errors. It is the one that
+  still reports green.
 
 **Then, and only then:** **Ontology Suite: Visualize Subject Graph**, for the
 questions.

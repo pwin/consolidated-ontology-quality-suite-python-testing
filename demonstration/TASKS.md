@@ -47,8 +47,9 @@ Verify each still behaves as recorded, then leave it alone:
 
 - [x] `competency_tests/fixtures/vsix/extension-only.ttl` — Act 1 beat 5. Seeds
       `VOC-001` on a `:Machnie` typo and `REA-005` on a sameAs/differentFrom
-      contradiction. **Both halves of the contrast re-confirmed.** CLI, suite
-      0.24.3: 2 findings, `DAT-002` and `QUA-004`, none of the three
+      contradiction. **Both halves of the contrast re-confirmed.** CLI,
+      re-checked on suite **0.25.0**: 2 findings, `DAT-002` and `QUA-004`,
+      none of the three
       extension-only ids. Editor, extension 0.16.3: `VOC-001` (Warning) on
       `:Pump` → `:Machnie` and `REA-005` (Violation) on `:pump-17`, by driving
       `runVocabularyChecks` and `runReasoningChecks` over the fixture directly.
@@ -65,6 +66,14 @@ Verify each still behaves as recorded, then leave it alone:
 - [ ] `examples/cross-folder-checks/` — **the whole basis of Act 4.** Folder B
       (SPARQL house rules), Folder C (a SHACL house rule), `prepare_checks.py`,
       and a README whose five failure modes are all measured
+- [x] `examples/severity-policy/` — **the whole basis of Act 5, and it needs
+      no props built.** `policy-repo/severities.json` is the flat
+      id→severity list the act shows on screen;
+      `policy-repo/severities-by-stage.json` is the staged version for beat 6;
+      `work-folder/` holds `myOntology.ttl` and the two gate configs;
+      `compare.sh` produces beat 6's table. **Re-measured on suite 0.25.0:**
+      13 findings in every reading, blocking set moving from `STR-002`,
+      `STR-007` at defaults to `STR-007` alone at sketch to three at release
 - [ ] `gate.py` + `ontology-suite.yml` — the close of Acts 3 and 4
 
 ## 4. Act-by-act preparation
@@ -133,7 +142,32 @@ Verify each still behaves as recorded, then leave it alone:
       Folder C and show that the finding **ids do not change at all** — the only
       trace anywhere is `STR-002` going from `shacl+sparql` to `sparql`
 - [ ] Decide whether `disabledChecks` is worth 30 seconds — turning a standard
-      check *down* is the other half of extensibility
+      check *down* is the other half of extensibility, and Act 5 beat 7 refers
+      back to it as the editor's blunt instrument
+
+### Act 5 — the standard checks, read your way
+
+Least preparation of any act: it runs from `examples/severity-policy/` as
+committed, and needs no props.
+
+- [ ] Confirm the installed suite is **0.25.0 or later**
+      (`ontology-quality-suite checks --help | grep severity-policy`).
+      `compare.sh` checks this too and says so rather than failing obscurely
+- [ ] Rehearse beat 3 as **one flag added to the beat 2 command**, not a new
+      command typed from scratch. The whole point is that nothing else changed
+- [ ] Have the beat 3 contrast ready to point at, because it is the beat:
+      13 findings and 2 Violations both times, `STR-002`/`STR-007` becoming
+      `STR-003`/`STR-007`. If you only show totals the act has no content
+- [ ] Open `full_results.csv` at the `declared_severity` column before beat 4
+      rather than hunting for it live
+- [ ] Beat 5's two failure modes are **told, not run** — each takes about a
+      minute and produces nothing to look at. Have the table on a slide
+- [ ] Decide whether to say the honest limit out loud in beat 7: there is no
+      stringency in the editor, only `disabledChecks`. Recommended — a room
+      that finds it afterwards trusts the rest less
+- [ ] If the room is a standards group rather than a project team, swap the
+      framing of beat 1: they are the owners of the policy repo, not the
+      consumers of it
 
 ## 5. Documentation to fix first
 

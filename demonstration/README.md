@@ -10,9 +10,11 @@ Two files, for two jobs:
 
 ## The argument
 
-Four acts, following the order of real work: write an ontology, write the
-transformations that populate it, review those transformations as a *set*, then
-add the checks your project needs that no tool ships with.
+Five acts, following the order of real work: write an ontology, write the
+transformations that populate it, review those transformations as a *set*, add
+the checks your project needs that no tool ships with — and then decide what
+any of it should actually block, which is where most adoption conversations
+really go.
 
 It is one claim, made four times:
 
@@ -49,9 +51,25 @@ dual formulation Act 4's hinge depends on.
 | 2 | Creating a set of TARQL transformations | 12 | two valid queries whose IRIs never join |
 | 3 | Reviewing the triplification patterns of the set | 12 | questions no single file can answer |
 | 4 | Adding checks beyond the standard ones | 10 | the same house rule, in the editor and in CI |
+| 5 | **The standard checks, read your way** | 12 | same 13 findings, a different pair blocking |
 
-Plus two minutes to open and two to close: **50 minutes**, and each act stands
-alone if it has to be cut to fifteen.
+Plus two minutes to open and two to close: **62 minutes** for all five, and
+each act stands alone if it has to be cut to fifteen.
+
+### Act 5 is the one to run if you only run one
+
+It needs nothing from Acts 1–4 and can open the session or be the whole
+session. It answers the objection that otherwise ends an adoption
+conversation — *we cannot switch this on, it would fail everything on day
+one* — and it is the shortest path from "a tool that judges us" to "a file we
+control".
+
+It is built on the three-folder situation people actually arrive with: the
+suite installed somewhere, a severity policy in someone else's repo, and the
+ontology under evaluation in a work folder. Every number in it is measured,
+and the whole thing runs from
+[`examples/severity-policy/`](../examples/severity-policy/) with no props to
+build. **It needs suite 0.25.0 or later.**
 
 ## Audience
 

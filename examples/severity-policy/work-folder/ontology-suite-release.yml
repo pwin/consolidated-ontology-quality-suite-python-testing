@@ -13,5 +13,5 @@ own_namespace: https://example.org/mine
 fail_on: Violation
 out_dir: out/release
 
-severity_policy: ../policy-repo/severities.json
+severity_policy: ../policy-repo/severities-by-stage.json
 stringency: release
