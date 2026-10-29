@@ -24,9 +24,17 @@ dependencies = [
     # gate reads `@builtin` as a directory name, finds nothing there, and
     # runs this project's eight CMP checks alone.
     #
+    # Raised to 0.25.0 for `--severity-policy`/`--stringency`, which
+    # examples/severity-policy/ is built on: before that release there was no
+    # supported way to read the standard checks at a project's own stringency,
+    # and the workaround -- rewriting copies of the suite's checks -- silently
+    # discarded the policy whenever it reached only one of a dual-formulated
+    # check's two arms. This floor subsumes both older ones, 0.22.0 and
+    # 0.18.0.
+    #
     # The uv source below makes this a local editable install, so the bound
     # documents the requirement rather than enforcing it here.
-    "ontology-quality-suite>=0.22.0",
+    "ontology-quality-suite>=0.25.0",
     "pyyaml>=6.0.3",
 ]
 

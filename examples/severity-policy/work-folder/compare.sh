@@ -17,8 +17,7 @@ cd "$REPO"
 
 if ! uv run ontology-quality-suite checks --help 2>&1 | grep -q -- "--severity-policy"; then
   echo "This example needs --severity-policy, which the installed suite does"
-  echo "not have. It is not in a release yet -- it is on the suite repo's"
-  echo "'severity-policy' branch. See the README's 'What this needs'."
+  echo "not have. It arrived in suite 0.25.0; this install is older."
   exit 1
 fi
 

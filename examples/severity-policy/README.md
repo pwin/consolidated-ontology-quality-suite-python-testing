@@ -23,16 +23,12 @@ came from running the commands shown.
 
 ## What this needs
 
-`--severity-policy` and `--stringency`. **These are not in a release yet** —
-the installed suite is 0.24.3 and the flags are on the suite repo's
-`severity-policy` branch, pending review. This example therefore runs against
-an editable install of that branch, and `compare.sh` checks for the flag and
-says so rather than failing obscurely. Update this note, and the version
-floor in `pyproject.toml`, when it lands.
+`--severity-policy` and `--stringency`, which are **suite 0.25.0 and later**.
+`compare.sh` checks for the flag and says so rather than failing obscurely.
 
-Before those flags there was no supported mechanism. *Why the flag exists*, at
-the end, is the measured argument for adding one rather than leaving it to
-each project.
+Before 0.25.0 there was no supported mechanism. *Why the flag exists*, at the
+end, is the measured argument for adding one rather than leaving it to each
+project.
 
 ---
 
