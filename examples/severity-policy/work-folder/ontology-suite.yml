@@ -1,25 +1,12 @@
+# The defaults: the suite's own checks, at the severities the checks declare.
+#
+# Nothing here mentions severity at all. This is the reading you get when you
+# do not ask for another one, and it is the baseline the policy runs are
+# compared against.
+#
 # Paths resolve against this file, so the run works from any directory.
 ontology: myOntology.ttl
-
-# All three point at what apply_severities.py assembles, and none of them at
-# the suite's own copies. That is the whole arrangement:
-#
-#   registry  reporting metadata, kept in step so reports do not contradict
-#             the findings -- it does NOT decide severities
-#   sparql    the rewritten copy of the suite's whole tree. No "@builtin":
-#             this IS the builtin tree, with the policy applied. Adding
-#             @builtin would run the unmodified checks alongside it.
-#   shapes    the rewritten copy of the suite's shapes. Required, because a
-#             shape's sh:severity beats the registry, so leaving this out
-#             silently restores shipped severities on the SHACL arm.
-registry: out/registry.json
-sparql:
-  - out/sparql
-shapes: out/shapes
-
-# `both` runs each formulation and cross-checks them for drift, which is what
-# makes a half-applied policy visible: the two arms would disagree.
 engine: both
-
 own_namespace: https://example.org/mine
 fail_on: Violation
+out_dir: out/defaults

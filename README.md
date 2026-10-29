@@ -27,7 +27,7 @@ uv run pytest -q            # same expectations, as pass/fail tests
 | [experiments/](experiments/) | Two standalone probes that isolate the suite issues found below |
 | [demonstration/](demonstration/) | A plan for demonstrating the VS Code extension and the suite together across one day's work — tasks to build it, and a script to present from |
 | [examples/cross-folder-checks/](examples/cross-folder-checks/) | A worked example of referencing project-local checks that live in *other* folders — SPARQL in one, SHACL in another — and the five ways that reference goes wrong |
-| [examples/severity-policy/](examples/severity-policy/) | A worked example of applying a severity policy held in another repo to the suite's own checks — why `--registry` alone does nothing, and the five ways that goes wrong |
+| [examples/severity-policy/](examples/severity-policy/) | One ontology read two ways — at the severities the checks declare, and at three named stringencies from a policy repo — plus the measured reason the suite grew a flag for it |
 
 ## Results
 

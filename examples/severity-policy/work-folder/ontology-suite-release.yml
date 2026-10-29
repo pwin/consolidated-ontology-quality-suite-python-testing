@@ -1,0 +1,17 @@
+# The alternative interpretation: the same checks, read at release stringency.
+#
+# The only difference from ontology-suite.yml is the last three lines. No copy
+# of the suite's checks, no assembled registry, no rewritten shapes -- the
+# policy is applied to the findings, so the checks are the installed suite's
+# in both runs and the two reports are comparable by construction.
+#
+# Committing this is the point: the stringency a branch is held to stops being
+# a flag someone remembers to pass.
+ontology: myOntology.ttl
+engine: both
+own_namespace: https://example.org/mine
+fail_on: Violation
+out_dir: out/release
+
+severity_policy: ../policy-repo/severities.json
+stringency: release

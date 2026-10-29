@@ -65,6 +65,12 @@ FLAGS: Dict[str, str] = {
     "own_namespace": "--own-namespace",
     "out_dir": "--out-dir",
     "fail_on": "--fail-on",
+    # `fail_on` says how strict this gate is; these two say which checks it
+    # cares about, which a single threshold cannot express. Committing them
+    # alongside the rest is the point: the stringency a branch is held to
+    # stops being a flag someone remembers to pass.
+    "severity_policy": "--severity-policy",
+    "stringency": "--stringency",
     "verbose": "--verbose",
 }
 
@@ -72,7 +78,7 @@ FLAGS: Dict[str, str] = {
 # directory: a committed config describes the project's layout, and a gate
 # invoked from a subdirectory or by a hook should not mean something else.
 PATH_KEYS = {"ontology", "queries", "csv_dir", "data", "registry", "sparql",
-             "shapes", "import_dir", "out_dir"}
+             "shapes", "import_dir", "out_dir", "severity_policy"}
 
 
 def load_config(path: Path) -> Dict[str, Any]:

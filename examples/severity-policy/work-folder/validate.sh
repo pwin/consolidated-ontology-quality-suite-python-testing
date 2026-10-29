@@ -1,24 +1,33 @@
 #!/usr/bin/env bash
-# Evaluate myOntology.ttl with the severities the policy repo asks for.
+# The same ontology gated two ways, from two committed configs:
+#
+#   ontology-suite.yml          the defaults -- the severities the checks declare
+#   ontology-suite-release.yml  the same checks read at release stringency
 #
 #   bash examples/severity-policy/work-folder/validate.sh
 #
-# Exits non-zero if anything reaches Violation, so it works unchanged as a CI
-# gate. Run it from anywhere: every path below is derived from this file.
-set -euo pipefail
+# Each gate exits non-zero when anything reaches its --fail-on, so either
+# works unchanged in CI. This script reports both and exits non-zero if
+# either did, so it can be run as one step while still showing the contrast.
+set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../../.." && pwd)"
 
 cd "$REPO"
 
-echo "== step 1: apply the policy repo's severities to a copy of the checks"
-# Must come first: ontology-suite.yml points --registry, --sparql and
-# --shapes at what this writes. It re-copies from the installed suite every
-# run, so the assembled checks are always this install's -- and it refuses to
-# finish if an override did not take or the config would undo it.
-uv run python "$HERE/apply_severities.py"
-
-echo
-echo "== step 2: evaluate the ontology against them"
+echo "== gate 1: the defaults"
 uv run python gate.py --config "$HERE/ontology-suite.yml"
+defaults=$?
+echo
+
+echo "== gate 2: release stringency"
+# Two extra lines in the config, no other difference. No copy of the suite's
+# checks is made for this: the policy is applied to the findings.
+uv run python gate.py --config "$HERE/ontology-suite-release.yml"
+release=$?
+echo
+
+echo "defaults gate exit $defaults, release gate exit $release"
+[ "$defaults" -eq 0 ] && [ "$release" -eq 0 ] && exit 0
+exit 1
