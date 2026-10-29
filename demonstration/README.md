@@ -34,6 +34,13 @@ Note `TQL-001`/`002`/`003` are in *both*: the extension reviews a query folder
 for them in seconds. `TQL-004`/`005` are not, because they are asked of the
 suite's BIND-facts graph, which the extension does not build.
 
+The two lists partition the registry exactly. Counted from extension 0.16.3's
+bundled `registry.json`: of its **61** checks the extension runs **50**
+in-process, and the 11 it does not are precisely the CLI-only list above —
+**50 + 11 = 61**, nothing unaccounted for. Of those 50, 44 are SPARQL queries
+and 21 are *also* written as SHACL shapes across 6 shape files, which is the
+dual formulation Act 4's hinge depends on.
+
 ## Shape and timing
 
 | Act | Subject | Minutes | The hinge |

@@ -47,9 +47,13 @@ Verify each still behaves as recorded, then leave it alone:
 
 - [x] `competency_tests/fixtures/vsix/extension-only.ttl` — Act 1 beat 5. Seeds
       `VOC-001` on a `:Machnie` typo and `REA-005` on a sameAs/differentFrom
-      contradiction. **CLI contrast re-confirmed on suite 0.24.3:** 2 findings,
-      `DAT-002` and `QUA-004`, and none of the three extension-only ids. Still
-      to do: confirm the editor half on extension 0.16.3
+      contradiction. **Both halves of the contrast re-confirmed.** CLI, suite
+      0.24.3: 2 findings, `DAT-002` and `QUA-004`, none of the three
+      extension-only ids. Editor, extension 0.16.3: `VOC-001` (Warning) on
+      `:Pump` → `:Machnie` and `REA-005` (Violation) on `:pump-17`, by driving
+      `runVocabularyChecks` and `runReasoningChecks` over the fixture directly.
+      That exercises the check engines, **not** the Problems-panel path — so
+      still run the palette command once on the day before showing it
 - [ ] `competency_tests/fixtures/model/` — Act 3 runs entirely on this:
       ontology 1.0.0 and 2.0.0, taxonomy, units, four mappings, their CSVs, two
       comparable outputs
@@ -133,11 +137,20 @@ Verify each still behaves as recorded, then leave it alone:
 
 ## 5. Documentation to fix first
 
-- [ ] `competency_tests/COMPETENCY_COVERAGE.md` still says to install
-      `ontology-dev-suite-0.13.6.vsix`. The current build is **0.16.3**. Fix the
-      line and re-verify the three extension-only findings on the new build
-- [ ] Re-confirm the "44 SPARQL + 6 SHACL-SPARQL checks in-process" figure from
-      the extension README against 0.16.3 before quoting it on screen
+- [x] `competency_tests/COMPETENCY_COVERAGE.md` said to install
+      `ontology-dev-suite-0.13.6.vsix`; the current build is **0.16.3**. Fixed
+      at the source — that file is generated, so the edit is in
+      `run_competency_checks.py`, and the line now says the version is not
+      load-bearing so the next bump does not silently invalidate it
+- [x] The extension README's "44 SPARQL + 6 SHACL-SPARQL checks" — measured
+      against 0.16.3's bundled registry rather than taken from the prose.
+      **The 44 holds**: 46 `.rq` files ship, minus `TQL-004`/`005`, which
+      `CLI_ONLY` excludes because they query the suite's BIND-facts graph.
+      **The 6 counts shape *files*, not checks** — those 6 files hold 22 shape
+      nodes resolving to 21 check ids, every one of which also has an `.rq`
+      twin. Do not say "6 checks" on screen. The figure worth quoting is the
+      one in `SCRIPT.md`: **50 of the registry's 61 run in-process**, and the
+      11 that do not are exactly `CLI_ONLY`
 
 ## 6. Rehearsal
 

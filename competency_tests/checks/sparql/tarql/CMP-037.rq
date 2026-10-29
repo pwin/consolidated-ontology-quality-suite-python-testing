@@ -29,10 +29,18 @@ WHERE {
            (GROUP_CONCAT(DISTINCT ?namespace; separator=", ") AS ?namespaces)
            (GROUP_CONCAT(DISTINCT ?source; separator=", ") AS ?files)
     WHERE {
-      ?b a tq:PrefixBinding ;
-        tq:prefix ?prefix ;
-        tq:namespace ?namespace ;
-        tq:source ?source .
+      # Ordered in a subquery because GROUP_CONCAT has no defined order: the
+      # same inputs listed the four files in a different sequence on each run,
+      # so results/findings.csv churned and a real change was lost in it.
+      # The aggregate follows the solution sequence it is handed.
+      SELECT DISTINCT ?prefix ?namespace ?source
+      WHERE {
+        ?b a tq:PrefixBinding ;
+          tq:prefix ?prefix ;
+          tq:namespace ?namespace ;
+          tq:source ?source .
+      }
+      ORDER BY ?prefix ?namespace ?source
     }
     GROUP BY ?prefix
     HAVING (COUNT(DISTINCT ?namespace) > 1)

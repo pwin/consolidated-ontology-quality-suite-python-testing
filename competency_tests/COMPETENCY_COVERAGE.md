@@ -835,7 +835,7 @@ draft_alarms.rq ends the gist namespace with a hash where every other mapping us
 
 **Observed**
 
-- `CMP-037` x1 in run `iri-pattern` -- The mapping set binds gist: to 2 different namespaces -- https://w3id.org/semanticarts/ns/ontology/gist/, https://w3id.org/semanticarts/ns/ontology/g...
+- `CMP-037` x1 in run `iri-pattern` -- The mapping set binds gist: to 2 different namespaces -- https://w3id.org/semanticarts/ns/ontology/gist#, https://w3id.org/semanticarts/ns/ontology/g...
 
 ### CT-38 -- Output changed where no change was intended
 
@@ -1074,7 +1074,7 @@ No competency test *depends* on these three: every one is evidenced by a check t
 
 `fixtures/vsix/extension-only.ttl` is a small dataset seeded for them:
 
-1. Open `fixtures/vsix/extension-only.ttl` in VS Code with the extension installed (`code --install-extension consolidated_ontology_suite_webapp/ontology-dev-suite-0.13.6.vsix`).
+1. Open `fixtures/vsix/extension-only.ttl` in VS Code with the extension installed (`code --install-extension consolidated_ontology_suite_webapp/ontology-dev-suite-0.16.3.vsix`, or whichever build is current -- the version is not load-bearing here, the three checks are).
 2. Run **Ontology Suite: Run Local Checks** from the command palette.
 3. The Problems panel should report `VOC-001` on `:Pump rdfs:subClassOf :Machnie` (a typo for `:Machine`) and `REA-005` on `:pump-17`, which is asserted both `owl:sameAs` and `owl:differentFrom` `:pump-seventeen`.
 

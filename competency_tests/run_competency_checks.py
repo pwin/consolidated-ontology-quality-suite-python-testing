@@ -445,11 +445,21 @@ def write_findings_csv(runs: List[Run]) -> Path:
         writer.writerow(["run", "check_id", "severity", "category", "focus_node", "path", "value",
                          "source_file", "line", "message"])
         for run in runs:
-            for row in run.rows:
-                writer.writerow([run.key, row.check_id, row.severity, row.category or "",
-                                 row.focus_node, row.path or "", row.value or "",
-                                 getattr(row, "source_file", None) or "",
-                                 getattr(row, "line", None) or "", row.message])
+            # Sorted, because the suite does not promise an order within a
+            # check and does not give the same one twice: two runs over
+            # identical inputs put the CNF-003 rows for one focus node in
+            # either order, so this tracked file churned on every run and a
+            # real change was invisible among the noise. Run order is kept as
+            # declared -- that sequence is this harness's, and it means
+            # something.
+            for cells in sorted(
+                [run.key, row.check_id, row.severity, row.category or "",
+                 row.focus_node, row.path or "", row.value or "",
+                 getattr(row, "source_file", None) or "",
+                 getattr(row, "line", None) or "", row.message]
+                for row in run.rows
+            ):
+                writer.writerow(cells)
     return path
 
 
@@ -653,7 +663,8 @@ def render_document(runs: List[Run], results) -> str:
     add("`fixtures/vsix/extension-only.ttl` is a small dataset seeded for them:")
     add("")
     add("1. Open `fixtures/vsix/extension-only.ttl` in VS Code with the extension installed "
-        "(`code --install-extension consolidated_ontology_suite_webapp/ontology-dev-suite-0.13.6.vsix`).")
+        "(`code --install-extension consolidated_ontology_suite_webapp/ontology-dev-suite-0.16.3.vsix`, "
+        "or whichever build is current -- the version is not load-bearing here, the three checks are).")
     add("2. Run **Ontology Suite: Run Local Checks** from the command palette.")
     add("3. The Problems panel should report `VOC-001` on `:Pump rdfs:subClassOf :Machnie` (a typo "
         "for `:Machine`) and `REA-005` on `:pump-17`, which is asserted both `owl:sameAs` and "

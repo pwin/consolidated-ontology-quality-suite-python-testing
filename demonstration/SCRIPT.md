@@ -17,8 +17,9 @@ quoting it.
 **Say:**
 - Two tools, one day's work: write an ontology, write the transformations that
   populate it, review those transformations, add the rules your project needs.
-- They are not alternatives. The editor runs ~50 checks in-process as you type.
-  The CLI runs the same registry plus eleven more it alone can produce.
+- They are not alternatives. The registry has 61 checks; the editor runs 50 of
+  them in-process as you type, and the 11 it does not are exactly the 11 the
+  CLI alone can produce. 50 + 11 = 61, with nothing falling between.
 - And three checks exist that **only** the editor can produce. Both lists are
   asserted by tests in the two repos, not claimed in a brochure.
 - The rule all day: the cheap check belongs where you are typing, the expensive
@@ -506,9 +507,9 @@ still looks green.
 **Say:**
 - Four acts, one rule: the cheap check where you type, the expensive one in the
   pipeline.
-- The editor does roughly fifty checks in-process and three that no pipeline can
-  do. The CLI does eleven the editor cannot, and asks the questions that need
-  more than one file — the set-level ones from Act 3.
+- The editor does 50 of the registry's 61 in-process, plus three that no
+  pipeline can do. The CLI does the 11 remaining, and asks the questions that
+  need more than one file — the set-level ones from Act 3.
 - Both are extensible by you, in three tiers: JSON rules, SPARQL checks, SHACL
   shapes. Committed, versioned, running in the editor and in CI from the same
   source.
