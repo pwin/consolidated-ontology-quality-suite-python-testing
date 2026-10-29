@@ -1,0 +1,9 @@
+{
+  "_comment": "Sketch stringency, complete in itself. One stage, named, so the name is checked against --stringency rather than assumed. Nothing is shared with its two siblings: file-per-stage means restating every entry, because extends cannot reach across files.",
+  "stages": {
+    "sketch": {
+      "STR-002": "Info",
+      "STR-003": "Info"
+    }
+  }
+}

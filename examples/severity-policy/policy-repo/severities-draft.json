@@ -1,0 +1,9 @@
+{
+  "_comment": "Draft stringency, complete in itself. STR-002 has risen to Warning; STR-003 is restated at Info -- unchanged from sketch, and it has to be written again here.",
+  "stages": {
+    "draft": {
+      "STR-002": "Warning",
+      "STR-003": "Info"
+    }
+  }
+}

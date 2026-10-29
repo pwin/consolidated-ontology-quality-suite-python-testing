@@ -168,6 +168,19 @@ committed, and needs no props.
 - [ ] If the room is a standards group rather than a project team, swap the
       framing of beat 1: they are the owners of the policy repo, not the
       consumers of it
+- [ ] Consider opening beat 3 with `policy-repo/levels/exploring.json` instead
+      of `severities.json`. It is the same flat shape, and it reports **13
+      findings and 0 Violations** — the gate passes with the report unchanged,
+      which is the literal answer to *we cannot switch this on, it would fail
+      everything on day one*. `severities.json` makes the subtler point (a
+      different pair blocking), so it is a choice about which objection the
+      room actually has
+- [ ] Have one answer ready for the question beat 6 invites: *can each stage be
+      its own file?* Yes — `split.sh` runs
+      `severities-{sketch,draft,release}.json` and compares each against the
+      matching stage of the nested file, identical every time. Know it, do not
+      show it: it is a filing decision, and on screen it looks like the same
+      output twice
 
 ## 5. Documentation to fix first
 

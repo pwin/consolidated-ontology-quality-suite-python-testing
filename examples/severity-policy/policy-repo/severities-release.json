@@ -1,0 +1,9 @@
+{
+  "_comment": "Release stringency, complete in itself. STR-002 is back at the severity the check itself declares, so this stage re-maps one check rather than two -- asking for the shipped severity is not an override, and the run says so.",
+  "stages": {
+    "release": {
+      "STR-002": "Violation",
+      "STR-003": "Violation"
+    }
+  }
+}

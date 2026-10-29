@@ -1,22 +1,38 @@
-# The same checks, read two ways
+# The same checks, read your way
 
-One ontology, evaluated twice: once at the severities the checks themselves
-declare, and once at the severities this project wants at a given stage of its
-life. Nothing is copied, nothing is rewritten, and the two reports are
-comparable by construction because both ran the installed suite's own checks.
+One ontology, evaluated at the severities the checks themselves declare, and
+then at the severities this project wants at a given point in its life.
+Nothing is copied, nothing is rewritten, and every report here is comparable
+with every other by construction, because all of them ran the installed
+suite's own checks.
+
+Two policies are committed, in three file arrangements, because the arrangement
+turns out to matter more than the schema: start at
+[the plainest one](#the-plainest-form-one-flat-file-per-level) if you want the
+shortest path to a working file.
 
 ```
 severity-policy/
 ├── policy-repo/                     <- a separate repo, someone else's
 │   ├── severities.json                  ids -> severity, one reading
-│   └── severities-by-stage.json         the same, once one is not enough
+│   ├── severities-by-stage.json         three stages, one file
+│   ├── severities-sketch.json           the same three, one file each
+│   ├── severities-draft.json
+│   ├── severities-release.json
+│   └── levels/                          a second policy, flat files only
+│       ├── exploring.json               one id per object, no stage names
+│       ├── reviewing.json
+│       └── publishing.json
 └── work-folder/                     <- the ontology under evaluation
     ├── myOntology.ttl
     ├── ontology-suite.yml               gate 1: the defaults
     ├── ontology-suite-release.yml       gate 2: release stringency
     ├── validate.sh                      both gates, from those two configs
     ├── compare.sh                       all four readings, side by side
-    └── compare.py                       the comparison table
+    ├── compare.py                       the comparison table
+    ├── split.sh                         one file per stage, and the proof
+    │                                    it is the same policy
+    └── levels.sh                        the flat files, against the defaults
 ```
 
 Everything is invented; the namespace is `example.org`. Every number below
@@ -25,7 +41,8 @@ came from running the commands shown.
 ## What this needs
 
 `--severity-policy` and `--stringency`, which are **suite 0.25.0 and later**.
-`compare.sh` checks for the flag and says so rather than failing obscurely.
+`compare.sh`, `split.sh` and `levels.sh` check for the flag and say so rather
+than failing obscurely.
 
 Before 0.25.0 there was no supported mechanism. *Why the flag exists*, at the
 end, is the measured argument for adding one rather than leaving it to each
@@ -124,6 +141,212 @@ assembled copy of anything. The policy is applied to the findings.
 > yet. It is left out of this example to keep the contrast about severity;
 > `docs/SEVERITY_POLICY.md` in the suite covers it.
 
+### Or one file per stringency
+
+`extends` cannot reach across files, so the alternative to one nested file is
+three self-contained ones, each holding a single stage:
+[`severities-sketch.json`](policy-repo/severities-sketch.json),
+[`severities-draft.json`](policy-repo/severities-draft.json),
+[`severities-release.json`](policy-repo/severities-release.json).
+
+```json
+{
+  "stages": {
+    "draft": {
+      "STR-002": "Warning",
+      "STR-003": "Info"
+    }
+  }
+}
+```
+
+Each is selected exactly as the nested file is, by naming the one stage it
+holds, so a gate changes by one line, the filename:
+
+```yaml
+severity_policy: ../policy-repo/severities-release.json
+stringency: release
+```
+
+```bash
+bash examples/severity-policy/work-folder/split.sh
+```
+
+```
+== draft, from severities-draft.json
+Severity policy 'draft' from severities-draft.json: 2 check(s) re-mapped
+  STR-002 Violation -> Warning (1 finding(s))
+  STR-003 Warning -> Info (1 finding(s))
+Findings: 13 total (1 Violation, 6 Warning, 6 Info)
+   vs the nested file's 'draft' stage: identical
+
+Both arrangements agree on every finding, at every stage.
+```
+
+`split.sh` runs each of the three files, runs the matching stage of the nested
+file, and compares the two reports row by row — check id, focus node,
+severity, declared severity. **All three stages come back identical**, which is
+the only claim worth making here: this is a filing decision, not a different
+policy.
+
+**What splitting costs.** `STR-003` is `Info` at both sketch and draft, and the
+draft file has to say so again. Nothing is shared, so each file restates every
+entry it keeps, and the failure that follows is the ordinary one — two files
+updated out of three.
+
+**What splitting buys.** Each file names its stage, so a gate pointed at the
+wrong file cannot run:
+
+```
+error: severities-sketch.json has no stage 'release'. Stages: sketch
+exit 2, nothing written
+```
+
+That guard is the reason these three files are not written flat. A flat file is
+read as a single stage called `default` and takes no `--stringency` at all, so
+the same mistake is not an error: pointing a release gate at a flat sketch file
+applies the sketch reading and carries on. Measured, with `--fail-on
+Violation`:
+
+```
+Severity policy 'default' from flat-sketch.json: 2 check(s) re-mapped
+  STR-002 Violation -> Info (1 finding(s))
+  STR-003 Warning -> Info (1 finding(s))
+Findings: 13 total (1 Violation, 5 Warning, 7 Info)
+exit 1
+```
+
+Nothing is hidden — the audit line names the file it came from, and a reader
+who notices `sketch` in a release log has found it. But the run did not refuse,
+and that is the difference.
+
+| | one nested file | one file per stringency | one flat file |
+|---|---|---|---|
+| Shape | `stages` with 2+ entries | `stages` with 1 entry | no `stages` key |
+| Selected by | `--stringency <name>` | `--stringency <name>` — optional, but it is the guard | `--severity-policy` alone |
+| Wrong file wired to a gate | n/a, one file holds every stage | **refused, exit 2** | applied silently |
+| Entries shared between stages | `extends` | restated in each file | n/a |
+| Room for a `_comment` | beside `stages` | beside `stages` | nowhere |
+
+Choose by who owns the file. One nested file when one person or group owns the
+whole progression and the stages mostly agree. One file per stringency when
+different stages are reviewed, approved or released on different schedules —
+then each is a small file with a name that says what it is, and the stage name
+inside it is what stops it being used as the wrong one.
+
+> A note on comments, since a policy file usually needs one: `_comment` is
+> ignored only as a sibling of `stages`. Inside a stage, or anywhere in a flat
+> file, it is read as a check id and the run stops with `_comment is not a
+> check in this registry`. A good diagnostic, and the second reason to name
+> the stage.
+
+### The plainest form: one flat file per level
+
+[`policy-repo/levels/`](policy-repo/levels/) holds a second, independent policy
+in the plainest shape the loader accepts: no `stages` key, no stage names, just
+a list with one id per object.
+
+```json
+[
+  {
+    "STR-001": "Violation"
+  },
+  {
+    "STR-002": "Warning"
+  },
+  {
+    "STR-003": "Info"
+  }
+]
+```
+
+Three files, three levels of stringency over the same six structural checks.
+The names are deliberately not `sketch`/`draft`/`release` — they are another
+project's vocabulary, and the suite ships none.
+
+| File | The reading it encodes |
+|---|---|
+| [`exploring.json`](policy-repo/levels/exploring.json) | a model being sketched. An undefined class is a typo at any stage, so `STR-001` stays `Violation`; missing domains, ranges and definitions are `Info`, because they are not written yet rather than wrong |
+| [`reviewing.json`](policy-repo/levels/reviewing.json) | ready to show someone. Structure has to hold; prose can lag, so `STR-004` (class has no formal definition) is the single concession |
+| [`publishing.json`](policy-repo/levels/publishing.json) | anyone may depend on it. Everything structural blocks |
+
+A flat file *is* a single unnamed stage, so each is selected by one flag with
+nothing to choose inside it — no `--stringency`, and the filename is the only
+name the level has:
+
+```
+--severity-policy ../policy-repo/levels/reviewing.json
+```
+
+```bash
+bash examples/severity-policy/work-folder/levels.sh
+```
+
+```
+Each run, as a whole
+  defaults   13 finding(s) (2 V, 6 W, 5 I) across  9 check(s)
+  exploring  13 finding(s) (0 V, 6 W, 7 I) across  9 check(s)
+  reviewing  13 finding(s) (2 V, 5 W, 6 I) across  9 check(s)
+  publishing 13 finding(s) (4 V, 4 W, 5 I) across  9 check(s)
+
+Where the readings differ
+  check     defaults    exploring   reviewing   publishing
+  STR-002   Violation   Warning     Violation   Violation
+  STR-003   Warning     Info        Warning     Violation
+  STR-004   Warning     Info        Info        Violation
+  STR-007   Violation   Warning     Violation   Violation
+
+What each run would block on, at --fail-on Violation
+  defaults   STR-002, STR-007
+  exploring  nothing
+  reviewing  STR-002, STR-007
+  publishing STR-002, STR-003, STR-004, STR-007
+```
+
+`levels.sh` reuses `compare.py` — it takes the run names to put beside the
+defaults, so a second policy needed no second comparison script.
+
+Three things this set shows that the staged one does not.
+
+**A level at which nothing blocks.** `exploring` reports all thirteen findings
+and zero Violations, so the gate passes while the report is unchanged. That is
+the answer to *we cannot switch this on, it would fail everything on day one*:
+switch it on at a level that blocks nothing and raise it later. Nothing is
+hidden to get there — six Warnings and seven Infos are still in the report.
+
+**Declaring what is already true costs nothing.** `reviewing` has six entries
+and re-maps exactly one check, because the other five ask for the severity the
+check already declares:
+
+```
+Severity policy 'default' from reviewing.json: 1 check(s) re-mapped
+  STR-004 Warning -> Info (1 finding(s))
+```
+
+So a file can be written out in full, as a statement of what this level
+expects, without that making it look like five overrides. If *nothing* in it
+moves, the run says so rather than passing quietly — measured on a variant
+whose five entries all restate what the checks already declare:
+
+```
+WARNING: severity policy stage 'default' changed nothing: none of its 5
+check(s) produced a finding whose severity differed. Check the stage name if
+that is a surprise.
+Severity policy 'default' from restating-the-defaults.json: 0 check(s) re-mapped
+Findings: 13 total (2 Violation, 6 Warning, 5 Info)
+```
+
+**The blocking set does not identify the reading.** `reviewing` blocks on
+`STR-002, STR-007` — the same pair as the defaults — and is not the same
+policy: `STR-004` is `Info` there. Two runs can agree on what fails and
+disagree about everything else, which is the second reason the
+`declared_severity` column exists.
+
+The cost of this shape is the one the table above names: a flat list has
+nowhere to put a comment, and no stage name inside it to check, so pointing a
+publishing gate at `exploring.json` runs happily. If that wiring is going to
+be done by hand in more than one place, name the stage instead.
+
 ---
 
 ## Both, side by side
@@ -204,11 +427,18 @@ bash examples/severity-policy/work-folder/validate.sh
 
 # all four readings and the comparison
 bash examples/severity-policy/work-folder/compare.sh
+
+# the same three stages as three separate files, and the proof they agree
+bash examples/severity-policy/work-folder/split.sh
+
+# the flat one-file-per-level policy, against the defaults
+bash examples/severity-policy/work-folder/levels.sh
 ```
 
 `validate.sh` runs each config through `gate.py` and reports both exit codes.
-`compare.sh` uses `--fail-on never` and compares afterwards, because its job
-is to show the difference rather than to pass or fail.
+`compare.sh`, `split.sh` and `levels.sh` use `--fail-on never` and compare
+afterwards, because their job is to show the difference rather than to pass or
+fail.
 
 Committing the stringency is the point of the two-config arrangement: which
 reading a branch is held to stops being a flag someone remembers to pass.
