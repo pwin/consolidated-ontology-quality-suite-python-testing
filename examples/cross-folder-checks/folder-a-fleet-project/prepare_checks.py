@@ -3,7 +3,7 @@
 Two jobs, because the suite takes project-local checks two different ways and
 only one of them is additive.
 
-    uv run python examples/two-folder-validation/folder-a-fleet-project/prepare_checks.py
+    uv run python examples/cross-folder-checks/folder-a-fleet-project/prepare_checks.py
 
 JOB 1: ONE REGISTRY
 -------------------

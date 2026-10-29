@@ -2,7 +2,7 @@
 # Folder A's validation run: the suite's own checks and Folder B's house
 # rules, in one pass, over Folder A's model and data.
 #
-#   bash examples/two-folder-validation/folder-a-fleet-project/validate.sh
+#   bash examples/cross-folder-checks/folder-a-fleet-project/validate.sh
 #
 # Exits non-zero if anything reaches Violation, so it works unchanged as a CI
 # gate. Run it from anywhere: every path below is derived from this file.

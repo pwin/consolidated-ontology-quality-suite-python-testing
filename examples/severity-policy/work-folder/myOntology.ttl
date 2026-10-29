@@ -1,0 +1,31 @@
+@prefix :     <https://example.org/mine#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# The ontology under evaluation. Small, and seeded so that each check the
+# policy has an opinion about fires exactly once -- so a policy that stops
+# working shows up as a finding at the wrong severity, not as a smaller total.
+
+<https://example.org/mine>
+    a             owl:Ontology ;
+    rdfs:label    "My ontology" ;
+    skos:prefLabel "My ontology" .
+
+:Widget
+    a           owl:Class ;
+    rdfs:label  "Widget" ;
+    skos:definition "A thing this example asserts things about." .
+
+# STR-003 fires here: declared as a property, given neither domain nor range.
+# The policy raises it from Warning to Violation.
+:looselyRelated
+    a           owl:ObjectProperty ;
+    rdfs:label  "loosely related" .
+
+# STR-002 fires here: :undeclaredProp is used but never declared a property.
+# The policy lowers it from Violation to Info.
+:widget-1
+    a                 :Widget ;
+    rdfs:label        "Widget one" ;
+    :undeclaredProp   "x" .
